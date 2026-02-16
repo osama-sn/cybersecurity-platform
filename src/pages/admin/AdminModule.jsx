@@ -2,7 +2,43 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight, Pencil, Save, XCircle } from 'lucide-react';
+
+// Helper Component for Topic Item to reduce code duplication
+const TopicItem = ({ topic, onDragStart, onUnlink, onDelete }) => {
+    return (
+        <div
+            draggable
+            onDragStart={(e) => onDragStart(e, topic.topicId)}
+            className="flex items-center justify-between p-3 bg-cyber-900 rounded border border-cyber-700 hover:border-cyber-500 transition-all cursor-move group"
+        >
+            <div className="flex items-center gap-3">
+                <GripVertical className="text-cyber-600 hover:text-cyber-400 cursor-grab active:cursor-grabbing" size={16} />
+                <FileText className="text-cyber-accent group-hover:text-cyber-primary transition-colors" size={18} />
+                <span className="font-medium text-white text-sm">{topic.title}</span>
+            </div>
+            <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                <Link to={`/admin/topics/${topic.topicId}`} className="text-xs text-cyber-primary hover:underline">
+                    Edit
+                </Link>
+                <button
+                    onClick={() => onUnlink(topic.junctionId, topic.title)}
+                    className="text-cyber-warning hover:text-yellow-400 p-1"
+                    title="Remove from module"
+                >
+                    <Unlink size={14} />
+                </button>
+                <button
+                    onClick={() => onDelete(topic.topicId, topic.title)}
+                    className="text-cyber-danger hover:text-red-400 p-1"
+                    title="Delete permanently"
+                >
+                    <Trash2 size={14} />
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const AdminModule = () => {
     const { moduleId } = useParams();
@@ -18,6 +54,8 @@ const AdminModule = () => {
     const [dragIndex, setDragIndex] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [isDraggingGroup, setIsDraggingGroup] = useState(false);
+    const [editingGroupId, setEditingGroupId] = useState(null);
+    const [editGroupTitle, setEditGroupTitle] = useState('');
 
     const fetchData = async () => {
         if (!moduleId) return;
@@ -94,6 +132,27 @@ const AdminModule = () => {
             console.error("Error adding group:", error);
             alert("Failed to add group");
         }
+    };
+
+    const handleUpdateGroup = async (groupId) => {
+        if (!editGroupTitle.trim()) return;
+
+        try {
+            const groupRef = doc(db, 'groups', groupId);
+            await updateDoc(groupRef, { title: editGroupTitle });
+
+            setEditingGroupId(null);
+            setEditGroupTitle('');
+            await fetchGroups();
+        } catch (error) {
+            console.error("Error updating group:", error);
+            alert("Failed to update group");
+        }
+    };
+
+    const startEditingGroup = (group) => {
+        setEditingGroupId(group.id);
+        setEditGroupTitle(group.title);
     };
 
     const handleDeleteGroup = async (groupId) => {
@@ -353,17 +412,44 @@ const AdminModule = () => {
                     {groups.map(group => (
                         <div key={group.id} className="bg-cyber-900/30 border border-cyber-700 rounded-xl overflow-hidden">
                             <div className="flex items-center justify-between p-3 bg-cyber-800/50 border-b border-cyber-700/50">
-                                <div className="flex items-center gap-2">
-                                    <Folder size={18} className="text-cyber-primary" />
-                                    <span className="font-bold text-cyber-200">{group.title}</span>
-                                    <span className="text-xs text-cyber-600">({getGroupTopics(group.id).length} topics)</span>
-                                </div>
-                                <button
-                                    onClick={() => handleDeleteGroup(group.id)}
-                                    className="p-1 text-cyber-600 hover:text-red-400 transition-colors"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                                {editingGroupId === group.id ? (
+                                    <div className="flex items-center gap-2 flex-1">
+                                        <input
+                                            className="input py-1 px-2 text-sm flex-1"
+                                            value={editGroupTitle}
+                                            onChange={e => setEditGroupTitle(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <button onClick={() => handleUpdateGroup(group.id)} className="text-green-500 hover:text-green-400 p-1">
+                                            <Save size={16} />
+                                        </button>
+                                        <button onClick={() => setEditingGroupId(null)} className="text-cyber-500 hover:text-white p-1">
+                                            <XCircle size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center gap-2">
+                                            <Folder size={18} className="text-cyber-primary" />
+                                            <span className="font-bold text-cyber-200">{group.title}</span>
+                                            <span className="text-xs text-cyber-600">({getGroupTopics(group.id).length} topics)</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => startEditingGroup(group)}
+                                                className="p-1 text-cyber-600 hover:text-cyber-primary transition-colors"
+                                            >
+                                                <Pencil size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteGroup(group.id)}
+                                                className="p-1 text-cyber-600 hover:text-red-400 transition-colors"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="p-2 space-y-2 min-h-[50px]"
@@ -478,6 +564,5 @@ const AdminModule = () => {
         </div >
     );
 };
-
 
 export default AdminModule;

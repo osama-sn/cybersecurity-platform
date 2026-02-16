@@ -4,6 +4,26 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } f
 import { db } from '../firebase/config';
 import { Box, ChevronRight, Lock } from 'lucide-react';
 
+// Helper Component
+const TopicCard = ({ topic }) => (
+  <Link
+    to={`/topics/${topic.id}`}
+    className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
+  >
+    <div className="flex items-center gap-4">
+      <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
+        <Box size={20} />
+      </div>
+      <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
+        {topic.title}
+      </span>
+    </div>
+    <div className="flex items-center gap-3">
+      <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
+    </div>
+  </Link>
+);
+
 const SectionPage = () => {
   const { sectionId } = useParams();
   const [section, setSection] = useState(null);
@@ -172,24 +192,6 @@ const SectionPage = () => {
   );
 };
 
-// Helper Component
-const TopicCard = ({ topic }) => (
-  <Link
-    to={`/topics/${topic.id}`}
-    className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
-  >
-    <div className="flex items-center gap-4">
-      <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
-        <Box size={20} />
-      </div>
-      <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
-        {topic.title}
-      </span>
-    </div>
-    <div className="flex items-center gap-3">
-      <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
-    </div>
-  </Link>
-);
+
 
 export default SectionPage;
