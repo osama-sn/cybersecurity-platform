@@ -53,6 +53,15 @@ const SectionPage = () => {
           if (moduleSnap.exists()) {
             const moduleData = { id: moduleSnap.id, ...moduleSnap.data(), order: jData.order || 0 };
 
+            // Fetch Groups
+            const groupsQ = query(
+              collection(db, 'groups'),
+              where('moduleId', '==', moduleData.id),
+              orderBy('order', 'asc')
+            );
+            const groupsSnap = await getDocs(groupsQ);
+            const groups = groupsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
             // Fetch topics via moduleTopics junction
             const topicJunctionQuery = query(
               collection(db, 'moduleTopics'),
@@ -66,12 +75,27 @@ const SectionPage = () => {
               const topicRef = doc(db, 'topics', tJData.topicId);
               const topicSnap = await getDoc(topicRef);
               if (topicSnap.exists()) {
-                topics.push({ id: topicSnap.id, ...topicSnap.data(), order: tJData.order || 0 });
+                topics.push({
+                  id: topicSnap.id,
+                  ...topicSnap.data(),
+                  order: tJData.order || 0,
+                  groupId: tJData.groupId || 'ungrouped'
+                });
               }
             }
 
             topics.sort((a, b) => a.order - b.order);
-            moduleData.topics = topics;
+
+            // Organize topics into groups
+            const groupIds = new Set(groups.map(g => g.id));
+
+            moduleData.groups = groups.map(group => ({
+              ...group,
+              topics: topics.filter(t => t.groupId === group.id)
+            }));
+
+            moduleData.ungroupedTopics = topics.filter(t => !t.groupId || t.groupId === 'ungrouped' || !groupIds.has(t.groupId));
+
             modulesData.push(moduleData);
           }
         }
@@ -112,29 +136,32 @@ const SectionPage = () => {
               {module.title}
             </h2>
 
-            <div className="grid gap-3">
-              {module.topics && module.topics.map(topic => (
-                <Link
-                  key={topic.id}
-                  to={`/topics/${topic.id}`}
-                  className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
-                      <Box size={20} />
+            <div className="space-y-6">
+              {/* Groups */}
+              {module.groups && module.groups.map(group => (
+                group.topics.length > 0 && (
+                  <div key={group.id} className="ml-4 border-l-2 border-cyber-800 pl-4 space-y-3">
+                    <h3 className="text-lg font-bold text-cyber-300 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-cyber-500"></div>
+                      {group.title}
+                    </h3>
+                    <div className="grid gap-3">
+                      {group.topics.map(topic => (
+                        <TopicCard key={topic.id} topic={topic} />
+                      ))}
                     </div>
-                    <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
-                      {topic.title}
-                    </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {/* Placeholder for completion status if we had it */}
-                    {/* <div className="w-5 h-5 rounded border border-cyber-600 bg-cyber-900 group-hover:border-cyber-500"></div> */}
-                    <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
-                  </div>
-                </Link>
+                )
               ))}
-              {(!module.topics || module.topics.length === 0) && (
+
+              {/* Ungrouped Topics */}
+              <div className="grid gap-3">
+                {module.ungroupedTopics && module.ungroupedTopics.map(topic => (
+                  <TopicCard key={topic.id} topic={topic} />
+                ))}
+              </div>
+
+              {(!module.groups?.length && !module.ungroupedTopics?.length) && (
                 <p className="text-sm text-cyber-600 italic px-1">No topics yet.</p>
               )}
             </div>
@@ -144,5 +171,25 @@ const SectionPage = () => {
     </div>
   );
 };
+
+// Helper Component
+const TopicCard = ({ topic }) => (
+  <Link
+    to={`/topics/${topic.id}`}
+    className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
+  >
+    <div className="flex items-center gap-4">
+      <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
+        <Box size={20} />
+      </div>
+      <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
+        {topic.title}
+      </span>
+    </div>
+    <div className="flex items-center gap-3">
+      <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
+    </div>
+  </Link>
+);
 
 export default SectionPage;
