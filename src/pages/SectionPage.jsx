@@ -21,11 +21,8 @@ const SectionPage = () => {
       const sectionRef = doc(db, 'sections', sectionId);
       const unsubSection = onSnapshot(sectionRef, (sectionSnap) => {
         if (sectionSnap.exists()) {
-          const sectionData = { id: sectionSnap.id, ...sectionSnap.data() };
-          console.log('✅ Section updated in real-time:', sectionData.title);
-          setSection(sectionData);
+          setSection({ id: sectionSnap.id, ...sectionSnap.data() });
         } else {
-          console.error('Section not found:', sectionId);
           setSection(null);
         }
         setLoading(false);
@@ -35,101 +32,63 @@ const SectionPage = () => {
       });
       unsubscribers.push(unsubSection);
 
-      // 2. Real-time listener for Modules
-      const modulesRef = collection(db, 'modules');
+      // 2. Real-time listener for Modules via sectionModules junction
+      const junctionQuery = query(
+        collection(db, 'sectionModules'),
+        where('sectionId', '==', sectionId)
+      );
 
-      // First, let's see ALL modules in the database for debugging
-      getDocs(modulesRef).then(allModulesSnap => {
-        console.log('=== ALL MODULES IN DATABASE ===');
-        allModulesSnap.docs.forEach(doc => {
-          const data = doc.data();
-          console.log(`Module: "${data.title}" | ID: ${doc.id} | sectionId: "${data.sectionId}"`);
-        });
-        console.log(`Current Section ID we're looking for: "${sectionId}"`);
-        console.log('================================');
-      });
-
-      // Set up real-time listener for modules
-      let modulesQuery;
-      try {
-        modulesQuery = query(modulesRef, where('sectionId', '==', sectionId), orderBy('order', 'asc'));
-      } catch (orderError) {
-        console.warn('OrderBy failed, using without order:', orderError);
-        modulesQuery = query(modulesRef, where('sectionId', '==', sectionId));
-      }
-
-      const unsubModules = onSnapshot(modulesQuery, async (modulesSnap) => {
-        console.log('Modules snapshot received:', modulesSnap.size);
-
-        if (modulesSnap.size === 0) {
-          console.error('❌ NO MODULES FOUND for sectionId:', sectionId);
-          console.log('💡 TIP: Check if the sectionId in your modules matches the section ID in the URL');
+      const unsubJunction = onSnapshot(junctionQuery, async (junctionSnap) => {
+        if (junctionSnap.empty) {
           setModules([]);
           return;
         }
 
-        const modulesData = await Promise.all(modulesSnap.docs.map(async (docSnap) => {
-          const module = { id: docSnap.id, ...docSnap.data() };
-          console.log('Processing module:', module.title);
+        const modulesData = [];
+        for (const jDoc of junctionSnap.docs) {
+          const jData = jDoc.data();
+          const moduleRef = doc(db, 'modules', jData.moduleId);
+          const moduleSnap = await getDoc(moduleRef);
 
-          // Fetch Topics for this module
-          const topicsRef = collection(db, 'topics');
-          let topicsQuery;
+          if (moduleSnap.exists()) {
+            const moduleData = { id: moduleSnap.id, ...moduleSnap.data(), order: jData.order || 0 };
 
-          try {
-            topicsQuery = query(topicsRef, where('moduleId', '==', module.id), orderBy('order', 'asc'));
-          } catch (topicOrderError) {
-            console.warn('Topic orderBy failed, fetching without order:', topicOrderError);
-            topicsQuery = query(topicsRef, where('moduleId', '==', module.id));
+            // Fetch topics via moduleTopics junction
+            const topicJunctionQuery = query(
+              collection(db, 'moduleTopics'),
+              where('moduleId', '==', moduleData.id)
+            );
+            const topicJunctionSnap = await getDocs(topicJunctionQuery);
+
+            const topics = [];
+            for (const tJDoc of topicJunctionSnap.docs) {
+              const tJData = tJDoc.data();
+              const topicRef = doc(db, 'topics', tJData.topicId);
+              const topicSnap = await getDoc(topicRef);
+              if (topicSnap.exists()) {
+                topics.push({ id: topicSnap.id, ...topicSnap.data(), order: tJData.order || 0 });
+              }
+            }
+
+            topics.sort((a, b) => a.order - b.order);
+            moduleData.topics = topics;
+            modulesData.push(moduleData);
           }
+        }
 
-          const topicsSnap = await getDocs(topicsQuery);
-          module.topics = topicsSnap.docs.map(t => ({ id: t.id, ...t.data() }));
-
-          // Sort topics in memory
-          module.topics.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-          console.log(`Module "${module.title}" has ${module.topics.length} topics`);
-          return module;
-        }));
-
-        // Sort modules in memory
-        modulesData.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        console.log('✅ Total modules loaded in real-time:', modulesData.length);
+        modulesData.sort((a, b) => a.order - b.order);
         setModules(modulesData);
       }, (error) => {
-        console.error('Error listening to modules:', error);
-        console.error('Error details:', error.message, error.code);
-        // Fallback without orderBy
-        const fallbackQuery = query(modulesRef, where('sectionId', '==', sectionId));
-        const unsubModulesFallback = onSnapshot(fallbackQuery, async (modulesSnap) => {
-          const modulesData = await Promise.all(modulesSnap.docs.map(async (docSnap) => {
-            const module = { id: docSnap.id, ...docSnap.data() };
-            const topicsRef = collection(db, 'topics');
-            const tq = query(topicsRef, where('moduleId', '==', module.id));
-            const topicsSnap = await getDocs(tq);
-            module.topics = topicsSnap.docs.map(t => ({ id: t.id, ...t.data() }));
-            module.topics.sort((a, b) => (a.order || 0) - (b.order || 0));
-            return module;
-          }));
-          modulesData.sort((a, b) => (a.order || 0) - (b.order || 0));
-          setModules(modulesData);
-          console.log('✅ Modules loaded (fallback):', modulesData.length);
-        });
-        unsubscribers.push(unsubModulesFallback);
+        console.error('Error listening to sectionModules:', error);
       });
-      unsubscribers.push(unsubModules);
+      unsubscribers.push(unsubJunction);
 
     } catch (err) {
-      console.error('Error setting up real-time listeners:', err);
-      console.error('Error details:', err.message, err.code);
+      console.error('Error setting up listeners:', err);
       setLoading(false);
     }
 
-    // Cleanup function
     return () => {
-      console.log('🔌 Unsubscribing from Section page listeners');
       unsubscribers.forEach(unsub => unsub());
     };
   }, [sectionId]);
