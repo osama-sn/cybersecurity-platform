@@ -47,7 +47,7 @@ const Home = () => {
               <div className="absolute -inset-2 bg-cyber-primary/20 rounded-full blur-xl animate-pulse-slow"></div>
               <div className="relative w-full h-full rounded-full border-2 border-cyber-primary/50 overflow-hidden bg-cyber-800 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                 <img
-                  src="/osama.jpeg"
+                  src={`${import.meta.env.BASE_URL}osama.jpeg`}
                   alt="Osama"
                   className="w-full h-full object-cover grayscale-[20%] contrast-110"
                 />

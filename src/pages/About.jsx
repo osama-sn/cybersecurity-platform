@@ -33,7 +33,7 @@ const About = () => {
         <motion.div variants={itemVariants} className="relative group shrink-0">
           <div className="absolute -inset-1 bg-gradient-to-r from-cyber-primary to-cyber-secondary rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-full bg-cyber-900 border-2 border-cyber-700 p-1 overflow-hidden shadow-2xl">
-            <img src="/osama.jpeg" alt="Osama" className="w-full h-full object-cover rounded-full" />
+            <img src={`${import.meta.env.BASE_URL}osama.jpeg`} alt="Osama" className="w-full h-full object-cover rounded-full" />
           </div>
         </motion.div>
 
