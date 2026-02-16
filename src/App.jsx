@@ -22,7 +22,7 @@ const NotFound = () => <div className="text-center mt-20"><h1>404</h1><p>Page no
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/cybersecurity-platform">
       <AuthProvider>
         <DataProvider>
           <ModeProvider>
