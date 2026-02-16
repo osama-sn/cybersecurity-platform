@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { Folder, FileText, ChevronRight, Lock } from 'lucide-react';
+import { Box, ChevronRight, Lock } from 'lucide-react';
 
 const SectionPage = () => {
   const { sectionId } = useParams();
@@ -104,30 +104,38 @@ const SectionPage = () => {
         <p className="text-cyber-400 mt-2">{section.description}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {modules.map((module) => (
-          <div key={module.id} className="card bg-cyber-900 border border-cyber-700/50">
-            <div className="flex items-center gap-3 mb-4">
-              <Folder className="text-cyber-secondary" size={20} />
-              <h2 className="text-xl font-bold text-white">{module.title}</h2>
-            </div>
+          <div key={module.id} className="animate-fade-in-up">
+            <h2 className="text-2xl font-bold text-white mb-4 mt-8 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-cyber-primary rounded-full inline-block"></span>
+              {module.title}
+            </h2>
 
-            <div className="space-y-2 pl-4 border-l-2 border-cyber-700 ml-2">
+            <div className="grid gap-3">
               {module.topics && module.topics.map(topic => (
                 <Link
                   key={topic.id}
                   to={`/topics/${topic.id}`}
-                  className="flex items-center justify-between p-3 rounded hover:bg-cyber-800 transition-colors group"
+                  className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
                 >
-                  <div className="flex items-center gap-3">
-                    <FileText size={16} className="text-cyber-500 group-hover:text-cyber-primary transition-colors" />
-                    <span className="text-cyber-300 group-hover:text-white transition-colors">{topic.title}</span>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
+                      <Box size={20} />
+                    </div>
+                    <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
+                      {topic.title}
+                    </span>
                   </div>
-                  <ChevronRight size={16} className="text-cyber-600 group-hover:text-cyber-300" />
+                  <div className="flex items-center gap-3">
+                    {/* Placeholder for completion status if we had it */}
+                    {/* <div className="w-5 h-5 rounded border border-cyber-600 bg-cyber-900 group-hover:border-cyber-500"></div> */}
+                    <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
+                  </div>
                 </Link>
               ))}
               {(!module.topics || module.topics.length === 0) && (
-                <p className="text-sm text-cyber-600 italic px-3">No topics yet.</p>
+                <p className="text-sm text-cyber-600 italic px-1">No topics yet.</p>
               )}
             </div>
           </div>
