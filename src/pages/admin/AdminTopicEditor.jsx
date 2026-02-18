@@ -452,19 +452,27 @@ const AdminTopicEditor = () => {
         const lines = text.split(/\r?\n/);
         const parsedBlocks = [];
         let currentCodeBlock = null;
+        let currentTableBlock = null;
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
+            const trimmedLine = line.trim();
 
-            // 1. Code Block Handling
-            if (line.trim().startsWith('```')) {
+            // 1. Code Block Handling (```)
+            if (trimmedLine.startsWith('```')) {
+                // If we were building a table, close it first
+                if (currentTableBlock) {
+                    parsedBlocks.push(currentTableBlock);
+                    currentTableBlock = null;
+                }
+
                 if (currentCodeBlock) {
                     // Close code block
                     parsedBlocks.push(currentCodeBlock);
                     currentCodeBlock = null;
                 } else {
                     // Start code block
-                    const lang = line.trim().replace(/^```/, '');
+                    const lang = trimmedLine.replace(/^```/, '');
                     currentCodeBlock = { type: 'code', content: '', metadata: { language: lang || 'bash' } };
                 }
                 continue;
@@ -475,7 +483,27 @@ const AdminTopicEditor = () => {
                 continue;
             }
 
-            // 2. Headings
+            // 2. Table Handling (Lines starting with |)
+            if (trimmedLine.startsWith('|')) {
+                if (!currentTableBlock) {
+                    currentTableBlock = {
+                        type: 'code', // Render tables as code blocks for now to preserve alignment
+                        content: line,
+                        metadata: { language: 'markdown' }
+                    };
+                } else {
+                    currentTableBlock.content += '\n' + line;
+                }
+                continue;
+            } else {
+                // If we were in a table but this line is not a table row, close the table
+                if (currentTableBlock) {
+                    parsedBlocks.push(currentTableBlock);
+                    currentTableBlock = null;
+                }
+            }
+
+            // 3. Headings
             const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
             if (headingMatch) {
                 parsedBlocks.push({
@@ -485,40 +513,47 @@ const AdminTopicEditor = () => {
                 continue;
             }
 
-            // 3. Dividers
-            if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
+            // 4. Dividers
+            if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmedLine)) {
                 parsedBlocks.push({ type: 'divider', content: '' });
                 continue;
             }
 
-            // 4. Lists (Unordered)
-            const bulletMatch = line.match(/^[\-\*]\s+(.+)$/);
+            // 5. Lists (Unordered) - Support bold star/dash too: **- item**
+            const bulletMatch = line.match(/^(\*\*|__)?[\-\*]\s+(.+)$/);
             if (bulletMatch) {
-                parsedBlocks.push({ type: 'bullet', content: bulletMatch[1] });
+                // bulletMatch[2] is the content. If it started with bold, we might want to keep the bolding?
+                // Actually regex above is tricky. Let's stick to standard markdown: - item.
+                // If user pastes "**- item**", it's technically a paragraph.
+                // Let's rely on standard logic but check for common "formatted" lists if needed.
+                // Resetting to simple check for now:
+            }
+            if (/^[\-\*]\s+/.test(line)) {
+                parsedBlocks.push({ type: 'bullet', content: line.replace(/^[\-\*]\s+/, '') });
                 continue;
             }
 
-            // 5. Lists (Ordered)
-            const numberMatch = line.match(/^\d+\.\s+(.+)$/);
+            // 6. Lists (Ordered)
+            // Support "1. item" or "1) item"
+            const numberMatch = line.match(/^\d+[\.\)]\s+(.+)$/);
             if (numberMatch) {
-                parsedBlocks.push({ type: 'numbered', content: numberMatch[1] }); // We use 'numbered' as type based on previous code
+                parsedBlocks.push({ type: 'numbered', content: numberMatch[1] });
                 continue;
             }
 
-            // 6. Blockquotes
+            // 7. Blockquotes
             const quoteMatch = line.match(/^>\s+(.+)$/);
             if (quoteMatch) {
                 parsedBlocks.push({ type: 'quote', content: quoteMatch[1] });
                 continue;
             }
 
-            // 7. General Text (Group Text?) 
-            // For now, treat every other line as text. 
-            // Optimization: Combine adjacent text lines?
-            // If the last block was text, append to it?
+            // 8. General Text
+            if (trimmedLine === '') continue;
 
-            if (line.trim() === '') continue; // Skip empty lines for now (or make them separators?)
-
+            // Optimization: If the previous block was text, append to it? 
+            // Users usually paste paragraphs. If we split every line into a block, it gets messy.
+            // Let's try to append if the previous block was text.
             const lastBlock = parsedBlocks[parsedBlocks.length - 1];
             if (lastBlock && lastBlock.type === 'text') {
                 lastBlock.content += '\n' + line;
@@ -527,8 +562,9 @@ const AdminTopicEditor = () => {
             }
         }
 
-        // Push remaining code block if unclosed
+        // Final cleanup
         if (currentCodeBlock) parsedBlocks.push(currentCodeBlock);
+        if (currentTableBlock) parsedBlocks.push(currentTableBlock);
 
         return parsedBlocks;
     };
