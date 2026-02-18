@@ -579,54 +579,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
             );
 
 
-            const TableBlock = ({ content }) => {
-                // Basic Markdown Table Parser
-                const lines = content.trim().split('\n');
-                const headers = lines[0]?.split('|').slice(1, -1).map(h => h.trim()) || [];
-                const alignmentLine = lines[1]?.split('|').slice(1, -1).map(a => a.trim()) || [];
-                const rows = lines.slice(2).map(line => line.split('|').slice(1, -1).map(c => c.trim()));
 
-                // alignments: :--- (left), :---: (center), ---: (right)
-                const alignments = alignmentLine.map(a => {
-                    if (a.startsWith(':') && a.endsWith(':')) return 'text-center';
-                    if (a.endsWith(':')) return 'text-end';
-                    return 'text-start';
-                });
-
-                return (
-                    <div className="overflow-x-auto my-6 rounded-lg border border-cyber-700 bg-cyber-900/30">
-                        <table className="w-full text-sm text-left rtl:text-right text-gray-400">
-                            <thead className="text-xs uppercase bg-cyber-800 text-cyber-400">
-                                <tr>
-                                    {headers.map((header, i) => (
-                                        <th key={i} scope="col" className={`px-6 py-3 border-b border-cyber-700 ${alignments[i] || ''}`}>
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.map((row, i) => (
-                                    <tr key={i} className="border-b border-cyber-700/50 hover:bg-cyber-800/50 transition-colors">
-                                        {row.map((cell, j) => (
-                                            <td key={j} className={`px-6 py-4 font-medium text-white whitespace-pre-wrap ${alignments[j] || ''}`}>
-                                                {cell}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                );
-            };
-
-        // ... inside BlockRenderer switch ...
-        case 'table':
-            return <TableBlock content={block.content} />;
-
-        case 'quiz':
-            return <ChallengeBlock block={block} />;
 
 
         case 'divider':
