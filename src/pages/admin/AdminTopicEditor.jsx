@@ -506,9 +506,14 @@ const AdminTopicEditor = () => {
             // 3. Headings
             const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
             if (headingMatch) {
+                let content = headingMatch[2].trim();
+                // Strip wrapping bold/italic markdown from headings as they are already styled
+                content = content.replace(/^(\*\*|__)(.*?)\1$/, '$2'); // Bold
+                content = content.replace(/^(\*|_)(.*?)\1$/, '$2');   // Italic
+
                 parsedBlocks.push({
                     type: headingMatch[1].length === 1 ? 'h1' : headingMatch[1].length === 2 ? 'h2' : 'h3',
-                    content: headingMatch[2]
+                    content: content
                 });
                 continue;
             }
