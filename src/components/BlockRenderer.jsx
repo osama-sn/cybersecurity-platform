@@ -383,7 +383,14 @@ const BlockRenderer = ({ block, index, onToggle }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
+    // Utility for style commonalities
     const commonClasses = "text-start leading-relaxed";
+
+    const getDirection = (text) => {
+        if (!text) return 'ltr';
+        const arabicPattern = /[\u0600-\u06FF]/;
+        return arabicPattern.test(text[0]) ? 'rtl' : 'ltr';
+    };
 
     switch (block.type) {
         case 'heading':
@@ -402,7 +409,13 @@ const BlockRenderer = ({ block, index, onToggle }) => {
                 sizeClass = sizes[level] || 'text-2xl';
             }
 
-            return <LevelTag dir="auto" className={`${sizeClass} font-bold text-white mt-10 mb-6 ${commonClasses}`}>{block.content}</LevelTag>;
+            return (
+                <LevelTag
+                    dir={getDirection(block.content)}
+                    className={`${sizeClass} font-bold text-white mt-10 mb-6 ${commonClasses}`}
+                    dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
+                />
+            );
 
         case 'text':
             const parseMarkdown = (text) => {
@@ -422,7 +435,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
 
             return (
                 <div
-                    dir="auto"
+                    dir={getDirection(block.content)}
                     className={`prose prose-invert max-w-none text-cyber-300 mb-6 text-lg whitespace-pre-wrap ${commonClasses}`}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
                 />
@@ -434,7 +447,9 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             if (block.type === 'list' && Array.isArray(block.items)) {
                 return (
                     <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 mb-8 marker:text-cyber-primary text-lg ${commonClasses}`}>
-                        {block.items.map((item, i) => <li key={i}>{item}</li>)}
+                        {block.items.map((item, i) => (
+                            <li key={i} dir={getDirection(item)} dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
+                        ))}
                     </ul>
                 );
             }
@@ -442,27 +457,27 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             // BUT if we want to group them, we'd need a different approach in the parent.
             // For now, let's render individual bullets.
             return (
-                <div className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
-                    <span className="text-cyber-primary mt-1.5">•</span>
-                    <span dir="auto">{block.content}</span>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
+                    <span className="text-cyber-primary mt-1.5 shrink-0">•</span>
+                    <span className="flex-1" dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }} />
                 </div>
             );
 
         case 'numbered':
             return (
-                <div className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
-                    <span className="text-cyber-primary font-mono mt-0.5">{index ? `${index}.` : '1.'}</span>
-                    <span dir="auto">{block.content}</span>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
+                    <span className="text-cyber-primary font-mono mt-0.5 shrink-0">{index ? `${index}.` : '1.'}</span>
+                    <span className="flex-1" dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }} />
                 </div>
             );
 
         case 'todo':
             return (
-                <div className={`flex items-start gap-3 mb-2 text-lg ${commonClasses}`}>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-lg ${commonClasses}`}>
                     <div
                         onClick={() => onToggle && onToggle(block.id, !block.metadata?.checked)}
                         className={`
-                            mt-1.5 w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer hover:border-cyber-primary
+                            mt-1.5 w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer hover:border-cyber-primary shrink-0
                             ${block.metadata?.checked
                                 ? 'bg-cyber-primary border-cyber-primary text-black'
                                 : 'border-cyber-600 bg-transparent text-transparent'
@@ -471,9 +486,10 @@ const BlockRenderer = ({ block, index, onToggle }) => {
                     >
                         <Check size={14} strokeWidth={4} />
                     </div>
-                    <span dir="auto" className={`${block.metadata?.checked ? 'text-cyber-600 line-through' : 'text-cyber-300'}`}>
-                        {block.content}
-                    </span>
+                    <span
+                        className={`flex-1 ${block.metadata?.checked ? 'text-cyber-600 line-through' : 'text-cyber-300'}`}
+                        dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
+                    />
                 </div>
             );
 
