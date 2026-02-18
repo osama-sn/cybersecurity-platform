@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Shield, Terminal, BookOpen, User, Layers, Target, Briefcase, ChevronRight, Lock, Code, Database, Network, Key, Cpu, Github, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useMode } from '../context/ModeContext';
+import { useLanguage } from '../context/LanguageContext';
+import ScrollReveal from '../components/animations/ScrollReveal';
 import { useData } from '../context/DataContext';
 
 const Home = () => {
