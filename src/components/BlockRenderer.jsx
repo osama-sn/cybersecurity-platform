@@ -379,12 +379,18 @@ const ToggleBlock = ({ block, children }) => {
     );
 };
 
-const BlockRenderer = ({ block, index, onToggle }) => {
+const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
-    // Utility for style commonalities
     const commonClasses = "text-start leading-relaxed";
+
+    // In editor mode, remove large margins to match the input fields
+    const spacingClass = isEditor ? 'mb-1' : 'mb-6';
+    const headingSpacing = isEditor ? 'mt-4 mb-2' : 'mt-10 mb-6';
+    const listSpacing = isEditor ? 'mb-2' : 'mb-8';
+    const blockSpacing = isEditor ? 'my-2' : 'my-8';
+    const dividerSpacing = isEditor ? 'my-4' : 'my-12';
 
     const getDirection = (text) => {
         if (!text) return 'ltr';
@@ -427,7 +433,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             return (
                 <LevelTag
                     dir={getDirection(block.content)}
-                    className={`${sizeClass} font-bold text-white mt-10 mb-6 ${commonClasses}`}
+                    className={`${sizeClass} font-bold text-white ${headingSpacing} ${commonClasses}`}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
                 />
             );
@@ -436,7 +442,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             return (
                 <div
                     dir={getDirection(block.content)}
-                    className={`prose prose-invert max-w-none text-cyber-300 mb-6 text-lg whitespace-pre-wrap ${commonClasses}`}
+                    className={`prose prose-invert max-w-none text-cyber-300 ${spacingClass} text-lg whitespace-pre-wrap ${commonClasses}`}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
                 />
             );
@@ -446,7 +452,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             // Handle both legacy 'list' (array of items) and new 'bullet' (single text content)
             if (block.type === 'list' && Array.isArray(block.items)) {
                 return (
-                    <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 mb-8 marker:text-cyber-primary text-lg ${commonClasses}`}>
+                    <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 ${listSpacing} marker:text-cyber-primary text-lg ${commonClasses}`}>
                         {block.items.map((item, i) => (
                             <li key={i} dir={getDirection(item)} dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
                         ))}
@@ -498,7 +504,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
 
         case 'quote':
             return (
-                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 my-8 text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg ${commonClasses}`}>
+                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg ${commonClasses}`}>
                     "{block.content}"
                 </blockquote>
             );
@@ -525,11 +531,11 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             return <ChallengeBlock block={block} />;
 
         case 'divider':
-            return <hr className="my-12 border-cyber-700/50" />;
+            return <hr className={`${dividerSpacing} border-cyber-700/50`} />;
 
         case 'warning':
             return (
-                <div dir="auto" className="bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 my-8 rounded-e-xl shadow-lg">
+                <div dir="auto" className={`bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 ${blockSpacing} rounded-e-xl shadow-lg`}>
                     <strong className="text-cyber-danger flex items-center gap-2 mb-2">
                         <AlertCircle size={18} />
                         {t('renderer.warning')}
@@ -541,7 +547,7 @@ const BlockRenderer = ({ block, index, onToggle }) => {
         case 'tip':
         case 'info':
             return (
-                <div dir="auto" className="bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 my-8 rounded-e-xl shadow-lg">
+                <div dir="auto" className={`bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 ${blockSpacing} rounded-e-xl shadow-lg`}>
                     <strong className="text-cyber-primary flex items-center gap-2 mb-2">
                         <Play size={18} className="fill-cyber-primary" />
                         {block.type.toUpperCase()}
