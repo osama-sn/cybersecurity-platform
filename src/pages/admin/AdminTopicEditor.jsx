@@ -249,6 +249,12 @@ const AdminTopicEditor = () => {
     const handleBlockChange = (updatedBlock) => {
         const content = updatedBlock.content || '';
 
+        // Auto-convert '---' (or more) to divider
+        if (updatedBlock.type === 'text' && /^---+$/.test(content) && content.length >= 3) {
+            updateBlock({ ...updatedBlock, type: 'divider', content: '' });
+            return;
+        }
+
         // Detect slash command
         if (content === '/') {
             // Get caret position for menu placement

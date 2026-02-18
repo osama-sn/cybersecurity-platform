@@ -392,6 +392,21 @@ const BlockRenderer = ({ block, index, onToggle }) => {
         return arabicPattern.test(text[0]) ? 'rtl' : 'ltr';
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return '';
+        // Simple parser for basic markdown
+        let html = text
+            // Bold **text**
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+            // Italic *text*
+            .replace(/\*(.*?)\*/g, '<em class="text-cyber-400 italic">$1</em>')
+            // Inline Code `text`
+            .replace(/`([^`]+)`/g, '<code class="bg-cyber-800 text-cyber-300 px-1.5 py-0.5 rounded font-mono text-sm border border-cyber-700">$1</code>')
+            // Wrapper Link [text](url)
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4">$1</a>');
+        return html;
+    };
+
     switch (block.type) {
         case 'heading':
         case 'h1':
@@ -418,21 +433,6 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             );
 
         case 'text':
-            const parseMarkdown = (text) => {
-                if (!text) return '';
-                // Simple parser for basic markdown
-                let html = text
-                    // Bold **text**
-                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
-                    // Italic *text*
-                    .replace(/\*(.*?)\*/g, '<em class="text-cyber-400 italic">$1</em>')
-                    // Inline Code `text`
-                    .replace(/`([^`]+)`/g, '<code class="bg-cyber-800 text-cyber-300 px-1.5 py-0.5 rounded font-mono text-sm border border-cyber-700">$1</code>')
-                    // Wrapper Link [text](url)
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4">$1</a>');
-                return html;
-            };
-
             return (
                 <div
                     dir={getDirection(block.content)}
