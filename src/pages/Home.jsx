@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Shield, Terminal, BookOpen, User, Layers, Target, Briefcase, ChevronRight, Lock, Code, Database, Network, Key, Cpu, Github, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useMode } from '../context/ModeContext';
-import { useLanguage } from '../context/LanguageContext';
-import ScrollReveal from '../components/animations/ScrollReveal';
+import { useData } from '../context/DataContext';
 
 const Home = () => {
   const { setMode } = useMode();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
+  const { sections } = useData();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -212,22 +211,28 @@ const Home = () => {
         </ScrollReveal>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { key: 'networkPlaybook', color: 'text-cyber-primary', animate: 'border-cyber-primary/20' },
-            { key: 'activeDirectory', color: 'text-cyber-secondary', animate: 'border-cyber-secondary/20' },
-            { key: 'enumeration', color: 'text-cyber-accent', animate: 'border-cyber-accent/20' },
-            { key: 'tools', color: 'text-cyber-warning', animate: 'border-cyber-warning/20' },
-            { key: 'cpts', color: 'text-cyber-danger', animate: 'border-cyber-danger/20' },
-            { key: 'cheatsheets', color: 'text-white', animate: 'border-white/20' },
-            { key: 'thinking', color: 'text-cyber-purple', animate: 'border-purple-500/20' }
-          ].map((item, i) => (
-            <ScrollReveal key={i} delay={i * 0.05} direction="none">
-              <div className={`p-4 bg-cyber-900 rounded-lg border ${item.animate} hover:bg-cyber-800 hover:-translate-y-1 transition-all group`}>
-                <h4 className={`text-lg font-bold mb-2 ${item.color} font-arabic group-hover:brightness-125 transition-all`}>{t(`home.platformSections.items.${item.key}.title`)}</h4>
-                <p className="text-sm text-cyber-400 font-arabic">{t(`home.platformSections.items.${item.key}.desc`)}</p>
-              </div>
-            </ScrollReveal>
-          ))}
+          {(sections || []).length > 0 ? (
+            sections.map((section, i) => (
+              <ScrollReveal key={section.id} delay={i * 0.05} direction="none">
+                <Link
+                  to={`/section/${section.id}`}
+                  className="block p-4 bg-cyber-900 rounded-lg border border-cyber-800 hover:border-cyber-primary/50 hover:bg-cyber-800 hover:-translate-y-1 transition-all group h-full"
+                >
+                  <h4 className="text-lg font-bold mb-2 text-cyber-primary font-arabic group-hover:text-white transition-colors">
+                    {section.title}
+                  </h4>
+                  <p className="text-sm text-cyber-400 font-arabic leading-relaxed">
+                    {language === 'ar' ? (section.descriptionAr || section.descriptionEn) : (section.descriptionEn || section.descriptionAr)}
+                  </p>
+                </Link>
+              </ScrollReveal>
+            ))
+          ) : (
+            // Fallback/Loading state if no sections found
+            <div className="col-span-full text-center py-12 text-cyber-500 font-mono">
+              No public sections available yet.
+            </div>
+          )}
         </div>
         <ScrollReveal delay={0.5}>
           <div className="text-center text-sm text-cyber-500 mt-4 font-mono">
