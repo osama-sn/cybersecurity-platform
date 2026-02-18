@@ -290,8 +290,8 @@ const EditorBlock = ({
         >
             {/* Side Controls (Grip + Add + Delete) - Left for LTR, Right for RTL */}
             <div className={`absolute top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ${isRTL
-                    ? 'right-0 translate-x-full pl-1'
-                    : 'left-0 -translate-x-full pr-1'
+                ? 'right-0 translate-x-full pl-1'
+                : 'left-0 -translate-x-full pr-1'
                 }`}>
                 <button
                     onClick={() => onAddBelow(index)}
@@ -318,7 +318,15 @@ const EditorBlock = ({
             {/* Block Content */}
             <div
                 className={`flex items-start ${wrapperClass()}`}
-                onClick={() => onFocus(block.id)}
+                onClick={(e) => {
+                    // If modifier keys are pressed, bubble up to parent (EditorBlock wrapper) which handles selection
+                    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                        return; // Let it bubble
+                    }
+                    // Otherwise focus
+                    onFocus(block.id);
+                    e.stopPropagation();
+                }}
             >
                 {blockPrefix()}
                 <div className="flex-1 min-w-0">

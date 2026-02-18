@@ -37,152 +37,70 @@ const AdminTopicEditor = () => {
     const { topicId } = useParams();
     const [topic, setTopic] = useState(null);
     const [blocks, setBlocks] = useState([]);
-    const [activeBlockId, setActiveBlockId] = useState(null);
-    const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
+    const [selectedBlockIds, setSelectedBlockIds] = useState(new Set());
 
-    // Slash menu state
-    const [slashMenu, setSlashMenu] = useState({ open: false, blockId: null, query: '', position: { top: 0, left: 0 } });
+    // ... (existing refs)
 
-    // Drag state
-    const [dragIndex, setDragIndex] = useState(null);
-    const [dragOverIndex, setDragOverIndex] = useState(null);
+    // ── Selection Logic ────────────────────────────────────────────────────────
+    const handleBlockClick = (e, blockId, index) => {
+        // Prevent default only if we are doing a selection action to avoid messing up focus
+        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+        }
 
-    // Debounce timer ref
-    const saveTimer = useRef(null);
-    // Map of blockId → Firestore docId (for blocks already persisted)
-    const firestoreIds = useRef({}); // { localId: firestoreDocId }
+        if (e.shiftKey && activeBlockId) {
+            // Range selection
+            const activeIndex = blocks.findIndex(b => b.id === activeBlockId);
+            if (activeIndex === -1) return;
 
-    // ── Load data ──────────────────────────────────────────────────────────────
-    useEffect(() => {
-        if (!topicId) return;
+            const start = Math.min(activeIndex, index);
+            const end = Math.max(activeIndex, index);
 
-        const fetchTopic = async () => {
-            const snap = await getDoc(doc(db, 'topics', topicId));
-            if (snap.exists()) setTopic({ id: snap.id, ...snap.data() });
-        };
-        fetchTopic();
-
-        const fetchBlocks = async () => {
-            const q = query(
-                collection(db, 'contentBlocks'),
-                where('topicId', '==', topicId),
-                orderBy('order', 'asc')
-            );
-            let snap;
-            try { snap = await getDocs(q); }
-            catch {
-                const fallback = query(collection(db, 'contentBlocks'), where('topicId', '==', topicId));
-                snap = await getDocs(fallback);
+            const newSelection = new Set();
+            for (let i = start; i <= end; i++) {
+                newSelection.add(blocks[i].id);
             }
-
-            const loaded = snap.docs.map(d => {
-                const localId = crypto.randomUUID();
-                firestoreIds.current[localId] = d.id;
-                return { id: localId, ...d.data(), _isNew: false };
-            });
-            loaded.sort((a, b) => (a.order || 0) - (b.order || 0));
-            setBlocks(loaded.length > 0 ? loaded : [newBlock('text')]);
-        };
-        fetchBlocks();
-    }, [topicId]);
-
-    // ── Auto-save (debounced) ──────────────────────────────────────────────────
-    const scheduleSave = useCallback((updatedBlocks) => {
-        if (saveTimer.current) clearTimeout(saveTimer.current);
-        setSaveStatus('saving');
-        saveTimer.current = setTimeout(() => persistBlocks(updatedBlocks), 800);
-    }, []);
-
-    const persistBlocks = async (currentBlocks) => {
-        try {
-            const batch = writeBatch(db);
-
-            currentBlocks.forEach((block, index) => {
-                const firestoreId = firestoreIds.current[block.id];
-                const data = {
-                    topicId,
-                    type: block.type,
-                    content: block.content || '',
-                    metadata: block.metadata || {},
-                    order: index,
-                };
-
-                if (firestoreId) {
-                    // Update existing
-                    batch.update(doc(db, 'contentBlocks', firestoreId), data);
-                } else {
-                    // Create new
-                    const newRef = doc(collection(db, 'contentBlocks'));
-                    firestoreIds.current[block.id] = newRef.id;
-                    batch.set(newRef, { ...data, createdAt: serverTimestamp() });
-                }
-            });
-
-            // Delete removed blocks
-            const currentLocalIds = new Set(currentBlocks.map(b => b.id));
-            for (const [localId, fsId] of Object.entries(firestoreIds.current)) {
-                if (!currentLocalIds.has(localId)) {
-                    batch.delete(doc(db, 'contentBlocks', fsId));
-                    delete firestoreIds.current[localId];
-                }
+            setSelectedBlockIds(newSelection);
+        } else if (e.ctrlKey || e.metaKey) {
+            // Toggle selection
+            const newSelection = new Set(selectedBlockIds);
+            if (newSelection.has(blockId)) {
+                newSelection.delete(blockId);
+            } else {
+                newSelection.add(blockId);
             }
-
-            await batch.commit();
-            setSaveStatus('saved');
-            setTimeout(() => setSaveStatus('idle'), 2000);
-        } catch (err) {
-            console.error('Save error:', err);
-            setSaveStatus('idle');
+            setSelectedBlockIds(newSelection);
+            setActiveBlockId(blockId); // Update active but keep others selected
+        } else {
+            // Single selection (default)
+            if (selectedBlockIds.size > 0) {
+                setSelectedBlockIds(new Set());
+            }
+            setActiveBlockId(blockId);
         }
     };
 
-    // ── Block mutations ────────────────────────────────────────────────────────
-    const updateBlock = (updatedBlock) => {
-        setBlocks(prev => {
-            const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
-            scheduleSave(next);
-            return next;
-        });
-    };
-
-    const addBlockAfter = (index, type = 'text') => {
-        const nb = newBlock(type);
-        setBlocks(prev => {
-            const next = [...prev];
-            next.splice(index + 1, 0, nb);
-            // Immediate save for structural change
-            persistBlocks(next);
-            return next;
-        });
-        setActiveBlockId(nb.id);
-        return nb.id;
-    };
-
-    const deleteBlock = (blockId) => {
-        setBlocks(prev => {
-            if (prev.length === 1) {
-                // Don't delete the last block; just clear it
-                const cleared = [{ ...prev[0], content: '', type: 'text', metadata: {} }];
-                // Immediate save
-                persistBlocks(cleared);
-                return cleared;
-            }
-            const idx = prev.findIndex(b => b.id === blockId);
-            const next = prev.filter(b => b.id !== blockId);
-            // Immediate save
-            persistBlocks(next);
-            // Focus previous block
-            const focusIdx = Math.max(0, idx - 1);
-            setActiveBlockId(next[focusIdx]?.id || null);
-            return next;
-        });
-    };
-
-    // ── Keyboard handler ───────────────────────────────────────────────────────
     // ── Keyboard handler ───────────────────────────────────────────────────────
     const handleKeyDown = (e, block, index) => {
         // Slash menu navigation is handled inside SlashMenu itself
         if (slashMenu.open) return;
+
+        // Bulk Delete
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            if (selectedBlockIds.size > 1) {
+                e.preventDefault();
+                const idsToDelete = Array.from(selectedBlockIds);
+                setBlocks(prev => {
+                    const next = prev.filter(b => !selectedBlockIds.has(b.id));
+                    if (next.length === 0) return [newBlock('text')]; // Always keep one
+                    persistBlocks(next);
+                    return next;
+                });
+                setSelectedBlockIds(new Set());
+                setActiveBlockId(null);
+                return;
+            }
+        }
 
         if (e.key === 'Enter') {
             const isMultiline = ['code', 'quote', 'tip', 'warning', 'quiz', 'toggle'].includes(block.type);
@@ -193,12 +111,6 @@ const AdminTopicEditor = () => {
                 addBlockAfter(index);
                 return;
             }
-
-            // For multi-line blocks, Enter inserts a new line (default behavior).
-            // We only intercept if it's NOT multi-line (or if Shift is pressed, which usually means new line in text editors, but here we want standard list behavior)
-            // Wait, standard behavior:
-            // Text/List: Enter = New Block. Shift+Enter = New Line.
-            // Code/Quote: Enter = New Line. Ctrl+Enter = New Block.
 
             if (isMultiline) {
                 // Allow default (new line)
@@ -215,7 +127,7 @@ const AdminTopicEditor = () => {
             }
         }
 
-        if (e.key === 'Backspace' && block.content === '') {
+        if (e.key === 'Backspace' && block.content === '' && selectedBlockIds.size <= 1) {
             e.preventDefault();
             deleteBlock(block.id);
             return;
@@ -236,12 +148,48 @@ const AdminTopicEditor = () => {
 
         // Arrow key navigation between blocks
         if (e.key === 'ArrowDown') {
-            const next = blocks[index + 1];
-            if (next) { e.preventDefault(); setActiveBlockId(next.id); }
+            if (e.shiftKey) {
+                e.preventDefault();
+                // Expand selection downwards
+                const nextIndex = index + 1;
+                if (nextIndex < blocks.length) {
+                    const nextBlock = blocks[nextIndex];
+                    const newSelection = new Set(selectedBlockIds);
+                    newSelection.add(block.id);
+                    newSelection.add(nextBlock.id);
+                    setSelectedBlockIds(newSelection);
+                    setActiveBlockId(nextBlock.id);
+                }
+            } else {
+                const next = blocks[index + 1];
+                if (next) {
+                    e.preventDefault();
+                    setActiveBlockId(next.id);
+                    setSelectedBlockIds(new Set()); // Clear selection on arrow move without shift
+                }
+            }
         }
         if (e.key === 'ArrowUp') {
-            const prev = blocks[index - 1];
-            if (prev) { e.preventDefault(); setActiveBlockId(prev.id); }
+            if (e.shiftKey) {
+                e.preventDefault();
+                // Expand selection upwards
+                const prevIndex = index - 1;
+                if (prevIndex >= 0) {
+                    const prevBlock = blocks[prevIndex];
+                    const newSelection = new Set(selectedBlockIds);
+                    newSelection.add(block.id);
+                    newSelection.add(prevBlock.id);
+                    setSelectedBlockIds(newSelection);
+                    setActiveBlockId(prevBlock.id);
+                }
+            } else {
+                const prev = blocks[index - 1];
+                if (prev) {
+                    e.preventDefault();
+                    setActiveBlockId(prev.id);
+                    setSelectedBlockIds(new Set()); // Clear selection on arrow move without shift
+                }
+            }
         }
     };
 
@@ -323,6 +271,132 @@ const AdminTopicEditor = () => {
         </div>
     );
 
+    // ─── Paste Handler ─────────────────────────────────────────────────────────
+    const handlePaste = (e) => {
+        // Only handle paste if we are NOT inside a specific input/textarea (unless it's the main container or a block that wants to accept full paste)
+        // Actually, we usually want to intercept paste on the container or the focused block.
+        // For simplicity, let's parse the clipboard data.
+        const clipboardData = e.clipboardData || window.clipboardData;
+        const pastedText = clipboardData.getData('text');
+
+        if (!pastedText) return;
+
+        // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
+        const isMultiLine = pastedText.includes('\n');
+        // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
+
+        e.preventDefault();
+
+        const newBlocksData = parseMarkdownToBlocks(pastedText);
+
+        if (newBlocksData.length === 0) return;
+
+        // Insert blocks after the active block, or at the end
+        setBlocks(prev => {
+            const activeIndex = prev.findIndex(b => b.id === activeBlockId);
+            const insertIndex = activeIndex >= 0 ? activeIndex + 1 : prev.length;
+
+            const newBlocks = newBlocksData.map(data => ({
+                ...newBlock(data.type, data.content),
+                metadata: data.metadata || {}
+            }));
+
+            const next = [...prev];
+            next.splice(insertIndex, 0, ...newBlocks);
+
+            persistBlocks(next);
+
+            // Focus the last pasted block
+            /* setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50); */
+            return next;
+        });
+    };
+
+    const parseMarkdownToBlocks = (text) => {
+        const lines = text.split(/\r?\n/);
+        const parsedBlocks = [];
+        let currentCodeBlock = null;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            // 1. Code Block Handling
+            if (line.trim().startsWith('```')) {
+                if (currentCodeBlock) {
+                    // Close code block
+                    parsedBlocks.push(currentCodeBlock);
+                    currentCodeBlock = null;
+                } else {
+                    // Start code block
+                    const lang = line.trim().replace(/^```/, '');
+                    currentCodeBlock = { type: 'code', content: '', metadata: { language: lang || 'bash' } };
+                }
+                continue;
+            }
+
+            if (currentCodeBlock) {
+                currentCodeBlock.content += (currentCodeBlock.content ? '\n' : '') + line;
+                continue;
+            }
+
+            // 2. Headings
+            const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+            if (headingMatch) {
+                parsedBlocks.push({
+                    type: headingMatch[1].length === 1 ? 'h1' : headingMatch[1].length === 2 ? 'h2' : 'h3',
+                    content: headingMatch[2]
+                });
+                continue;
+            }
+
+            // 3. Dividers
+            if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
+                parsedBlocks.push({ type: 'divider', content: '' });
+                continue;
+            }
+
+            // 4. Lists (Unordered)
+            const bulletMatch = line.match(/^[\-\*]\s+(.+)$/);
+            if (bulletMatch) {
+                parsedBlocks.push({ type: 'bullet', content: bulletMatch[1] });
+                continue;
+            }
+
+            // 5. Lists (Ordered)
+            const numberMatch = line.match(/^\d+\.\s+(.+)$/);
+            if (numberMatch) {
+                parsedBlocks.push({ type: 'numbered', content: numberMatch[1] }); // We use 'numbered' as type based on previous code
+                continue;
+            }
+
+            // 6. Blockquotes
+            const quoteMatch = line.match(/^>\s+(.+)$/);
+            if (quoteMatch) {
+                parsedBlocks.push({ type: 'quote', content: quoteMatch[1] });
+                continue;
+            }
+
+            // 7. General Text (Group Text?) 
+            // For now, treat every other line as text. 
+            // Optimization: Combine adjacent text lines?
+            // If the last block was text, append to it?
+
+            if (line.trim() === '') continue; // Skip empty lines for now (or make them separators?)
+
+            const lastBlock = parsedBlocks[parsedBlocks.length - 1];
+            if (lastBlock && lastBlock.type === 'text') {
+                lastBlock.content += '\n' + line;
+            } else {
+                parsedBlocks.push({ type: 'text', content: line });
+            }
+        }
+
+        // Push remaining code block if unclosed
+        if (currentCodeBlock) parsedBlocks.push(currentCodeBlock);
+
+        return parsedBlocks;
+    };
+
     return (
         <div className="max-w-full mx-auto pb-40 animate-fade-in px-8 lg:px-12">
             {/* ── Header ── */}
@@ -367,6 +441,7 @@ const AdminTopicEditor = () => {
                         setActiveBlockId(blocks[blocks.length - 1]?.id || null);
                     }
                 }}
+                onPaste={handlePaste}
             >
                 {/* Hint */}
                 {blocks.length === 1 && blocks[0].content === '' && (
@@ -394,6 +469,8 @@ const AdminTopicEditor = () => {
                                     index={index} // logical index for array operations
                                     listNumber={block.type === 'numbered' ? listIndex : undefined} // visual index for display
                                     isActive={activeBlockId === block.id}
+                                    isSelected={selectedBlockIds.has(block.id)}
+                                    onClick={(e) => handleBlockClick(e, block.id, index)}
                                     onFocus={(id) => setActiveBlockId(id)}
                                     onChange={handleBlockChange}
                                     onKeyDown={handleKeyDown}
