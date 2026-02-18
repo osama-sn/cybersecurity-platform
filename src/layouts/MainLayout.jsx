@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const MainLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Start open on desktop (md = 768px), closed on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { mode, toggleMode, isLearningMode } = useMode();
   const { user, logout } = useAuth();
@@ -41,16 +42,19 @@ const MainLayout = () => {
     }
   };
 
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <div className="flex h-screen bg-cyber-900 text-cyber-200 overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col h-full relative">
+      <div className="flex-1 flex flex-col h-full relative tranisition-all duration-300">
         {/* Header */}
         <header className="h-16 border-b border-cyber-700 bg-cyber-900/95 backdrop-blur flex items-center justify-between px-4 z-10">
           <button
-            className="md:hidden p-2 text-cyber-400 hover:text-white"
-            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-cyber-400 hover:text-white transition-colors"
+            onClick={toggleSidebar}
+            title="Toggle Sidebar"
           >
             <Menu size={24} />
           </button>

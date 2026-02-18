@@ -63,10 +63,12 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-cyber-900 border-r border-cyber-700
-        transform transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 z-50 h-full bg-cyber-900 border-r border-cyber-700
+        transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:static
+        ${isOpen ? 'md:w-64' : 'md:w-0 md:border-r-0 md:overflow-hidden'}
+        w-64
       `}>
         <div className="p-4 border-b border-cyber-700 flex items-center gap-2">
           <BookOpen className="text-cyber-primary" size={24} />
