@@ -10,7 +10,7 @@ export default {
     extend: {
       colors: {
         cyber: {
-          900: '#0a0a0b', // Background
+          900: '#0e0e11', // Background
           800: '#121214', // Card bg
           700: '#1c1c1f', // Hover
           600: '#27272a', // Border

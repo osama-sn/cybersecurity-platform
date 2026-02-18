@@ -148,7 +148,8 @@ const AdminTopicEditor = () => {
         setBlocks(prev => {
             const next = [...prev];
             next.splice(index + 1, 0, nb);
-            scheduleSave(next);
+            // Immediate save for structural change
+            persistBlocks(next);
             return next;
         });
         setActiveBlockId(nb.id);
@@ -160,12 +161,14 @@ const AdminTopicEditor = () => {
             if (prev.length === 1) {
                 // Don't delete the last block; just clear it
                 const cleared = [{ ...prev[0], content: '', type: 'text', metadata: {} }];
-                scheduleSave(cleared);
+                // Immediate save
+                persistBlocks(cleared);
                 return cleared;
             }
             const idx = prev.findIndex(b => b.id === blockId);
             const next = prev.filter(b => b.id !== blockId);
-            scheduleSave(next);
+            // Immediate save
+            persistBlocks(next);
             // Focus previous block
             const focusIdx = Math.max(0, idx - 1);
             setActiveBlockId(next[focusIdx]?.id || null);
@@ -180,7 +183,9 @@ const AdminTopicEditor = () => {
 
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            addBlockAfter(index);
+            // Inherit list types
+            const nextType = ['bullet', 'numbered', 'todo'].includes(block.type) ? block.type : 'text';
+            addBlockAfter(index, nextType);
             return;
         }
 
@@ -270,7 +275,8 @@ const AdminTopicEditor = () => {
             const next = [...prev];
             const [moved] = next.splice(dragIndex, 1);
             next.splice(targetIndex, 0, moved);
-            scheduleSave(next);
+            // Immediate save for reordering
+            persistBlocks(next);
             return next;
         });
         setDragIndex(null);

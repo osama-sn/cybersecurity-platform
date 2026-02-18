@@ -362,12 +362,22 @@ const BlockRenderer = ({ block }) => {
 
     switch (block.type) {
         case 'heading':
-            const HeadingTag = `h${block.metadata?.level || 2}`; // Default to h2
-            const headingSizes = {
-                1: 'text-4xl', 2: 'text-3xl', 3: 'text-2xl', 4: 'text-xl', 5: 'text-lg', 6: 'text-base'
-            };
-            const size = headingSizes[block.metadata?.level] || 'text-2xl';
-            return <HeadingTag dir="auto" className={`${size} font-bold text-white mt-10 mb-6 ${commonClasses}`}>{block.content}</HeadingTag>;
+        case 'h1':
+        case 'h2':
+        case 'h3':
+            let LevelTag = 'h2';
+            let sizeClass = 'text-3xl';
+
+            if (block.type === 'h1') { LevelTag = 'h1'; sizeClass = 'text-4xl'; }
+            else if (block.type === 'h3') { LevelTag = 'h3'; sizeClass = 'text-2xl'; }
+            else if (block.type === 'heading') {
+                const level = block.metadata?.level || 2;
+                LevelTag = `h${level}`;
+                const sizes = { 1: 'text-4xl', 2: 'text-3xl', 3: 'text-2xl', 4: 'text-xl', 5: 'text-lg', 6: 'text-base' };
+                sizeClass = sizes[level] || 'text-2xl';
+            }
+
+            return <LevelTag dir="auto" className={`${sizeClass} font-bold text-white mt-10 mb-6 ${commonClasses}`}>{block.content}</LevelTag>;
 
         case 'text':
             return (
@@ -379,10 +389,56 @@ const BlockRenderer = ({ block }) => {
             );
 
         case 'list':
+        case 'bullet':
+            // Handle both legacy 'list' (array of items) and new 'bullet' (single text content)
+            if (block.type === 'list' && Array.isArray(block.items)) {
+                return (
+                    <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 mb-8 marker:text-cyber-primary text-lg ${commonClasses}`}>
+                        {block.items.map((item, i) => <li key={i}>{item}</li>)}
+                    </ul>
+                );
+            }
+            // For 'bullet', it's usually a single block per bullet in Notion-like editors, 
+            // BUT if we want to group them, we'd need a different approach in the parent.
+            // For now, let's render individual bullets.
             return (
-                <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 mb-8 marker:text-cyber-primary text-lg ${commonClasses}`}>
-                    {block.items?.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
+                <div className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
+                    <span className="text-cyber-primary mt-1.5">•</span>
+                    <span dir="auto">{block.content}</span>
+                </div>
+            );
+
+        case 'numbered':
+            return (
+                <div className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
+                    <span className="text-cyber-primary font-mono mt-0.5">{block.order ? `${block.order + 1}.` : '1.'}</span>
+                    <span dir="auto">{block.content}</span>
+                </div>
+            );
+
+        case 'todo':
+            return (
+                <div className={`flex items-start gap-3 mb-2 text-lg ${commonClasses}`}>
+                    <div className={`
+                        mt-1.5 w-5 h-5 rounded border flex items-center justify-center transition-all
+                        ${block.metadata?.checked
+                            ? 'bg-cyber-primary border-cyber-primary text-black'
+                            : 'border-cyber-600 bg-transparent text-transparent'
+                        }
+                    `}>
+                        <Check size={14} strokeWidth={4} />
+                    </div>
+                    <span dir="auto" className={`${block.metadata?.checked ? 'text-cyber-600 line-through' : 'text-cyber-300'}`}>
+                        {block.content}
+                    </span>
+                </div>
+            );
+
+        case 'quote':
+            return (
+                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 my-8 text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg ${commonClasses}`}>
+                    "{block.content}"
+                </blockquote>
             );
 
         case 'code':

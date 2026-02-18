@@ -13,6 +13,14 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
 
     const baseClass = "w-full bg-transparent outline-none resize-none overflow-hidden leading-relaxed";
 
+    // Helper to detect text direction
+    const getDirection = (text) => {
+        if (!text) return 'ltr';
+        // Check for Arabic characters
+        const arabicPattern = /[\u0600-\u06FF]/;
+        return arabicPattern.test(text[0]) ? 'rtl' : 'ltr';
+    };
+
     if (block.type === 'code') {
         return (
             <div className="relative my-2">
@@ -32,6 +40,7 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                     onKeyDown={onKeyDown}
                     placeholder="// code here..."
                     rows={3}
+                    dir="ltr" // Code is always LTR
                 />
             </div>
         );
@@ -46,6 +55,7 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                 onChange={e => onChange({ ...block, content: e.target.value })}
                 onKeyDown={onKeyDown}
                 placeholder="Paste YouTube URL..."
+                dir="ltr" // URLs are LTR
             />
         );
     }
@@ -62,6 +72,7 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                     onKeyDown={onKeyDown}
                     placeholder="Challenge question..."
                     rows={2}
+                    dir={getDirection(block.metadata?.question)}
                 />
                 <div className="grid grid-cols-2 gap-2">
                     <input
@@ -69,12 +80,14 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                         placeholder="Correct flag (e.g. FLAG{...})"
                         value={block.metadata?.correctFlag || ''}
                         onChange={e => onChange({ ...block, metadata: { ...block.metadata, correctFlag: e.target.value, challengeType: 'flag' } })}
+                        dir="ltr"
                     />
                     <input
                         className="input text-sm py-2"
                         placeholder="Flag pattern (e.g. FLAG{****})"
                         value={block.metadata?.flagPattern || ''}
                         onChange={e => onChange({ ...block, metadata: { ...block.metadata, flagPattern: e.target.value } })}
+                        dir="ltr"
                     />
                 </div>
                 <input
@@ -82,12 +95,14 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                     placeholder="Hint (optional)"
                     value={block.metadata?.hint || ''}
                     onChange={e => onChange({ ...block, metadata: { ...block.metadata, hint: e.target.value } })}
+                    dir={getDirection(block.metadata?.hint)}
                 />
                 <input
                     className="input text-sm py-2"
                     placeholder="Explanation (shown after answer)"
                     value={block.metadata?.explanation || ''}
                     onChange={e => onChange({ ...block, metadata: { ...block.metadata, explanation: e.target.value } })}
+                    dir={getDirection(block.metadata?.explanation)}
                 />
             </div>
         );
@@ -115,6 +130,7 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
             onKeyDown={onKeyDown}
             placeholder={placeholder || 'Type \'/\' for commands...'}
             rows={1}
+            dir={getDirection(block.content)}
         />
     );
 };
