@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { GripVertical, X, Plus, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 // Renders the block content in "edit mode" - a simple textarea or input
 const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
@@ -220,6 +221,7 @@ const EditorBlock = ({
 }) => {
     const inputRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
+    const { isRTL } = useLanguage();
 
     useEffect(() => {
         if (isActive && inputRef.current) {
@@ -266,7 +268,8 @@ const EditorBlock = ({
                 onDragOver={e => { e.preventDefault(); onDragOver(index); }}
                 onDrop={() => onDrop(index)}
             >
-                <div className={`absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-full pr-2`}>
+                {/* Delete Button for Divider (Relative to direction) */}
+                <div className={`absolute top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isRTL ? 'right-0 translate-x-full pl-2' : 'left-0 -translate-x-full pr-2'}`}>
                     <button className="p-1 text-cyber-600 hover:text-cyber-400 cursor-grab"><GripVertical size={14} /></button>
                     <button onClick={() => onDelete(block.id)} className="p-1 text-cyber-600 hover:text-red-400"><X size={14} /></button>
                 </div>
@@ -285,8 +288,11 @@ const EditorBlock = ({
             onDragOver={e => { e.preventDefault(); onDragOver(index); }}
             onDrop={() => onDrop(index)}
         >
-            {/* Left Controls */}
-            <div className={`absolute left-0 top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-full pr-1`}>
+            {/* Side Controls (Grip + Add) - Left for LTR, Right for RTL */}
+            <div className={`absolute top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ${isRTL
+                    ? 'right-0 translate-x-full pl-1'
+                    : 'left-0 -translate-x-full pr-1'
+                }`}>
                 <button
                     onClick={() => onAddBelow(index)}
                     className="p-1 text-cyber-600 hover:text-cyber-primary transition-colors"
@@ -302,10 +308,11 @@ const EditorBlock = ({
                 </button>
             </div>
 
-            {/* Delete Button */}
+            {/* Delete Button - Right for LTR, Left for RTL */}
             <button
                 onClick={() => onDelete(block.id)}
-                className="absolute right-0 top-2 p-1 text-cyber-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                className={`absolute top-2 p-1 text-cyber-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all ${isRTL ? 'left-0' : 'right-0'
+                    }`}
                 title="Delete block"
             >
                 <X size={14} />

@@ -5,7 +5,7 @@ import {
     addDoc, deleteDoc, serverTimestamp, updateDoc, writeBatch
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2, Plus } from 'lucide-react';
 import EditorBlock from '../../components/NotionEditor/EditorBlock';
 import SlashMenu from '../../components/NotionEditor/SlashMenu';
 
@@ -401,6 +401,15 @@ const AdminTopicEditor = () => {
                         });
                     })()}
                 </div>
+
+                {/* Add Block Button at the End */}
+                <button
+                    onClick={() => addBlockAfter(blocks.length - 1)}
+                    className="w-full mt-4 py-3 flex items-center justify-center gap-2 text-cyber-600 hover:text-cyber-primary hover:bg-cyber-900/40 border border-transparent hover:border-cyber-primary/30 rounded-xl transition-all group"
+                >
+                    <Plus size={16} className="group-hover:scale-110 transition-transform" />
+                    <span className="font-mono text-xs uppercase tracking-widest">Add New Block</span>
+                </button>
 
                 {/* Slash Menu */}
                 {slashMenu.open && (
