@@ -182,6 +182,26 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
         );
     }
 
+    if (block.type === 'table') {
+        return (
+            <div className="relative my-2">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-cyber-500 font-mono uppercase tracking-widest">Markdown Table</span>
+                </div>
+                <textarea
+                    ref={inputRef}
+                    className={`${baseClass} font-mono text-sm text-cyber-300 bg-cyber-900/30 border border-cyber-700 rounded-lg p-4 min-h-[100px] whitespace-pre`}
+                    value={block.content}
+                    onChange={e => onChange({ ...block, content: e.target.value })}
+                    onKeyDown={onKeyDown}
+                    placeholder="| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |"
+                    rows={4}
+                    dir="ltr"
+                />
+            </div>
+        );
+    }
+
     const styleMap = {
         h1: `${baseClass} text-4xl font-bold text-white`,
         h2: `${baseClass} text-3xl font-bold text-white`,

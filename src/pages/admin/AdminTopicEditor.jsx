@@ -487,7 +487,7 @@ const AdminTopicEditor = () => {
             if (trimmedLine.startsWith('|')) {
                 if (!currentTableBlock) {
                     currentTableBlock = {
-                        type: 'code', // Render tables as code blocks for now to preserve alignment
+                        type: 'table',
                         content: line,
                         metadata: { language: 'markdown' }
                     };
