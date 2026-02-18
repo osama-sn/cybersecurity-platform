@@ -318,7 +318,7 @@ const AdminTopicEditor = () => {
     );
 
     return (
-        <div className="max-w-3xl mx-auto pb-40 animate-fade-in px-4">
+        <div className="max-w-full mx-auto pb-40 animate-fade-in px-8 lg:px-12">
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-cyber-700/50 pb-6 mb-8">
                 <div className="space-y-2">
