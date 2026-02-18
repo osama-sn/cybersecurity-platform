@@ -24,6 +24,18 @@ const Home = () => {
     visible: { opacity: 1, y: 0 }
   };
 
+  const getSectionStyle = (colorName) => {
+    const colors = {
+      primary: { text: 'text-cyber-primary', border: 'hover:border-cyber-primary/50' },
+      secondary: { text: 'text-cyber-secondary', border: 'hover:border-cyber-secondary/50' },
+      accent: { text: 'text-cyber-accent', border: 'hover:border-cyber-accent/50' },
+      danger: { text: 'text-cyber-danger', border: 'hover:border-cyber-danger/50' },
+      warning: { text: 'text-cyber-warning', border: 'hover:border-cyber-warning/50' },
+      purple: { text: 'text-indigo-400', border: 'hover:border-indigo-500/50' },
+    };
+    return colors[colorName] || colors.primary;
+  };
+
   return (
     <motion.div
       initial="hidden"
@@ -215,21 +227,24 @@ const Home = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {(sections || []).length > 0 ? (
-            sections.map((section, i) => (
-              <ScrollReveal key={section.id} delay={i * 0.05} direction="none">
-                <Link
-                  to={`/section/${section.id}`}
-                  className="block p-4 bg-cyber-900 rounded-lg border border-cyber-800 hover:border-cyber-primary/50 hover:bg-cyber-800 hover:-translate-y-1 transition-all group h-full"
-                >
-                  <h4 className="text-lg font-bold mb-2 text-cyber-primary font-arabic group-hover:text-white transition-colors">
-                    {section.title}
-                  </h4>
-                  <p className="text-sm text-cyber-400 font-arabic leading-relaxed">
-                    {language === 'ar' ? (section.descriptionAr || section.descriptionEn) : (section.descriptionEn || section.descriptionAr)}
-                  </p>
-                </Link>
-              </ScrollReveal>
-            ))
+            sections.map((section, i) => {
+              const style = getSectionStyle(section.themeColor);
+              return (
+                <ScrollReveal key={section.id} delay={i * 0.05} direction="none">
+                  <Link
+                    to={`/section/${section.id}`}
+                    className={`block p-4 bg-cyber-900 rounded-lg border border-cyber-800 hover:bg-cyber-800 hover:-translate-y-1 transition-all group h-full ${style.border}`}
+                  >
+                    <h4 className={`text-lg font-bold mb-2 font-arabic group-hover:text-white transition-colors ${style.text}`}>
+                      {section.title}
+                    </h4>
+                    <p className="text-sm text-cyber-400 font-arabic leading-relaxed">
+                      {language === 'ar' ? (section.descriptionAr || section.descriptionEn) : (section.descriptionEn || section.descriptionAr)}
+                    </p>
+                  </Link>
+                </ScrollReveal>
+              );
+            })
           ) : (
             // Fallback/Loading state if no sections found
             <div className="col-span-full text-center py-12 text-cyber-500 font-mono">

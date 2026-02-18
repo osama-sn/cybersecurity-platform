@@ -143,58 +143,103 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            <div className="bg-cyber-800 p-6 rounded-lg border border-cyber-700">
-                <div className="space-y-4">
-                    {displaySections.map((section, index) => (
-                        <div
-                            key={section.id}
-                            draggable
-                            onDragStart={() => handleDragStart(index)}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDrop={() => handleDrop(index)}
-                            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
-                            className={`border rounded-lg p-4 bg-cyber-900/50 transition-all cursor-move
-                                ${dragOverIndex === index ? 'border-cyber-primary bg-cyber-800 scale-[1.01]' : 'border-cyber-600'}
+            <div className="bg-cyber-800 p-6 rounded-lg border border-cyber-700 min-h-[500px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {displaySections.map((section, index) => {
+                        const themeColorObj = THEME_COLORS.find(c => c.id === (section.themeColor || 'primary')) || THEME_COLORS[0];
+
+                        return (
+                            <div
+                                key={section.id}
+                                draggable
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDrop={() => handleDrop(index)}
+                                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                                className={`
+                                relative group flex flex-col bg-cyber-900 rounded-xl border-t-4 shadow-lg transition-all cursor-move overflow-hidden
+                                ${dragOverIndex === index ? 'scale-[1.02] z-10' : ''}
                                 ${dragIndex === index ? 'opacity-50' : 'opacity-100'}
+                                hover:shadow-[0_0_20px_rgba(0,0,0,0.3)]
                             `}
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-3">
-                                    <GripVertical className="text-cyber-600 hover:text-cyber-400 cursor-grab active:cursor-grabbing" size={16} />
-                                    <Layers className="text-cyber-primary" size={20} />
-                                    <div>
-                                        <h3 className="text-lg font-bold text-white">{section.title}</h3>
-                                        <div className="flex gap-4 text-xs text-cyber-400 mt-1">
-                                            <span>🇺🇸 {section.descriptionEn || 'No EN desc'}</span>
-                                            <span>🇸🇦 {section.descriptionAr || 'No AR desc'}</span>
+                                style={{ borderColor: themeColorObj.id === 'white' ? '#fff' : undefined }} // Fallback if needed, but classes handle it mostly
+                            >
+                                {/* Theme Color Indicator Border */}
+                                <div className={`absolute top-0 left-0 right-0 h-1 ${themeColorObj.bg}`} />
+
+                                <div className="p-5 flex-1 flex flex-col space-y-4">
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-lg bg-cyber-950 border border-cyber-800 group-hover:border-cyber-700 transition-colors`}>
+                                                <Layers className={`text-cyber-400`} size={20} />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-white text-lg leading-tight">{section.title}</h3>
+                                                <span className={`text-[10px] uppercase font-bold tracking-wider opacity-60 ${themeColorObj.id === 'danger' ? 'text-red-400' : 'text-cyber-400'}`}>
+                                                    {themeColorObj.label} Theme
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-cyber-950/50 rounded-lg p-1 border border-cyber-800">
+                                            <button
+                                                onClick={() => openModal(section)}
+                                                className="p-1.5 text-cyber-400 hover:text-white hover:bg-cyber-800 rounded-md transition-colors"
+                                                title="Edit Section"
+                                            >
+                                                <Edit size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteSection(section.id)}
+                                                className="p-1.5 text-cyber-400 hover:text-red-400 hover:bg-cyber-800 rounded-md transition-colors"
+                                                title="Delete Section"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                            <div className="w-px h-4 bg-cyber-700 mx-1"></div>
+                                            <div className="cursor-grab active:cursor-grabbing p-1.5 text-cyber-500 hover:text-cyber-300">
+                                                <GripVertical size={14} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="space-y-3 bg-cyber-950/30 rounded-lg p-3 border border-cyber-800/50">
+                                        <div className="flex gap-3 items-start">
+                                            <span className="text-sm select-none grayscale opacity-70">🇺🇸</span>
+                                            <p className="text-sm text-cyber-300 line-clamp-2 leading-relaxed">
+                                                {section.descriptionEn || <span className="text-cyber-600 italic">No English description</span>}
+                                            </p>
+                                        </div>
+                                        <div className="w-full h-px bg-cyber-800/50"></div>
+                                        <div className="flex gap-3 items-start" dir="rtl">
+                                            <span className="text-sm select-none grayscale opacity-70">🇸🇦</span>
+                                            <p className="text-sm text-cyber-300 line-clamp-2 leading-relaxed font-arabic">
+                                                {section.descriptionAr || <span className="text-cyber-600 italic">لا يوجد وصف عربي</span>}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => openModal(section)}
-                                        className="p-1 hover:text-cyber-primary"
-                                        title="Edit Section"
+
+                                {/* Footer */}
+                                <div className="p-3 bg-cyber-950 border-t border-cyber-800 flex justify-between items-center group-hover:bg-cyber-900/80 transition-colors">
+                                    <span className="text-[10px] text-cyber-600 font-mono">ID: {section.order + 1}</span>
+                                    <Link
+                                        to={`/admin/section/${section.id}`}
+                                        className={`text-xs font-bold flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all
+                                        hover:bg-cyber-800 ${themeColorObj.id === 'danger' ? 'text-red-400' : 'text-cyber-primary'}
+                                    `}
                                     >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteSection(section.id)}
-                                        className="p-1 hover:text-cyber-danger"
-                                        title="Delete Section"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                        <Folder size={14} />
+                                        Manage Content
+                                    </Link>
                                 </div>
                             </div>
-                            <div className="pl-6 border-l border-cyber-700 ml-2 pt-2">
-                                <Link to={`/admin/section/${section.id}`} className="text-xs text-cyber-primary hover:underline flex items-center gap-1">
-                                    <Folder size={12} /> Manage Modules & Topics &rarr;
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
-                    {displaySections.length === 0 && <p className="text-center text-cyber-500">No sections yet.</p>}
+                        );
+                    })}
+                    {displaySections.length === 0 && <p className="col-span-full text-center text-cyber-500 py-12">No sections yet.</p>}
                 </div>
             </div>
 
