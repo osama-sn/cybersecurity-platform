@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { GripVertical, Trash2, Plus } from 'lucide-react';
+import { GripVertical, Trash2, Plus, ChevronRight } from 'lucide-react';
 
 // Renders the block content in "edit mode" - a simple textarea or input
 const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
@@ -57,6 +57,51 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                 placeholder="Paste YouTube URL..."
                 dir="ltr" // URLs are LTR
             />
+        );
+    }
+
+    if (block.type === 'toggle') {
+        const isOpen = block.metadata?.isOpen || false;
+        return (
+            <div className="flex items-start gap-2">
+                <button
+                    className="mt-1.5 text-cyber-500 hover:text-cyber-300 transition-colors"
+                    onClick={() => onChange({ ...block, metadata: { ...block.metadata, isOpen: !isOpen } })}
+                >
+                    <ChevronRight size={20} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                </button>
+                <div className="flex-1 space-y-2">
+                    <textarea
+                        ref={inputRef}
+                        className={`${baseClass} text-cyber-300 font-medium`}
+                        value={block.content}
+                        onChange={e => onChange({ ...block, content: e.target.value })}
+                        onKeyDown={onKeyDown}
+                        placeholder="Toggle list item"
+                        rows={1}
+                        dir={getDirection(block.content)}
+                    />
+                    {isOpen && (
+                        <textarea
+                            className={`${baseClass} text-cyber-400 text-sm bg-cyber-900/30 border-l-2 border-cyber-700 pl-3 py-2`}
+                            value={block.metadata?.details || ''}
+                            onChange={e => onChange({ ...block, metadata: { ...block.metadata, details: e.target.value } })}
+                            onKeyDown={(e) => {
+                                // Specific handler for details area
+                                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                                    e.stopPropagation(); // Prevent parent handler (New Block)
+                                    // Allow default behavior (New Line)
+                                    return;
+                                }
+                                onKeyDown(e); // Pass other keys (like arrows, backspace) to parent
+                            }}
+                            placeholder="Type details here..."
+                            rows={2}
+                            dir={getDirection(block.metadata?.details)}
+                        />
+                    )}
+                </div>
+            </div>
         );
     }
 

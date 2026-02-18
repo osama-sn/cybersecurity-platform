@@ -125,9 +125,33 @@ const TopicPage = () => {
       </div>
 
       <div className="space-y-2">
-        {blocks.map(block => (
-          <BlockRenderer key={block.id} block={block} />
-        ))}
+        {(() => {
+          let listIndex = 0;
+          return blocks.map((block, index) => {
+            // Logic for numbered list grouping
+            if (block.type === 'numbered') {
+              listIndex++;
+            } else {
+              listIndex = 0;
+            }
+
+            // Handler for interactive blocks (like checkboxes)
+            const handleUpdate = (blockId, newVal) => {
+              setBlocks(prev => prev.map(b =>
+                b.id === blockId ? { ...b, metadata: { ...b.metadata, checked: newVal } } : b
+              ));
+            };
+
+            return (
+              <BlockRenderer
+                key={block.id}
+                block={block}
+                index={block.type === 'numbered' ? listIndex : undefined}
+                onToggle={handleUpdate}
+              />
+            );
+          });
+        })()}
 
         {blocks.length === 0 && (
           <div className="p-6 border border-dashed border-cyber-700 rounded-lg text-center text-cyber-500">

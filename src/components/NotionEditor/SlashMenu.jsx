@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Type, Heading1, Heading2, Heading3, Code, Video, Key, Minus, Lightbulb, AlertTriangle, List, ListOrdered, CheckSquare, Quote, Image } from 'lucide-react';
+import { Type, Heading1, Heading2, Heading3, Code, Video, Key, Minus, Lightbulb, AlertTriangle, List, ListOrdered, CheckSquare, Quote, Image, ChevronRight } from 'lucide-react';
 
 const BLOCK_TYPES = [
     { id: 'text', label: 'Text', description: 'Plain paragraph', icon: <Type size={16} />, color: 'text-blue-400' },
@@ -15,6 +15,7 @@ const BLOCK_TYPES = [
     { id: 'warning', label: 'Warning', description: 'Warning callout', icon: <AlertTriangle size={16} />, color: 'text-red-400' },
     { id: 'youtube', label: 'Video', description: 'Embed YouTube video', icon: <Video size={16} />, color: 'text-red-500' },
     { id: 'quiz', label: 'Challenge', description: 'Quiz or flag challenge', icon: <Key size={16} />, color: 'text-yellow-500' },
+    { id: 'toggle', label: 'Toggle List', description: 'Toggles can hide content inside', icon: <ChevronRight size={16} />, color: 'text-cyber-300' },
     { id: 'divider', label: 'Divider', description: 'Horizontal rule', icon: <Minus size={16} />, color: 'text-cyber-500' },
 ];
 

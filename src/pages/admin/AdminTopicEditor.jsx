@@ -177,16 +177,40 @@ const AdminTopicEditor = () => {
     };
 
     // ── Keyboard handler ───────────────────────────────────────────────────────
+    // ── Keyboard handler ───────────────────────────────────────────────────────
     const handleKeyDown = (e, block, index) => {
         // Slash menu navigation is handled inside SlashMenu itself
         if (slashMenu.open) return;
 
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            // Inherit list types
-            const nextType = ['bullet', 'numbered', 'todo'].includes(block.type) ? block.type : 'text';
-            addBlockAfter(index, nextType);
-            return;
+        if (e.key === 'Enter') {
+            const isMultiline = ['code', 'quote', 'tip', 'warning', 'quiz', 'toggle'].includes(block.type);
+
+            // Ctrl+Enter (or Cmd+Enter) always creates a new block below
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                addBlockAfter(index);
+                return;
+            }
+
+            // For multi-line blocks, Enter inserts a new line (default behavior).
+            // We only intercept if it's NOT multi-line (or if Shift is pressed, which usually means new line in text editors, but here we want standard list behavior)
+            // Wait, standard behavior:
+            // Text/List: Enter = New Block. Shift+Enter = New Line.
+            // Code/Quote: Enter = New Line. Ctrl+Enter = New Block.
+
+            if (isMultiline) {
+                // Allow default (new line)
+                return;
+            }
+
+            // Standard blocks (Text, Headers, Lists)
+            if (!e.shiftKey) {
+                e.preventDefault();
+                // Inherit list types
+                const nextType = ['bullet', 'numbered', 'todo'].includes(block.type) ? block.type : 'text';
+                addBlockAfter(index, nextType);
+                return;
+            }
         }
 
         if (e.key === 'Backspace' && block.content === '') {
@@ -345,22 +369,34 @@ const AdminTopicEditor = () => {
 
                 {/* Blocks */}
                 <div className="space-y-0.5 pl-8">
-                    {blocks.map((block, index) => (
-                        <EditorBlock
-                            key={block.id}
-                            block={block}
-                            index={index}
-                            isActive={activeBlockId === block.id}
-                            onFocus={(id) => setActiveBlockId(id)}
-                            onChange={handleBlockChange}
-                            onKeyDown={handleKeyDown}
-                            onDelete={deleteBlock}
-                            onAddBelow={(idx) => addBlockAfter(idx)}
-                            onDragStart={handleDragStart}
-                            onDragOver={handleDragOver}
-                            onDrop={handleDrop}
-                        />
-                    ))}
+                    {(() => {
+                        let listIndex = 0;
+                        return blocks.map((block, index) => {
+                            // Numbered list grouping logic
+                            if (block.type === 'numbered') {
+                                listIndex++;
+                            } else {
+                                listIndex = 0;
+                            }
+
+                            return (
+                                <EditorBlock
+                                    key={block.id}
+                                    block={block}
+                                    index={block.type === 'numbered' ? listIndex : index}
+                                    isActive={activeBlockId === block.id}
+                                    onFocus={(id) => setActiveBlockId(id)}
+                                    onChange={handleBlockChange}
+                                    onKeyDown={handleKeyDown}
+                                    onDelete={deleteBlock}
+                                    onAddBelow={(idx) => addBlockAfter(idx)}
+                                    onDragStart={handleDragStart}
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                />
+                            );
+                        });
+                    })()}
                 </div>
 
                 {/* Slash Menu */}

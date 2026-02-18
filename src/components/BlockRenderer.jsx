@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock } from 'lucide-react';
+import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const CopyButton = ({ text }) => {
@@ -354,7 +354,32 @@ const YouTubeBlock = ({ url }) => {
     );
 };
 
-const BlockRenderer = ({ block }) => {
+const ToggleBlock = ({ block, children }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="my-2">
+            <div className="flex items-start gap-2">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="mt-1.5 p-0.5 rounded hover:bg-cyber-700/50 text-cyber-500 transition-colors"
+                >
+                    <ChevronRight size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                </button>
+                <div className="flex-1">
+                    <p dir="auto" className="text-cyber-300 text-lg leading-relaxed">{block.content}</p>
+                    {isOpen && (
+                        <div className="mt-2 pl-2 border-l-2 border-cyber-700/50">
+                            <p dir="auto" className="text-cyber-400 text-base leading-relaxed">{block.metadata?.details}</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BlockRenderer = ({ block, index, onToggle }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
@@ -411,7 +436,7 @@ const BlockRenderer = ({ block }) => {
         case 'numbered':
             return (
                 <div className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
-                    <span className="text-cyber-primary font-mono mt-0.5">{block.order ? `${block.order + 1}.` : '1.'}</span>
+                    <span className="text-cyber-primary font-mono mt-0.5">{index ? `${index}.` : '1.'}</span>
                     <span dir="auto">{block.content}</span>
                 </div>
             );
@@ -419,13 +444,16 @@ const BlockRenderer = ({ block }) => {
         case 'todo':
             return (
                 <div className={`flex items-start gap-3 mb-2 text-lg ${commonClasses}`}>
-                    <div className={`
-                        mt-1.5 w-5 h-5 rounded border flex items-center justify-center transition-all
-                        ${block.metadata?.checked
-                            ? 'bg-cyber-primary border-cyber-primary text-black'
-                            : 'border-cyber-600 bg-transparent text-transparent'
-                        }
-                    `}>
+                    <div
+                        onClick={() => onToggle && onToggle(block.id, !block.metadata?.checked)}
+                        className={`
+                            mt-1.5 w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer hover:border-cyber-primary
+                            ${block.metadata?.checked
+                                ? 'bg-cyber-primary border-cyber-primary text-black'
+                                : 'border-cyber-600 bg-transparent text-transparent'
+                            }
+                        `}
+                    >
                         <Check size={14} strokeWidth={4} />
                     </div>
                     <span dir="auto" className={`${block.metadata?.checked ? 'text-cyber-600 line-through' : 'text-cyber-300'}`}>
@@ -433,6 +461,9 @@ const BlockRenderer = ({ block }) => {
                     </span>
                 </div>
             );
+
+        case 'toggle':
+            return <ToggleBlock block={block} />;
 
         case 'quote':
             return (
