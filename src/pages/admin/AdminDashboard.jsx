@@ -16,9 +16,18 @@ const AdminDashboard = () => {
     // Modal State
     const [showModal, setShowModal] = useState(false);
     const [editingSection, setEditingSection] = useState(null);
-    const [formData, setFormData] = useState({ title: '', descriptionEn: '', descriptionAr: '' });
+    const [formData, setFormData] = useState({ title: '', descriptionEn: '', descriptionAr: '', themeColor: 'primary' });
 
     const displaySections = localSections || sections;
+
+    const THEME_COLORS = [
+        { id: 'primary', bg: 'bg-cyber-primary', border: 'border-cyber-primary', label: 'Green' },
+        { id: 'secondary', bg: 'bg-cyber-secondary', border: 'border-cyber-secondary', label: 'Blue' },
+        { id: 'accent', bg: 'bg-cyber-accent', border: 'border-cyber-accent', label: 'Cyan' },
+        { id: 'danger', bg: 'bg-cyber-danger', border: 'border-cyber-danger', label: 'Red' },
+        { id: 'warning', bg: 'bg-cyber-warning', border: 'border-cyber-warning', label: 'Orange' },
+        { id: 'purple', bg: 'bg-indigo-500', border: 'border-indigo-500', label: 'Purple' },
+    ];
 
     const openModal = (section = null) => {
         setEditingSection(section);
@@ -26,10 +35,11 @@ const AdminDashboard = () => {
             setFormData({
                 title: section.title,
                 descriptionEn: section.descriptionEn || '',
-                descriptionAr: section.descriptionAr || ''
+                descriptionAr: section.descriptionAr || '',
+                themeColor: section.themeColor || 'primary'
             });
         } else {
-            setFormData({ title: '', descriptionEn: '', descriptionAr: '' });
+            setFormData({ title: '', descriptionEn: '', descriptionAr: '', themeColor: 'primary' });
         }
         setShowModal(true);
     };
@@ -44,7 +54,8 @@ const AdminDashboard = () => {
                 await updateDoc(doc(db, 'sections', editingSection.id), {
                     title: formData.title,
                     descriptionEn: formData.descriptionEn,
-                    descriptionAr: formData.descriptionAr
+                    descriptionAr: formData.descriptionAr,
+                    themeColor: formData.themeColor
                 });
             } else {
                 // Create
@@ -52,6 +63,7 @@ const AdminDashboard = () => {
                     title: formData.title,
                     descriptionEn: formData.descriptionEn,
                     descriptionAr: formData.descriptionAr,
+                    themeColor: formData.themeColor,
                     order: sections.length,
                     createdAt: serverTimestamp()
                 });
@@ -221,6 +233,24 @@ const AdminDashboard = () => {
                                     placeholder="وصف قصير بالعربية..."
                                     dir="rtl"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-cyber-300 mb-2">Theme Color</label>
+                                <div className="flex flex-wrap gap-3">
+                                    {THEME_COLORS.map(color => (
+                                        <button
+                                            key={color.id}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, themeColor: color.id })}
+                                            className={`
+                                                w-8 h-8 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center
+                                                ${color.bg}
+                                                ${formData.themeColor === color.id ? 'border-white ring-2 ring-white/20 scale-110' : 'border-transparent opacity-60 hover:opacity-100'}
+                                            `}
+                                            title={color.label}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
                                 <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">Cancel</button>
