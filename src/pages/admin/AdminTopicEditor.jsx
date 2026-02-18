@@ -16,6 +16,8 @@ const MARKDOWN_SHORTCUTS = [
     { pattern: /^### $/, type: 'h3' },
     { pattern: /^- $/, type: 'bullet' },
     { pattern: /^\* $/, type: 'bullet' },
+    { pattern: /^1\. $/, type: 'numbered' },
+    { pattern: /^```$/, type: 'code' },
     { pattern: /^> $/, type: 'quote' },
     { pattern: /^\[\] $/, type: 'todo' },
     { pattern: /^--- $/, type: 'divider' },
@@ -383,7 +385,8 @@ const AdminTopicEditor = () => {
                                 <EditorBlock
                                     key={block.id}
                                     block={block}
-                                    index={block.type === 'numbered' ? listIndex : index}
+                                    index={index} // logical index for array operations
+                                    listNumber={block.type === 'numbered' ? listIndex : undefined} // visual index for display
                                     isActive={activeBlockId === block.id}
                                     onFocus={(id) => setActiveBlockId(id)}
                                     onChange={handleBlockChange}

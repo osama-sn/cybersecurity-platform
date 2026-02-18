@@ -405,11 +405,26 @@ const BlockRenderer = ({ block, index, onToggle }) => {
             return <LevelTag dir="auto" className={`${sizeClass} font-bold text-white mt-10 mb-6 ${commonClasses}`}>{block.content}</LevelTag>;
 
         case 'text':
+            const parseMarkdown = (text) => {
+                if (!text) return '';
+                // Simple parser for basic markdown
+                let html = text
+                    // Bold **text**
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+                    // Italic *text*
+                    .replace(/\*(.*?)\*/g, '<em class="text-cyber-400 italic">$1</em>')
+                    // Inline Code `text`
+                    .replace(/`([^`]+)`/g, '<code class="bg-cyber-800 text-cyber-300 px-1.5 py-0.5 rounded font-mono text-sm border border-cyber-700">$1</code>')
+                    // Wrapper Link [text](url)
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4">$1</a>');
+                return html;
+            };
+
             return (
                 <div
                     dir="auto"
                     className={`prose prose-invert max-w-none text-cyber-300 mb-6 text-lg whitespace-pre-wrap ${commonClasses}`}
-                    dangerouslySetInnerHTML={{ __html: block.content }}
+                    dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
                 />
             );
 
@@ -477,6 +492,18 @@ const BlockRenderer = ({ block, index, onToggle }) => {
 
         case 'youtube':
             return <YouTubeBlock url={block.content} />;
+
+        case 'image':
+            return (
+                <div className="my-6">
+                    <img
+                        src={block.content}
+                        alt="Content"
+                        className="w-full h-auto rounded-xl shadow-lg border border-cyber-700"
+                        loading="lazy"
+                    />
+                </div>
+            );
 
         case 'quiz':
             return <ChallengeBlock block={block} />;

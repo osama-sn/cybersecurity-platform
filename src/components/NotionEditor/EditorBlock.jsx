@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { GripVertical, Trash2, Plus, ChevronRight } from 'lucide-react';
+import { GripVertical, X, Plus, ChevronRight } from 'lucide-react';
 
 // Renders the block content in "edit mode" - a simple textarea or input
 const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
@@ -57,6 +57,30 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                 placeholder="Paste YouTube URL..."
                 dir="ltr" // URLs are LTR
             />
+        );
+    }
+
+    if (block.type === 'image') {
+        return (
+            <div className="space-y-2">
+                <input
+                    ref={inputRef}
+                    className={`${baseClass} text-cyber-300`}
+                    value={block.content}
+                    onChange={e => onChange({ ...block, content: e.target.value })}
+                    onKeyDown={onKeyDown}
+                    placeholder="Paste Image URL..."
+                    dir="ltr"
+                />
+                {block.content && (
+                    <img
+                        src={block.content}
+                        alt="Preview"
+                        className="max-w-full h-auto rounded-lg border border-cyber-700 mt-2 max-h-96 object-contain bg-black/20"
+                        onError={(e) => e.target.style.display = 'none'}
+                    />
+                )}
+            </div>
         );
     }
 
@@ -192,6 +216,7 @@ const EditorBlock = ({
     onDragStart,
     onDragOver,
     onDrop,
+    ...props
 }) => {
     const inputRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -207,7 +232,7 @@ const EditorBlock = ({
 
     const blockPrefix = () => {
         if (block.type === 'bullet') return <span className="text-cyber-primary mr-2 shrink-0 mt-1">•</span>;
-        if (block.type === 'numbered') return <span className="text-cyber-primary mr-2 shrink-0 mt-1 font-mono text-sm">{index + 1}.</span>;
+        if (block.type === 'numbered') return <span className="text-cyber-primary mr-2 shrink-0 mt-1 font-mono text-sm">{props.listNumber ? `${props.listNumber}.` : `${index + 1}.`}</span>;
         if (block.type === 'todo') return (
             <input
                 type="checkbox"
@@ -243,7 +268,7 @@ const EditorBlock = ({
             >
                 <div className={`absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-full pr-2`}>
                     <button className="p-1 text-cyber-600 hover:text-cyber-400 cursor-grab"><GripVertical size={14} /></button>
-                    <button onClick={() => onDelete(block.id)} className="p-1 text-cyber-600 hover:text-red-400"><Trash2 size={12} /></button>
+                    <button onClick={() => onDelete(block.id)} className="p-1 text-cyber-600 hover:text-red-400"><X size={14} /></button>
                 </div>
                 <hr className="border-cyber-700/50" />
             </div>
@@ -283,7 +308,7 @@ const EditorBlock = ({
                 className="absolute right-0 top-2 p-1 text-cyber-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Delete block"
             >
-                <Trash2 size={12} />
+                <X size={14} />
             </button>
 
             {/* Block Content */}
