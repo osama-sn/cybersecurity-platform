@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Plus, Trash2, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink, AlertTriangle } from 'lucide-react';
+import { Plus, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink } from 'lucide-react';
 
 const AdminSection = () => {
     const { sectionId } = useParams();
@@ -264,17 +264,10 @@ const AdminSection = () => {
                                 </Link>
                                 <button
                                     onClick={() => handleUnlinkModule(mod.junctionId, mod.title)}
-                                    className="text-cyber-warning hover:text-yellow-400 p-1"
-                                    title="Remove from this section (keeps module)"
+                                    className="text-cyber-warning hover:text-yellow-400 p-1 transition-colors"
+                                    title="Remove from this section (module is preserved)"
                                 >
                                     <Unlink size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteModuleGlobally(mod.moduleId, mod.title)}
-                                    className="text-cyber-danger hover:text-red-400 p-1"
-                                    title="Delete module permanently from all sections"
-                                >
-                                    <Trash2 size={16} />
                                 </button>
                             </div>
                         </div>
