@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Hash, BookOpen, Layers, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ChevronRight, Hash, BookOpen, Layers, ShieldAlert, PanelLeftClose } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -70,9 +70,18 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? 'md:w-64' : 'md:w-0 md:border-r-0 md:overflow-hidden'}
         w-64
       `}>
-        <div className="p-4 border-b border-cyber-700 flex items-center gap-2">
-          <BookOpen className="text-cyber-primary" size={24} />
-          <span className="text-xl font-bold tracking-tight text-white font-arabic">النخبة</span>
+        <div className="p-4 border-b border-cyber-700 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <BookOpen className="text-cyber-primary" size={24} />
+            <span className="text-xl font-bold tracking-tight text-white font-arabic">النخبة</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="hidden md:flex p-1.5 text-cyber-400 hover:text-white hover:bg-cyber-800 rounded-lg transition-colors"
+            title="Collapse Sidebar"
+          >
+            <PanelLeftClose size={20} className={document.dir === 'rtl' ? 'rotate-180' : ''} />
+          </button>
         </div>
 
         <nav className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-65px)] scrollbar-hide">
