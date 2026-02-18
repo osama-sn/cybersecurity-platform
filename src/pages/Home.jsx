@@ -232,7 +232,7 @@ const Home = () => {
               return (
                 <ScrollReveal key={section.id} delay={i * 0.05} direction="none">
                   <Link
-                    to={`/section/${section.id}`}
+                    to={`/sections/${section.id}`}
                     className={`block p-4 bg-cyber-900 rounded-lg border border-cyber-800 hover:bg-cyber-800 hover:-translate-y-1 transition-all group h-full ${style.border}`}
                   >
                     <h4 className={`text-lg font-bold mb-2 font-arabic group-hover:text-white transition-colors ${style.text}`}>
