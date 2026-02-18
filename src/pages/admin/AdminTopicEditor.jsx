@@ -37,11 +37,147 @@ const AdminTopicEditor = () => {
     const { topicId } = useParams();
     const [topic, setTopic] = useState(null);
     const [blocks, setBlocks] = useState([]);
+    const [activeBlockId, setActiveBlockId] = useState(null);
+    const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
     const [selectedBlockIds, setSelectedBlockIds] = useState(new Set());
 
-    // ... (existing refs)
+    // Slash menu state
+    const [slashMenu, setSlashMenu] = useState({ open: false, blockId: null, query: '', position: { top: 0, left: 0 } });
 
-    // ── Selection Logic ────────────────────────────────────────────────────────
+    // Drag state
+    const [dragIndex, setDragIndex] = useState(null);
+    const [dragOverIndex, setDragOverIndex] = useState(null);
+
+    // Debounce timer ref
+    const saveTimer = useRef(null);
+    // Map of blockId → Firestore docId (for blocks already persisted)
+    const firestoreIds = useRef({}); // { localId: firestoreDocId }
+
+    // ── Load data ──────────────────────────────────────────────────────────────
+    useEffect(() => {
+        if (!topicId) return;
+
+        const fetchTopic = async () => {
+            const snap = await getDoc(doc(db, 'topics', topicId));
+            if (snap.exists()) setTopic({ id: snap.id, ...snap.data() });
+        };
+        fetchTopic();
+
+        const fetchBlocks = async () => {
+            const q = query(
+                collection(db, 'contentBlocks'),
+                where('topicId', '==', topicId),
+                orderBy('order', 'asc')
+            );
+            let snap;
+            try { snap = await getDocs(q); }
+            catch {
+                const fallback = query(collection(db, 'contentBlocks'), where('topicId', '==', topicId));
+                snap = await getDocs(fallback);
+            }
+
+            const loaded = snap.docs.map(d => {
+                const localId = crypto.randomUUID();
+                firestoreIds.current[localId] = d.id;
+                return { id: localId, ...d.data(), _isNew: false };
+            });
+            loaded.sort((a, b) => (a.order || 0) - (b.order || 0));
+            setBlocks(loaded.length > 0 ? loaded : [newBlock('text')]);
+        };
+        fetchBlocks();
+    }, [topicId]);
+
+    // ── Auto-save (debounced) ──────────────────────────────────────────────────
+    const scheduleSave = useCallback((updatedBlocks) => {
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        setSaveStatus('saving');
+        saveTimer.current = setTimeout(() => persistBlocks(updatedBlocks), 800);
+    }, []);
+
+    const persistBlocks = async (currentBlocks) => {
+        try {
+            const batch = writeBatch(db);
+
+            currentBlocks.forEach((block, index) => {
+                const firestoreId = firestoreIds.current[block.id];
+                const data = {
+                    topicId,
+                    type: block.type,
+                    content: block.content || '',
+                    metadata: block.metadata || {},
+                    order: index,
+                };
+
+                if (firestoreId) {
+                    // Update existing
+                    batch.update(doc(db, 'contentBlocks', firestoreId), data);
+                } else {
+                    // Create new
+                    const newRef = doc(collection(db, 'contentBlocks'));
+                    firestoreIds.current[block.id] = newRef.id;
+                    batch.set(newRef, { ...data, createdAt: serverTimestamp() });
+                }
+            });
+
+            // Delete removed blocks
+            const currentLocalIds = new Set(currentBlocks.map(b => b.id));
+            for (const [localId, fsId] of Object.entries(firestoreIds.current)) {
+                if (!currentLocalIds.has(localId)) {
+                    batch.delete(doc(db, 'contentBlocks', fsId));
+                    delete firestoreIds.current[localId];
+                }
+            }
+
+            await batch.commit();
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+        } catch (err) {
+            console.error('Save error:', err);
+            setSaveStatus('idle');
+        }
+    };
+
+    // ── Block mutations ────────────────────────────────────────────────────────
+    const updateBlock = (updatedBlock) => {
+        setBlocks(prev => {
+            const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+            scheduleSave(next);
+            return next;
+        });
+    };
+
+    const addBlockAfter = (index, type = 'text') => {
+        const nb = newBlock(type);
+        setBlocks(prev => {
+            const next = [...prev];
+            next.splice(index + 1, 0, nb);
+            // Immediate save for structural change
+            persistBlocks(next);
+            return next;
+        });
+        setActiveBlockId(nb.id);
+        return nb.id;
+    };
+
+    const deleteBlock = (blockId) => {
+        setBlocks(prev => {
+            if (prev.length === 1) {
+                // Don't delete the last block; just clear it
+                const cleared = [{ ...prev[0], content: '', type: 'text', metadata: {} }];
+                // Immediate save
+                persistBlocks(cleared);
+                return cleared;
+            }
+            const idx = prev.findIndex(b => b.id === blockId);
+            const next = prev.filter(b => b.id !== blockId);
+            // Immediate save
+            persistBlocks(next);
+            // Focus previous block
+            const focusIdx = Math.max(0, idx - 1);
+            setActiveBlockId(next[focusIdx]?.id || null);
+            return next;
+        });
+    };
     const handleBlockClick = (e, blockId, index) => {
         // Prevent default only if we are doing a selection action to avoid messing up focus
         if (e.shiftKey || e.ctrlKey || e.metaKey) {
