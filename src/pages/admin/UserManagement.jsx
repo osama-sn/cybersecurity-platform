@@ -93,10 +93,12 @@ const UserManagement = () => {
         }
     };
 
-    const filteredUsers = users.filter(user =>
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = users
+        .filter(user => user.email !== 'osamaessamkhalifa@gmail.com')
+        .filter(user =>
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.id.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
     if (loading) return <div className="text-center text-white py-10">Loading users...</div>;
 
