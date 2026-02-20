@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight, Pencil, Save, XCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight, Pencil, Save, XCircle, User } from 'lucide-react';
 
 // Helper Component for Topic Item to reduce code duplication
-const TopicItem = ({ topic, onDragStart, onUnlink, onDelete }) => {
+const TopicItem = ({ topic, onDragStart, onUnlink, onDelete, currentUser, isAdmin }) => {
+    const isCreator = topic.createdBy?.uid === currentUser?.uid;
+    const canManage = isAdmin || isCreator; // Admin or Creator can edit/delete
+
     return (
         <div
             draggable
@@ -15,26 +19,39 @@ const TopicItem = ({ topic, onDragStart, onUnlink, onDelete }) => {
             <div className="flex items-center gap-3">
                 <GripVertical className="text-cyber-600 hover:text-cyber-400 cursor-grab active:cursor-grabbing" size={16} />
                 <FileText className="text-cyber-accent group-hover:text-cyber-primary transition-colors" size={18} />
-                <span className="font-medium text-white text-sm">{topic.title}</span>
+                <div>
+                    <div className="font-medium text-white text-sm">{topic.title}</div>
+                    {topic.createdBy && (
+                        <div className="text-[10px] text-cyber-500 flex items-center gap-1">
+                            <User size={10} /> {topic.createdBy.displayName || topic.createdBy.email}
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                <Link to={`/admin/topics/${topic.topicId}`} className="text-xs text-cyber-primary hover:underline">
-                    Edit
-                </Link>
-                <button
-                    onClick={() => onUnlink(topic.junctionId, topic.title)}
-                    className="text-cyber-warning hover:text-yellow-400 p-1"
-                    title="Remove from module"
-                >
-                    <Unlink size={14} />
-                </button>
-                <button
-                    onClick={() => onDelete(topic.topicId, topic.title)}
-                    className="text-cyber-danger hover:text-red-400 p-1"
-                    title="Delete permanently"
-                >
-                    <Trash2 size={14} />
-                </button>
+                {canManage ? (
+                    <>
+                        <Link to={`/admin/topics/${topic.topicId}`} className="text-xs text-cyber-primary hover:underline">
+                            Edit
+                        </Link>
+                        <button
+                            onClick={() => onUnlink(topic.junctionId, topic.title)}
+                            className="text-cyber-warning hover:text-yellow-400 p-1"
+                            title="Remove from module"
+                        >
+                            <Unlink size={14} />
+                        </button>
+                        <button
+                            onClick={() => onDelete(topic.topicId, topic.title)}
+                            className="text-cyber-danger hover:text-red-400 p-1"
+                            title="Delete permanently"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    </>
+                ) : (
+                    <span className="text-[10px] text-cyber-600 italic">Read Only</span>
+                )}
             </div>
         </div>
     );
@@ -42,6 +59,7 @@ const TopicItem = ({ topic, onDragStart, onUnlink, onDelete }) => {
 
 const AdminModule = () => {
     const { moduleId } = useParams();
+    const { user, isAdmin } = useAuth();
     const [moduleData, setModuleData] = useState(null);
     const [topics, setTopics] = useState([]); // { junctionId, topicId, order, title, groupId }
     const [groups, setGroups] = useState([]); // { id, title, order }
@@ -100,13 +118,15 @@ const AdminModule = () => {
             const topicRef = doc(db, 'topics', jData.topicId);
             const topicSnap = await getDoc(topicRef);
             if (topicSnap.exists()) {
+                const topicData = topicSnap.data();
                 topicsData.push({
                     junctionId: jDoc.id,
                     topicId: topicSnap.id,
                     order: jData.order || 0,
-                    title: topicSnap.data().title,
+                    title: topicData.title,
                     groupId: jData.groupId || 'ungrouped',
-                    createdAt: topicSnap.data().createdAt,
+                    createdAt: topicData.createdAt,
+                    createdBy: topicData.createdBy // { uid, email, displayName }
                 });
             }
         }
@@ -189,7 +209,13 @@ const AdminModule = () => {
         try {
             const topicRef = await addDoc(collection(db, 'topics'), {
                 title: newTopicTitle,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                createdBy: {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL || null
+                }
             });
 
             await addDoc(collection(db, 'moduleTopics'), {
@@ -463,6 +489,8 @@ const AdminModule = () => {
                                         onDragStart={onDragTopicStart}
                                         onUnlink={handleUnlinkTopic}
                                         onDelete={handleDeleteTopicGlobally}
+                                        currentUser={user}
+                                        isAdmin={isAdmin}
                                     />
                                 ))}
                                 {getGroupTopics(group.id).length === 0 && (
@@ -494,6 +522,8 @@ const AdminModule = () => {
                                     onDragStart={onDragTopicStart}
                                     onUnlink={handleUnlinkTopic}
                                     onDelete={handleDeleteTopicGlobally}
+                                    currentUser={user}
+                                    isAdmin={isAdmin}
                                 />
                             ))}
                             {getGroupTopics('ungrouped').length === 0 && (
