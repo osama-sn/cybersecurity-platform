@@ -77,7 +77,7 @@ const Home = () => {
             variants={itemVariants}
             className="inline-flex items-center justify-center gap-3 px-4 py-1.5 bg-cyber-900/60 rounded-full border border-cyber-primary/30 backdrop-blur-md"
           >
-            <span className="text-[10px] md:text-xs font-mono text-cyber-400 uppercase tracking-[0.4em] font-bold">Verified Security Specialist</span>
+            <span className="text-[10px] md:text-xs font-mono text-cyber-400 uppercase tracking-[0.4em] font-bold">Elite Cyber Authority</span>
           </motion.div>
 
           <div className="space-y-4">
@@ -378,7 +378,7 @@ const Home = () => {
           </p>
 
           <Link
-            to="/about"
+            to="/sections"
             className="btn btn-secondary px-8 py-3 inline-flex items-center gap-2 group-hover:bg-cyber-700 transition-all shadow-lg shadow-black/20"
           >
             {t('home.forCompanies.button')}

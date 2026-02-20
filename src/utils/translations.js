@@ -2,138 +2,138 @@ export const translations = {
     ar: {
         home: {
             hero: {
-                title: "أسامة | خبير أمن هجومي",
-                subtitle: "تفكيك البنية التحتية، كشف مسارات الهجوم، وتعزيز الصمود السيبراني.",
-                description: "منصة تقنية متقدمة مخصصة لتوثيق أبحاث اختبار اختراق الشبكات والتحليل الهجومي لبيئات Active Directory. نركز على الدقة التقنية والمنهجية الواقعية لتحقيق أثر أمني ملموس.",
+                title: "نخبة | Elite Cyber Platform",
+                subtitle: "نصنع مرجعًا عربيًا يُعتمد عليه… ونطوّر عقلية تفكير احترافية",
+                description: "منصة تهدف إلى بناء أقوى قاعدة معرفية عربية في الأمن السيبراني ورفع مستوى التفكير التحليلي. نحن لا نكرر محتوى، بل ننظم المعرفة، نحللها، ونقدمها بمنهجية واضحة تجعلها قابلة للفهم والتطبيق.",
                 buttons: {
-                    learning: "استكشاف الوحدات التعليمية",
-                    profile: "الملف المهني الكامل",
+                    learning: "استكشف المرجع",
+                    profile: "طور طريقة تفكيرك",
                     sections: "الأقسام التقنية"
                 }
             },
             stats: {
                 label: "إحصائيات الكفاءة",
                 items: [
-                    { label: "اختبارات شبكة ناجحة", value: "50+" },
-                    { label: "هجمات AD موثقة", value: "100+" },
-                    { label: "أدوات مخصصة", value: "15+" },
-                    { label: "ساعات بحث", value: "2000+" }
+                    { label: "مرجع شامل", value: "100%" },
+                    { label: "دقة التحليل", value: "100%" },
+                    { label: "منهجية واضحة", value: "∞" },
+                    { label: "تطوير العقلية", value: "∞" }
                 ]
             },
             quickAbout: {
-                title: "النهج التقني",
-                content: "متخصص في كشف نقاط الضعف المعقدة داخل الشبكات المؤسسية. نؤمن بأن الأمن ليس حالة ثابتة، بل هو عملية مستمرة من التحدي والتحسين.",
-                quote: "الاختراق الناجح يبدأ بعقلية منظمة وتعداد لا يترك مجالاً للصدفة."
+                title: "رسالتنا",
+                content: "نخبة مشروع معرفي يهدف إلى رفع مستوى Cyber Security في العالم العربي.\nنقف على ركيزتين: بناء أقوى مرجع عربي شامل في المجال، وتطوير طريقة التفكير الصحيحة لكل متعلم ومحترف.",
+                quote: "المعرفة أساس… والتفكير هو الفارق."
             },
             coreSkills: {
-                title: "التخصصات الرئيسية",
+                title: "التغطية المعرفية",
                 networkEnum: {
-                    title: "تحليل الشبكة (Recon)",
+                    title: "Network Security & AD",
                     items: [
-                        "تعداد الخدمات ونقاط الضعف",
-                        "تحليل البروتوكولات (Protocol Inspection)",
-                        "رسم خرائط سطح الهجوم",
-                        "تحليل حركة الشبكة (Traffic Analysis)"
+                        "هيكلة وتأمين الشبكات",
+                        "Active Directory وأمن النطاقات",
+                        "إدارة الثقة والهويات",
+                        "تحليل التهديدات المتقدمة"
                     ]
                 },
                 adAttacks: {
-                    title: "حروب Active Directory",
+                    title: "Identity & Authentication",
                     items: [
-                        "استغلال مسارات الثقة",
-                        "الهجمات المعتمدة على الـ Delegation",
-                        "إساءة استخدام الكائنات (GPO, ACL)",
-                        "الحركة الجانبية المتقدمة"
+                        "إدارة الوصول والصلاحيات",
+                        "Kerberos & NTLM",
+                        "بروتوكولات المصادقة",
+                        "حماية بيانات الاعتماد"
                     ]
                 },
                 credentialAttacks: {
-                    title: "بيانات الاعتماد (Identity)",
+                    title: "Attack & Defense Concepts",
                     items: [
-                        "هجمات Relay و Interception",
-                        "تزوير التذاكر (Golden/Silver Tickets)",
-                        "استخراج بيانات الهوية",
-                        "تحليل التشفير (Crypto Analysis)"
+                        "تكتيكات الهجوم والمحاكاة",
+                        "استراتيجيات الاستجابة للحوادث",
+                        "استغلال مسارات الثقة",
+                        "المصطلحات التقنية بشكل دقيق"
                     ]
                 },
                 tooling: {
-                    title: "ترسانة الأدوات",
+                    title: "تطوير العقلية والمنهجية",
                     items: [
-                        "تطوير سكربتات مخصصة",
-                        "استخدام أدوات الفحص المتقدمة",
-                        "محاكاة الخصوم (Adv Sim)",
-                        "تحليل الثغرات"
+                        "كيف تقرأ البيئة؟",
+                        "كيف تحدد Attack Surface؟",
+                        "بناء واختبار الفرضيات",
+                        "اتخاذ قرار مبني على الأدلة"
                     ]
                 }
             },
             platformSections: {
-                title: "بنية المعرفة",
-                description: "تم تنظيم المحتوى وفق معايير عالمية لضمان الانتقال السلس من النظرية إلى التطبيق العملي المكثف.",
+                title: "المرجع العربي الشامل",
+                description: "نهدف إلى توثيق المجال بكل تفاصيله، ليكون لدى المتعلم مصدر عربي احترافي يمكنه الرجوع إليه في أي وقت.",
                 items: {
-                    networkPlaybook: { title: "Network Playbook", desc: "دليل العمليات الشامل لاختبار البناء التحتية." },
-                    activeDirectory: { title: "Active Directory", desc: "استكشاف أعماق دومين ويندوز وأمن النطاق." },
-                    enumeration: { title: "Enumeration", desc: "إتقان فن جمع المعلومات قبل الهجوم." },
-                    tools: { title: "Tools Arsenal", desc: "دليل استخدام وتطوير الأدوات الهجومية." },
-                    cpts: { title: "CPTS Roadmap", desc: "مسار التحضير لشهادات الأمن الهجومي العالمية." },
-                    cheatsheets: { title: "Quick Reference", desc: "قواعد بيانات سريعة للأوامر والتقنيات." },
-                    thinking: { title: "Adversary Mindset", desc: "دروس مستفادة في التفكير خارج الصندوق." }
+                    networkPlaybook: { title: "Network Security", desc: "أمن الشبكات وحمايتها." },
+                    activeDirectory: { title: "Active Directory", desc: "دليل الدومين وأمن الهويات." },
+                    enumeration: { title: "Identity & Auth", desc: "التوثيق والمصادقة." },
+                    tools: { title: "Kerberos & NTLM", desc: "تحليل بروتوكولات المصادقة." },
+                    cpts: { title: "Attack Concepts", desc: "المفاهيم الهجومية." },
+                    cheatsheets: { title: "Defensive Concepts", desc: "استراتيجيات الدفاع." },
+                    thinking: { title: "Technical Terms", desc: "المصطلحات التقنية بوضوح." }
                 },
-                supports: "النظام يدعم تتبع التقدم، الاختبارات العملية، والتوسع المستمر في المحتوى التقني."
+                supports: "النظام يدعم المنهجية الواضحة لبناء محترف مستقل لا يعتمد فقط على الأدوات."
             },
             philosophy: {
-                title: "فلسفة الأداء العالي",
-                content: "نحن لا نكتفي بوجود الثغرة، بل نسعى لفهم مسبباتها وكيفية إغلاقها بشكل نهائي.",
+                title: "تحليل حلول Labs عالمية",
+                content: "نشارك تحليلات لحلول Labs من منصات عالمية، لا نعرض الحل فقط، بل نشرح طريقة التفكير خطوة بخطوة:",
                 modes: {
-                    learning: { title: "مسار التعلم", desc: "بناء أساسات تقنية صلبة من الصفر." },
-                    reference: { title: "المرجع السريع", desc: "وصول فوري للمعلومات أثناء العمليات الميدانية." }
+                    learning: { title: "لماذا كان المسار منطقيًا؟", desc: "شرح المؤشرات التي قادت لاتخاذ القرار." },
+                    reference: { title: "ما البدائل الممكنة؟", desc: "تحليل الخيارات الأخرى لفهم الصورة الكاملة." }
                 },
-                goal: "الهدف هو تحويل المعرفة إلى قوة دفاعية قوية."
+                goal: "الهدف ليس الوصول إلى Flag. الهدف هو فهم طريقة الوصول إليه."
             },
             currentFocus: {
-                title: "خارطة الطريق الحالية",
+                title: "معالم المنهجية",
                 items: [
-                    "أتمتة سلاسل استغلال Active Directory",
-                    "أبحاث متقدمة في تجاوز أنظمة الدفاع (EDR/AV)",
-                    "تطوير أدوات اختبار الشبكات المخصصة",
-                    "المساهمة في مجتمعات الأمن السيبراني"
+                    "كيف تقرأ البيئة؟",
+                    "كيف تحدد Attack Surface؟",
+                    "كيف تبني فرضية وتختبرها؟",
+                    "كيف تتخذ قرارًا مبنيًا على الأدلة؟"
                 ]
             },
             forCompanies: {
-                title: "للشركات الاحترافية",
-                content: "نقدم رؤية أمنية مبنية على الخبرة العملية والمنهجية العلمية:",
+                title: "رؤيتنا",
+                content: "أن تصبح نخبة المرجع العربي الأول في Cyber Security، المصدر الذي يُعتمد عليه للفهم العميق وليس السطحي.",
                 items: [
-                    "تقييمات أمن شبكة واقعية",
-                    "تحليل مخاطر البنية التحتية",
-                    "محاكاة هجمات حقيقية",
-                    "تقارير تقنية موجهة للأثر الإيجابي",
-                    "التزام بأعلى معايير السرية والاحتراف"
+                    "المرجع العربي الأول",
+                    "بيئة تجمع المتعلمين والمحترفين",
+                    "الفهم العميق والأساس الصلب",
+                    "تطوير عقلية احترافية مستقلة",
+                    "رفع مستوى المجال بشكل حقيقي"
                 ],
-                cta: "لتحميل السيرة الذاتية المهنية وطلب استشارات تقنية، يرجى زيارة صفحة التعريف.",
-                button: "🔹 الملف المهني الكامل"
+                cta: "لنبنِ معًا مرجعًا قويًا يساهم في أمان العالم الرقمي.",
+                button: "🔹 استكشف المرجع"
             },
             builtTools: {
-                title: "أدواتي",
-                description: "مجموعة من الأدوات البرمجية والسكربتات المخصصة التي قمت بتطويرها لتسهيل عمليات التعداد وأتمتة سلاسل الاستغلال.",
+                title: "أدوات التفكير التحليلي",
+                description: "الأدوات ليست ما يصنع محترفًا، طريقة التفكير هي الأساس. نركز على الانتقال بالمتعلم من تنفيذ أوامر إلى فهم أنظمة.",
                 items: [
                     {
-                        name: "AD-Explorer Pro",
-                        desc: "أداة متقدمة لاستكشاف علاقات الثقة وتصعيد الامديازات داخل بيئات Active Directory.",
-                        tech: "Python | LDAP | Impacket"
+                        name: "تحديد مسارات الهجوم",
+                        desc: "تحليل البيئة واكتشاف نقاط الضعف النشطة برؤية ثاقبة غير معتمدة على الأتمتة فقط.",
+                        tech: "Logic | Enumeration"
                     },
                     {
-                        name: "Net-Enum-Suite",
-                        desc: "مجموعة سكربتات لأتمتة التعداد المنظم للشبكات الكبيرة وتوليد تقارير أولية.",
-                        tech: "Bash | Nmap | Python"
+                        name: "بناء واختبار الفرضيات",
+                        desc: "القدرة على تكوين فرضية هجومية أو دفاعية بناءً على المعطيات واختبارها.",
+                        tech: "Analysis | Strategy"
                     },
                     {
-                        name: "Identity-Relay-Fix",
-                        desc: "أداة لمحاكاة وتحليل ثغرات Relay داخل بروتوكولات الهوية المؤسسية.",
-                        tech: "C# | Socket Programming"
+                        name: "القرارات المبنية على الأدلة",
+                        desc: "اتخاذ قرارات فنية صارمة بعد تحليل المعطيات والمؤشرات الدقيقة للشبكة.",
+                        tech: "Evidence | Decisions"
                     }
                 ],
-                github: "عرض كافة المشاريع على GitHub"
+                github: "عرض المفاهيم وبناء العقلية"
             },
             footer: {
-                copyright: "© 2026 أسامة | المنصة الاحترافية للأمن الشبكي",
-                builtWith: "تم التطوير بمعايير أمنية وبمنهجية offensive-first.",
+                copyright: "© 2026 نخبة | Building Knowledge. Developing Mindset.",
+                builtWith: "نبني مرجعًا… ونصنع عقلية.",
                 admin: "لوحة التحكم"
             }
         },
@@ -246,138 +246,138 @@ export const translations = {
     en: {
         home: {
             hero: {
-                title: "Osama | Offensive Security Expert",
-                subtitle: "Deconstructing infrastructure, exposing attack paths, and reinforcing cyber resilience.",
-                description: "An advanced technical platform dedicated to documenting network penetration testing research and offensive analysis of Active Directory environments. We focus on technical precision and realistic methodology to achieve measurable security impact.",
+                title: "Elite Cyber Platform",
+                subtitle: "Building a reliable Arabic reference... and developing a professional mindset",
+                description: "A platform aiming to build the strongest Arabic knowledge base in Cyber Security and elevate analytical thinking. We do not repeat content; we organize, analyze, and present knowledge with a clear methodology.",
                 buttons: {
-                    learning: "Explore Learning Modules",
-                    profile: "Full Professional Profile",
+                    learning: "Explore Reference",
+                    profile: "Develop Mindset",
                     sections: "Technical Sections"
                 }
             },
             stats: {
-                label: "Competency Metrics",
+                label: "Platform Focus",
                 items: [
-                    { label: "Successful Network Tests", value: "50+" },
-                    { label: "Documented AD Attacks", value: "100+" },
-                    { label: "Custom Tooling", value: "15+" },
-                    { label: "Research Hours", value: "2000+" }
+                    { label: "Comprehensive Reference", value: "100%" },
+                    { label: "Analytical Accuracy", value: "100%" },
+                    { label: "Clear Methodology", value: "∞" },
+                    { label: "Mindset Development", value: "∞" }
                 ]
             },
             quickAbout: {
-                title: "Technical Approach",
-                content: "Specialized in uncovering complex vulnerabilities within corporate networks. We believe that security is not a static state, but a continuous process of challenge and improvement.",
-                quote: "Effective exploitation begins with a structured mindset and enumeration that leaves nothing to chance."
+                title: "Our Mission",
+                content: "Elite is a knowledge project aiming to elevate Cyber Security in the Arab world.\nBased on two pillars: Building a comprehensive reference, and developing the right mindset for professionals.",
+                quote: "Knowledge is the foundation... Thinking makes the difference."
             },
             coreSkills: {
-                title: "Core Specializations",
+                title: "Knowledge Coverage",
                 networkEnum: {
-                    title: "Network Recon & Analysis",
+                    title: "Network Security & AD",
                     items: [
-                        "Service & Vulnerability Enumeration",
-                        "Protocol Inspection & Analysis",
-                        "Attack Surface Mapping",
-                        "Strategic Traffic Analysis"
+                        "Secure Network Architecture",
+                        "Active Directory & Domains",
+                        "Trust & Identity Management",
+                        "Advanced Threat Analysis"
                     ]
                 },
                 adAttacks: {
-                    title: "Active Directory Warfare",
+                    title: "Identity & Authentication",
                     items: [
-                        "Trust Path Exploitation",
-                        "Delegation-Based Attacks",
-                        "Object Abuse (GPO, ACL)",
-                        "Advanced Lateral Movement"
+                        "Access & Identity Management",
+                        "Kerberos & NTLM",
+                        "Authentication Protocols",
+                        "Credential Protection"
                     ]
                 },
                 credentialAttacks: {
-                    title: "Identity & Credentials",
+                    title: "Attack & Defense Concepts",
                     items: [
-                        "Relay & Interception Attacks",
-                        "Ticket Forgery (Golden/Silver)",
-                        "Identity Data Extraction",
-                        "Cryptographic Analysis"
+                        "Attack Tactics & Simulation",
+                        "Incident Response Strategies",
+                        "Trust Path Exploitation",
+                        "Accurate Tech Terminology"
                     ]
                 },
                 tooling: {
-                    title: "Offensive Arsenal",
+                    title: "Mindset & Methodology",
                     items: [
-                        "Custom Script Development",
-                        "Advanced Probe Deployment",
-                        "Adversary Simulation (Adv Sim)",
-                        "Vulnerability Research"
+                        "How to read environments?",
+                        "Identifying Attack Surfaces",
+                        "Building & testing hypotheses",
+                        "Evidence-based decisions"
                     ]
                 }
             },
             platformSections: {
-                title: "Knowledge Architecture",
-                description: "Content is structured according to global standards to ensure a seamless transition from theory to intensive practical application.",
+                title: "Comprehensive Arabic Reference",
+                description: "We aim to document the field in all its details, providing learners with a professional Arabic source accessible anytime.",
                 items: {
-                    networkPlaybook: { title: "Network Playbook", desc: "Comprehensive operations guide for infrastructure testing." },
-                    activeDirectory: { title: "Active Directory", desc: "Deep dive into Windows domain internals and security." },
-                    enumeration: { title: "Enumeration", desc: "Mastering the art of pre-attack information gathering." },
-                    tools: { title: "Tools Arsenal", desc: "Guide for using and developing offensive tools." },
-                    cpts: { title: "CPTS Roadmap", desc: "Preparation path for global offensive security certifications." },
-                    cheatsheets: { title: "Quick Reference", desc: "Fast-access databases for commands and techniques." },
-                    thinking: { title: "Adversary Mindset", desc: "Key findings in non-linear offensive thinking." }
+                    networkPlaybook: { title: "Network Security", desc: "Network security and protection." },
+                    activeDirectory: { title: "Active Directory", desc: "Domain guide and identity security." },
+                    enumeration: { title: "Identity & Auth", desc: "Authentication and identities." },
+                    tools: { title: "Kerberos & NTLM", desc: "Auth protocols analysis." },
+                    cpts: { title: "Attack Concepts", desc: "Offensive concepts." },
+                    cheatsheets: { title: "Defensive Concepts", desc: "Defensive strategies." },
+                    thinking: { title: "Technical Terms", desc: "Clear technical terminology." }
                 },
-                supports: "System supports progress tracking, practical labs, and continuous technical content expansion."
+                supports: "The system supports a clear methodology to build an independent professional, not just tool reliance."
             },
             philosophy: {
-                title: "High-Performance Philosophy",
-                content: "We don't settle for finding a vulnerability; we strive to understand its root cause and how to permanently remediate it.",
+                title: "Global Labs Analysis",
+                content: "We share analyses of Labs from global platforms. We don't just show the solution; we explain the mindset:",
                 modes: {
-                    learning: { title: "Learning Path", desc: "Building solid technical foundations from ground zero." },
-                    reference: { title: "Reference Mode", desc: "Immediate access to information during field operations." }
+                    learning: { title: "Why did it make sense?", desc: "Explaining the indicators that led to the decision." },
+                    reference: { title: "What are the alternatives?", desc: "Analyzing other options to understand the full picture." }
                 },
-                goal: "The goal is to transform knowledge into formidable defensive power."
+                goal: "The goal is not to reach the Flag. The goal is to understand how to get there."
             },
             currentFocus: {
-                title: "Current Roadmap",
+                title: "Methodology Milestones",
                 items: [
-                    "Automating Active Directory exploit chains",
-                    "Advanced research in EDR/AV evasion",
-                    "Developing custom network testing tools",
-                    "Contributing to offensive security communities"
+                    "How to read the environment?",
+                    "How to define Attack Surfaces?",
+                    "How to build a hypothesis?",
+                    "How to test it and decide?"
                 ]
             },
             forCompanies: {
-                title: "Professional Enterprise",
-                content: "Providing security vision built on practical experience and scientific methodology:",
+                title: "Our Vision",
+                content: "To become the #1 Arabic reference in Cyber Security, a reliable source for profound understanding rather than superficial knowledge.",
                 items: [
-                    "Realistic network security assessments",
-                    "Infrastructure risk analysis",
-                    "True adversary simulations",
-                    "Impact-driven technical reporting",
-                    "Commitment to highest confidentiality standards"
+                    "The First Arabic Reference",
+                    "A hub for learners & pros",
+                    "Deep foundational understanding",
+                    "Developing an independent mindset",
+                    "Elevating the industry standard"
                 ],
-                cta: "To download professional CV or request technical consultations, please visit the profile page.",
-                button: "🔹 Full Professional Profile"
+                cta: "Let's build a strong reference that contributes to cyber resilience.",
+                button: "🔹 Explore Reference"
             },
             builtTools: {
-                title: "My Tools",
-                description: "A collection of specialized tools and scripts I've developed to streamline enumeration and automate exploitation chains.",
+                title: "Analytical Thinking Arsenal",
+                description: "Tools don't make the professional; the mindset does. We focus on moving the learner from executing commands to understanding systems.",
                 items: [
                     {
-                        name: "AD-Explorer Pro",
-                        desc: "Advanced tool for exploring trust relationships and privilege escalation within Active Directory.",
-                        tech: "Python | LDAP | Impacket"
+                        name: "Attack Path Identification",
+                        desc: "Analyzing environments and discovering vulnerabilities with deep insight.",
+                        tech: "Logic | Enumeration"
                     },
                     {
-                        name: "Net-Enum-Suite",
-                        desc: "Automation scripts for structured enumeration of large-scale networks and preliminary reporting.",
-                        tech: "Bash | Nmap | Python"
+                        name: "Hypothesis Testing",
+                        desc: "Forming offensive scenarios based on explicit data.",
+                        tech: "Analysis | Strategy"
                     },
                     {
-                        name: "Identity-Relay-Fix",
-                        desc: "Simulation and analysis tool for Relay vulnerabilities across enterprise identity protocols.",
-                        tech: "C# | Socket Programming"
+                        name: "Evidence-Based Decisions",
+                        desc: "Making strict technical choices based on indicators.",
+                        tech: "Evidence | Decisions"
                     }
                 ],
-                github: "View all projects on GitHub"
+                github: "View Core Concepts & Mindset"
             },
             footer: {
-                copyright: "© 2026 Osama | Professional Network Security Platform",
-                builtWith: "Developed with security standards and an offensive-first methodology.",
+                copyright: "© 2026 Elite | Building Knowledge. Developing Mindset.",
+                builtWith: "We build a reference... and shape a mindset.",
                 admin: "Admin Dashboard"
             }
         },
