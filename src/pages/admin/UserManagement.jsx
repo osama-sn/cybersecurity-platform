@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { db } from '../../firebase/config';
 import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { useData } from '../../context/DataContext';
-import { Shield, User, Trash2, Edit, Check, X, Search } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Shield, User, Trash2, Edit, Check, X, Search, Lock } from 'lucide-react';
 
 const UserManagement = () => {
     const { sections } = useData();
+    const { isSuperAdmin } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -167,33 +169,40 @@ const UserManagement = () => {
                                     )}
                                 </td>
                                 <td className="px-6 py-4 text-right space-x-2">
-                                    {user.role !== 'super_admin' && (
+                                    {/* Protect Super Admin from everyone. */}
+                                    {user.role === 'super_admin' ? (
+                                        <span className="text-xs text-cyber-500 italic flex items-center justify-end gap-1">
+                                            <Lock size={12} /> Protected
+                                        </span>
+                                    ) : (
                                         <>
-                                            <button
-                                                onClick={() => handleToggleAdmin(user.id, user.role)}
-                                                className={`p-1.5 rounded transition-colors ${user.role === 'admin' ? 'text-orange-400 hover:bg-orange-900/30' : 'text-green-400 hover:bg-green-900/30'}`}
-                                                title={user.role === 'admin' ? "Remove Admin" : "Make Admin"}
-                                            >
-                                                <Shield size={16} />
-                                            </button>
-
-                                            {user.role !== 'admin' && (
+                                            {isSuperAdmin && (
                                                 <button
-                                                    onClick={() => openPermissionsModal(user)}
-                                                    className="p-1.5 text-blue-400 hover:bg-blue-900/30 rounded transition-colors"
-                                                    title="Manage Permissions"
+                                                    onClick={() => handleToggleAdmin(user.id, user.role)}
+                                                    className={`p-1.5 rounded transition-colors ${user.role === 'admin' ? 'text-orange-400 hover:bg-orange-900/30' : 'text-green-400 hover:bg-green-900/30'}`}
+                                                    title={user.role === 'admin' ? "Remove Admin" : "Make Admin"}
                                                 >
-                                                    <Edit size={16} />
+                                                    <Shield size={16} />
                                                 </button>
                                             )}
 
                                             <button
-                                                onClick={() => handleDeleteUser(user.id)}
-                                                className="p-1.5 text-red-400 hover:bg-red-900/30 rounded transition-colors"
-                                                title="Delete User"
+                                                onClick={() => openPermissionsModal(user)}
+                                                className="p-1.5 text-blue-400 hover:bg-blue-900/30 rounded transition-colors"
+                                                title="Manage Permissions"
                                             >
-                                                <Trash2 size={16} />
+                                                <Edit size={16} />
                                             </button>
+
+                                            {isSuperAdmin && (
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    className="p-1.5 text-red-400 hover:bg-red-900/30 rounded transition-colors"
+                                                    title="Delete User"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </td>

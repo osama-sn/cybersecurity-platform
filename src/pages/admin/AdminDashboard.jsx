@@ -137,13 +137,13 @@ const AdminDashboard = () => {
                     <p className="text-cyber-400 text-sm">Manage your platform content and users</p>
                 </div>
 
-                {isSuperAdmin && (
+                {isAdmin && (
                     <div className="flex bg-cyber-900 p-1 rounded-lg border border-cyber-700">
                         <button
                             onClick={() => setActiveTab('content')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'content'
-                                    ? 'bg-cyber-700 text-white shadow-sm'
-                                    : 'text-cyber-400 hover:text-white hover:bg-cyber-800'
+                                ? 'bg-cyber-700 text-white shadow-sm'
+                                : 'text-cyber-400 hover:text-white hover:bg-cyber-800'
                                 }`}
                         >
                             <Layout size={16} /> Content
@@ -151,8 +151,8 @@ const AdminDashboard = () => {
                         <button
                             onClick={() => setActiveTab('users')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'users'
-                                    ? 'bg-cyber-700 text-white shadow-sm'
-                                    : 'text-cyber-400 hover:text-white hover:bg-cyber-800'
+                                ? 'bg-cyber-700 text-white shadow-sm'
+                                : 'text-cyber-400 hover:text-white hover:bg-cyber-800'
                                 }`}
                         >
                             <Users size={16} /> Users
@@ -161,7 +161,7 @@ const AdminDashboard = () => {
                 )}
             </div>
 
-            {activeTab === 'users' && isSuperAdmin ? (
+            {activeTab === 'users' ? (
                 <UserManagement />
             ) : (
                 <>
