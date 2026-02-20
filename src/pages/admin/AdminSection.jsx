@@ -2,18 +2,22 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Plus, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Plus, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink, User } from 'lucide-react';
 
 const AdminSection = () => {
     const { sectionId } = useParams();
+    const { user, isAdmin, userData } = useAuth();
     const [section, setSection] = useState(null);
-    const [modules, setModules] = useState([]); // { junctionId, moduleId, order, title }
+    const [modules, setModules] = useState([]); // { junctionId, moduleId, order, title, createdBy }
     const [newModuleTitle, setNewModuleTitle] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
     const [allModules, setAllModules] = useState([]);
     const [importSearch, setImportSearch] = useState('');
     const [dragIndex, setDragIndex] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
+
+    const canManageSection = isAdmin || userData?.allowedSections?.includes(sectionId);
 
     const fetchData = async () => {
         if (!sectionId) return;
@@ -52,12 +56,14 @@ const AdminSection = () => {
             const moduleRef = doc(db, 'modules', jData.moduleId);
             const moduleSnap = await getDoc(moduleRef);
             if (moduleSnap.exists()) {
+                const modData = moduleSnap.data();
                 modulesData.push({
                     junctionId: jDoc.id,
                     moduleId: moduleSnap.id,
                     order: jData.order || 0,
-                    title: moduleSnap.data().title,
-                    createdAt: moduleSnap.data().createdAt,
+                    title: modData.title,
+                    createdAt: modData.createdAt,
+                    createdBy: modData.createdBy // { uid, email, displayName }
                 });
             }
         }
@@ -68,17 +74,24 @@ const AdminSection = () => {
 
     useEffect(() => {
         fetchData();
-    }, [sectionId]);
+    }, [sectionId, user]); // Re-fetch if user/permissions change (though unlikely to change mid-session)
 
     // Create a brand new module + link it to this section
     const handleAddModule = async (e) => {
         e.preventDefault();
         if (!newModuleTitle.trim()) return;
+        if (!canManageSection) return;
 
         try {
             const moduleRef = await addDoc(collection(db, 'modules'), {
                 title: newModuleTitle,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                createdBy: {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL || null
+                }
             });
 
             await addDoc(collection(db, 'sectionModules'), {
@@ -97,6 +110,9 @@ const AdminSection = () => {
 
     // Remove module from this section only (unlink junction)
     const handleUnlinkModule = async (junctionId, moduleTitle) => {
+        // Can unlink if admin or if they have access to this section (conceptually they can remove things from their section)
+        if (!canManageSection) return;
+
         if (!window.confirm(`Remove "${moduleTitle}" from this section?\n\nThe module will still exist in other sections where it's linked.`)) return;
         try {
             await deleteDoc(doc(db, 'sectionModules', junctionId));
@@ -106,28 +122,10 @@ const AdminSection = () => {
         }
     };
 
-    // Delete module globally (from all sections)
-    const handleDeleteModuleGlobally = async (moduleId, moduleTitle) => {
-        if (!window.confirm(`⚠️ PERMANENTLY DELETE "${moduleTitle}" from ALL sections?\n\nThis will also delete all topic links for this module. This cannot be undone.`)) return;
-        try {
-            // Delete all sectionModules junctions for this module
-            const smSnap = await getDocs(query(collection(db, 'sectionModules'), where('moduleId', '==', moduleId)));
-            for (const d of smSnap.docs) await deleteDoc(doc(db, 'sectionModules', d.id));
-
-            // Delete all moduleTopics junctions for this module
-            const mtSnap = await getDocs(query(collection(db, 'moduleTopics'), where('moduleId', '==', moduleId)));
-            for (const d of mtSnap.docs) await deleteDoc(doc(db, 'moduleTopics', d.id));
-
-            // Delete the module itself
-            await deleteDoc(doc(db, 'modules', moduleId));
-            await fetchModules();
-        } catch (error) {
-            console.error("Error deleting module globally:", error);
-        }
-    };
-
     // Import existing module into this section
     const handleImportModule = async (moduleId) => {
+        if (!canManageSection) return;
+
         try {
             // Check if already linked
             const existing = await getDocs(
@@ -165,16 +163,18 @@ const AdminSection = () => {
 
     // Drag and drop reorder
     const handleDragStart = (index) => {
+        if (!canManageSection) return;
         setDragIndex(index);
     };
 
     const handleDragOver = (e, index) => {
         e.preventDefault();
+        if (!canManageSection) return;
         setDragOverIndex(index);
     };
 
     const handleDrop = async (index) => {
-        if (dragIndex === null || dragIndex === index) {
+        if (!canManageSection || dragIndex === null || dragIndex === index) {
             setDragIndex(null);
             setDragOverIndex(null);
             return;
@@ -221,58 +221,87 @@ const AdminSection = () => {
             <div className="card">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-bold">Modules</h3>
-                    <button
-                        onClick={openImportModal}
-                        className="btn btn-outline flex items-center gap-2 text-sm"
-                    >
-                        <Import size={16} /> Import Existing Module
-                    </button>
+                    {canManageSection && (
+                        <button
+                            onClick={openImportModal}
+                            className="btn btn-outline flex items-center gap-2 text-sm"
+                        >
+                            <Import size={16} /> Import Existing Module
+                        </button>
+                    )}
                 </div>
 
-                <form onSubmit={handleAddModule} className="flex gap-4 mb-6">
-                    <input
-                        className="input flex-1"
-                        placeholder="New Module Title..."
-                        value={newModuleTitle}
-                        onChange={e => setNewModuleTitle(e.target.value)}
-                    />
-                    <button className="btn btn-primary flex items-center gap-2"><Plus size={16} /> Create New</button>
-                </form>
+                {canManageSection && (
+                    <form onSubmit={handleAddModule} className="flex gap-4 mb-6">
+                        <input
+                            className="input flex-1"
+                            placeholder="New Module Title..."
+                            value={newModuleTitle}
+                            onChange={e => setNewModuleTitle(e.target.value)}
+                        />
+                        <button className="btn btn-primary flex items-center gap-2"><Plus size={16} /> Create New</button>
+                    </form>
+                )}
 
                 <div className="space-y-2">
-                    {modules.map((mod, index) => (
-                        <div
-                            key={mod.junctionId}
-                            draggable
-                            onDragStart={() => handleDragStart(index)}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDrop={() => handleDrop(index)}
-                            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
-                            className={`flex items-center justify-between p-3 bg-cyber-900 rounded border transition-all cursor-move
-                                ${dragOverIndex === index ? 'border-cyber-primary bg-cyber-800 scale-[1.02]' : 'border-cyber-700'}
-                                ${dragIndex === index ? 'opacity-50' : 'opacity-100'}
-                            `}
-                        >
-                            <div className="flex items-center gap-3">
-                                <GripVertical className="text-cyber-600 hover:text-cyber-400 cursor-grab active:cursor-grabbing" size={16} />
-                                <Folder className="text-cyber-secondary" size={20} />
-                                <span className="font-medium text-white">{mod.title}</span>
+                    {modules.map((mod, index) => {
+                        const isCreator = mod.createdBy?.uid === user?.uid;
+                        const canEditModule = isAdmin || isCreator;
+
+                        // Even if user can manage section, they can ONLY edit the module itself if they created it (or are admin)
+                        // However, they *can* always Unlink it from their section if they can manage the section (handled in handleUnlinkModule)
+
+                        return (
+                            <div
+                                key={mod.junctionId}
+                                draggable={canManageSection}
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDrop={() => handleDrop(index)}
+                                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                                className={`flex items-center justify-between p-3 bg-cyber-900 rounded border transition-all 
+                                    ${canManageSection ? 'cursor-move' : ''}
+                                    ${dragOverIndex === index ? 'border-cyber-primary bg-cyber-800 scale-[1.02]' : 'border-cyber-700'}
+                                    ${dragIndex === index ? 'opacity-50' : 'opacity-100'}
+                                `}
+                            >
+                                <div className="flex items-center gap-3">
+                                    {canManageSection && (
+                                        <GripVertical className="text-cyber-600 hover:text-cyber-400 cursor-grab active:cursor-grabbing" size={16} />
+                                    )}
+                                    <Folder className="text-cyber-secondary" size={20} />
+                                    <div>
+                                        <div className="font-medium text-white">{mod.title}</div>
+                                        {mod.createdBy && (
+                                            <div className="text-[10px] text-cyber-500 flex items-center gap-1">
+                                                <User size={10} /> {mod.createdBy.displayName || mod.createdBy.email}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    {canEditModule ? (
+                                        <Link to={`/admin/modules/${mod.moduleId}`} className="text-sm text-cyber-primary hover:underline">
+                                            Manage Topics
+                                        </Link>
+                                    ) : (
+                                        <span className="text-xs text-cyber-600 italic">Read Only</span>
+                                    )}
+
+                                    {canManageSection && (
+                                        <button
+                                            onClick={() => handleUnlinkModule(mod.junctionId, mod.title)}
+                                            className="text-cyber-warning hover:text-yellow-400 p-1 transition-colors"
+                                            title="Remove from this section (module is preserved)"
+                                        >
+                                            <Unlink size={16} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <Link to={`/admin/modules/${mod.moduleId}`} className="text-sm text-cyber-primary hover:underline">
-                                    Manage Topics
-                                </Link>
-                                <button
-                                    onClick={() => handleUnlinkModule(mod.junctionId, mod.title)}
-                                    className="text-cyber-warning hover:text-yellow-400 p-1 transition-colors"
-                                    title="Remove from this section (module is preserved)"
-                                >
-                                    <Unlink size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                    {modules.length === 0 && <p className="text-cyber-500 text-center py-4">No modules yet. Create one or import an existing module.</p>}
+                        );
+                    })}
+                    {modules.length === 0 && <p className="text-cyber-500 text-center py-4">No modules yet.</p>}
                 </div>
             </div>
 
