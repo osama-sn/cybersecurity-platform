@@ -27,17 +27,18 @@ const MainLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = async (e) => {
+    if (e) e.preventDefault();
+    console.log('🔓 Attempting to logout...');
+    setProfileMenuOpen(false);
+
     try {
-      console.log('🔓 Attempting to logout...');
-      setProfileMenuOpen(false);
       await logout();
-      console.log('✅ Logout successful, navigating to login page...');
-      navigate('/login');
+      console.log('✅ Logout successful');
     } catch (error) {
       console.error('❌ Logout failed:', error);
-      console.error('Error details:', error.message, error.code);
-      // Still try to navigate even if there's an error
+    } finally {
+      console.log('🔄 Navigating to login page...');
       navigate('/login');
     }
   };
@@ -125,6 +126,7 @@ const MainLayout = () => {
                       {/* Menu Items */}
                       <div className="py-1">
                         <button
+                          type="button"
                           onClick={() => {
                             setProfileMenuOpen(false);
                             navigate('/profile');
@@ -139,6 +141,7 @@ const MainLayout = () => {
                       {/* Logout */}
                       <div className="border-t border-cyber-700 py-1">
                         <button
+                          type="button"
                           onClick={handleLogout}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                         >
