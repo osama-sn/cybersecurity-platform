@@ -144,7 +144,13 @@ const AdminModule = () => {
                 moduleId,
                 title: newGroupTitle,
                 order: groups.length,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                createdBy: {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL || null
+                }
             });
             setNewGroupTitle('');
             await fetchGroups();
@@ -156,6 +162,13 @@ const AdminModule = () => {
 
     const handleUpdateGroup = async (groupId) => {
         if (!editGroupTitle.trim()) return;
+
+        const group = groups.find(g => g.id === groupId);
+        const isGroupCreator = group?.createdBy?.uid === user?.uid;
+        if (!isAdmin && !isGroupCreator) {
+            alert("You can only edit groups you created.");
+            return;
+        }
 
         try {
             const groupRef = doc(db, 'groups', groupId);
@@ -176,6 +189,13 @@ const AdminModule = () => {
     };
 
     const handleDeleteGroup = async (groupId) => {
+        const group = groups.find(g => g.id === groupId);
+        const isGroupCreator = group?.createdBy?.uid === user?.uid;
+        if (!isAdmin && !isGroupCreator) {
+            alert("You can only delete groups you created.");
+            return;
+        }
+
         if (!confirm("Delete this group? Topics inside will be ungrouped.")) return;
 
         try {
@@ -435,72 +455,88 @@ const AdminModule = () => {
 
                 <div className="space-y-6">
                     {/* Groups */}
-                    {groups.map(group => (
-                        <div key={group.id} className="bg-cyber-900/30 border border-cyber-700 rounded-xl overflow-hidden">
-                            <div className="flex items-center justify-between p-3 bg-cyber-800/50 border-b border-cyber-700/50">
-                                {editingGroupId === group.id ? (
-                                    <div className="flex items-center gap-2 flex-1">
-                                        <input
-                                            className="input py-1 px-2 text-sm flex-1"
-                                            value={editGroupTitle}
-                                            onChange={e => setEditGroupTitle(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <button onClick={() => handleUpdateGroup(group.id)} className="text-green-500 hover:text-green-400 p-1">
-                                            <Save size={16} />
-                                        </button>
-                                        <button onClick={() => setEditingGroupId(null)} className="text-cyber-500 hover:text-white p-1">
-                                            <XCircle size={16} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="flex items-center gap-2">
-                                            <Folder size={18} className="text-cyber-primary" />
-                                            <span className="font-bold text-cyber-200">{group.title}</span>
-                                            <span className="text-xs text-cyber-600">({getGroupTopics(group.id).length} topics)</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => startEditingGroup(group)}
-                                                className="p-1 text-cyber-600 hover:text-cyber-primary transition-colors"
-                                            >
-                                                <Pencil size={14} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteGroup(group.id)}
-                                                className="p-1 text-cyber-600 hover:text-red-400 transition-colors"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                    {groups.map(group => {
+                        const isGroupCreator = group.createdBy?.uid === user?.uid;
+                        const canManageGroup = isAdmin || isGroupCreator;
 
-                            <div className="p-2 space-y-2 min-h-[50px]"
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={(e) => onDropTopic(e, group.id)}
-                            >
-                                {getGroupTopics(group.id).map((topic, index) => (
-                                    <TopicItem
-                                        key={topic.junctionId}
-                                        topic={topic}
-                                        onDragStart={onDragTopicStart}
-                                        onUnlink={handleUnlinkTopic}
-                                        onDelete={handleDeleteTopicGlobally}
-                                        currentUser={user}
-                                        isAdmin={isAdmin}
-                                    />
-                                ))}
-                                {getGroupTopics(group.id).length === 0 && (
-                                    <div className="text-center py-4 text-xs text-cyber-600 italic border border-dashed border-cyber-800 rounded">
-                                        Drag topics here
-                                    </div>
-                                )}
+                        return (
+                            <div key={group.id} className="bg-cyber-900/30 border border-cyber-700 rounded-xl overflow-hidden">
+                                <div className="flex items-center justify-between p-3 bg-cyber-800/50 border-b border-cyber-700/50">
+                                    {editingGroupId === group.id ? (
+                                        <div className="flex items-center gap-2 flex-1">
+                                            <input
+                                                className="input py-1 px-2 text-sm flex-1"
+                                                value={editGroupTitle}
+                                                onChange={e => setEditGroupTitle(e.target.value)}
+                                                autoFocus
+                                            />
+                                            <button onClick={() => handleUpdateGroup(group.id)} className="text-green-500 hover:text-green-400 p-1">
+                                                <Save size={16} />
+                                            </button>
+                                            <button onClick={() => setEditingGroupId(null)} className="text-cyber-500 hover:text-white p-1">
+                                                <XCircle size={16} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-2">
+                                                <Folder size={18} className="text-cyber-primary" />
+                                                <span className="font-bold text-cyber-200">{group.title}</span>
+                                                <span className="text-xs text-cyber-600">({getGroupTopics(group.id).length} topics)</span>
+                                                {group.createdBy && (
+                                                    <div className="text-[10px] text-cyber-600 flex items-center gap-1 ml-2 px-2 py-0.5 bg-cyber-900 rounded-full border border-cyber-800">
+                                                        <User size={8} /> {group.createdBy.displayName || group.createdBy.email.split('@')[0]}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {canManageGroup ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => startEditingGroup(group)}
+                                                            className="p-1 text-cyber-600 hover:text-cyber-primary transition-colors"
+                                                        >
+                                                            <Pencil size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteGroup(group.id)}
+                                                            className="p-1 text-cyber-600 hover:text-red-400 transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-[10px] text-cyber-600 italic">Read Only</span>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                <div className="p-2 space-y-2 min-h-[50px]"
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => onDropTopic(e, group.id)}
+                                >
+                                    {getGroupTopics(group.id).map((topic, index) => (
+                                        <TopicItem
+                                            key={topic.junctionId}
+                                            topic={topic}
+                                            onDragStart={onDragTopicStart}
+                                            onUnlink={handleUnlinkTopic}
+                                            onDelete={handleDeleteTopicGlobally}
+                                            currentUser={user}
+                                            isAdmin={isAdmin}
+                                        />
+                                    ))}
+                                    {getGroupTopics(group.id).length === 0 && (
+                                        <div className="text-center py-4 text-xs text-cyber-600 italic border border-dashed border-cyber-800 rounded">
+                                            Drag topics here
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
 
                     {/* Ungrouped Topics */}
                     <div className="bg-cyber-900/30 border border-cyber-700/50 rounded-xl overflow-hidden">

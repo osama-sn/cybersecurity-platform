@@ -10,7 +10,7 @@ import UserManagement from './UserManagement';
 
 const AdminDashboard = () => {
     const { sections } = useData();
-    const { isSuperAdmin, isAdmin } = useAuth();
+    const { isSuperAdmin, isAdmin, userData } = useAuth();
     const [activeTab, setActiveTab] = useState('content');
     const [isMigrating, setIsMigrating] = useState(false);
     const [localSections, setLocalSections] = useState(null);
@@ -22,7 +22,12 @@ const AdminDashboard = () => {
     const [editingSection, setEditingSection] = useState(null);
     const [formData, setFormData] = useState({ title: '', descriptionEn: '', descriptionAr: '', themeColor: 'primary' });
 
-    const displaySections = localSections || sections;
+    // Filter sections based on permissions
+    const visibleSections = (isAdmin || isSuperAdmin)
+        ? sections
+        : sections.filter(section => userData?.allowedSections?.includes(section.id));
+
+    const displaySections = localSections || visibleSections;
 
     const THEME_COLORS = [
         { id: 'primary', bg: 'bg-cyber-primary', border: 'border-cyber-primary', label: 'Green' },
