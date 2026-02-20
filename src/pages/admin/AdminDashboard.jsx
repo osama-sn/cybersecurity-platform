@@ -10,7 +10,7 @@ import UserManagement from './UserManagement';
 
 const AdminDashboard = () => {
     const { sections } = useData();
-    const { isSuperAdmin } = useAuth();
+    const { isSuperAdmin, isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('content');
     const [isMigrating, setIsMigrating] = useState(false);
     const [localSections, setLocalSections] = useState(null);
