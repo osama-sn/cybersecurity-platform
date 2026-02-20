@@ -51,7 +51,7 @@ const MainLayout = () => {
 
       <div className="flex-1 flex flex-col h-full relative tranisition-all duration-300">
         {/* Header */}
-        <header className="h-16 border-b border-cyber-700 bg-cyber-900/95 backdrop-blur flex items-center justify-between px-4 z-10">
+        <header className="h-16 border-b border-cyber-700 bg-cyber-900/95 backdrop-blur flex items-center justify-between px-4 z-40">
           <button
             className="p-2 text-cyber-400 hover:text-white transition-colors"
             onClick={toggleSidebar}
