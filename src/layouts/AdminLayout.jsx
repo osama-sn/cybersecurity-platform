@@ -3,11 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 const AdminLayout = () => {
-    const { user, isAdmin, loading } = useAuth();
+    const { user, userData, isAdmin, loading } = useAuth();
 
     if (loading) return <div className="text-center p-20">Checking clearance...</div>;
 
-    if (!user || !isAdmin) {
+    const hasAccess = isAdmin || (userData?.allowedSections && userData.allowedSections.length > 0);
+
+    if (!user || !hasAccess) {
         return (
             <div className="flex flex-col items-center justify-center h-screen space-y-4">
                 <ShieldAlert size={64} className="text-cyber-danger" />

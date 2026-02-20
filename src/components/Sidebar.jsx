@@ -48,7 +48,7 @@ const SidebarItem = ({ item, depth = 0 }) => {
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { sections } = useData();
-  const { isAdmin } = useAuth();
+  const { isAdmin, userData } = useAuth();
   const { t } = useLanguage();
 
   return (
@@ -106,6 +106,27 @@ const Sidebar = ({ isOpen, onClose }) => {
           <NavLink to="/about" className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-800 text-white' : 'text-cyber-400 hover:text-cyber-200'}`}>
             <span>{t('sidebar.about')}</span>
           </NavLink>
+
+          {/* Managed Sections (For Delegated Users) */}
+          {userData?.allowedSections?.length > 0 && !isAdmin && (
+            <div className="mt-6 pt-6 border-t border-cyber-700">
+              <div className="text-xs font-semibold text-cyber-500 uppercase tracking-wider mb-2">
+                Managed Sections
+              </div>
+              {sections
+                .filter(s => userData.allowedSections.includes(s.id))
+                .map(section => (
+                  <NavLink
+                    key={section.id}
+                    to={`/admin/section/${section.id}`}
+                    className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20' : 'text-cyber-400 hover:text-cyber-primary'}`}
+                  >
+                    <BookOpen size={16} />
+                    <span className="truncate">{section.title}</span>
+                  </NavLink>
+                ))}
+            </div>
+          )}
 
           {/* Admin Link */}
           {isAdmin && (
