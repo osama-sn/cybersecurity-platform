@@ -175,16 +175,20 @@ const AdminDashboard = () => {
                             <Layout size={20} className="text-cyber-primary" /> Content Sections
                         </h3>
                         <div className="flex gap-2">
-                            <button
-                                onClick={handleMigrate}
-                                disabled={isMigrating}
-                                className="btn btn-outline flex items-center gap-2 text-sm"
-                            >
-                                <Database size={16} /> Data Migration
-                            </button>
-                            <button onClick={() => openModal()} className="btn btn-primary flex items-center gap-2">
-                                <Plus size={18} /> Add Section
-                            </button>
+                            {isAdmin && (
+                                <>
+                                    <button
+                                        onClick={handleMigrate}
+                                        disabled={isMigrating}
+                                        className="btn btn-outline flex items-center gap-2 text-sm"
+                                    >
+                                        <Database size={16} /> Data Migration
+                                    </button>
+                                    <button onClick={() => openModal()} className="btn btn-primary flex items-center gap-2">
+                                        <Plus size={18} /> Add Section
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -229,24 +233,28 @@ const AdminDashboard = () => {
 
                                                 {/* Actions */}
                                                 <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-cyber-950/50 rounded-lg p-1 border border-cyber-800">
-                                                    <button
-                                                        onClick={() => openModal(section)}
-                                                        className="p-1.5 text-cyber-400 hover:text-white hover:bg-cyber-800 rounded-md transition-colors"
-                                                        title="Edit Section"
-                                                    >
-                                                        <Edit size={14} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteSection(section.id)}
-                                                        className="p-1.5 text-cyber-400 hover:text-red-400 hover:bg-cyber-800 rounded-md transition-colors"
-                                                        title="Delete Section"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                    <div className="w-px h-4 bg-cyber-700 mx-1"></div>
-                                                    <div className="cursor-grab active:cursor-grabbing p-1.5 text-cyber-500 hover:text-cyber-300">
-                                                        <GripVertical size={14} />
-                                                    </div>
+                                                    {isAdmin && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => openModal(section)}
+                                                                className="p-1.5 text-cyber-400 hover:text-white hover:bg-cyber-800 rounded-md transition-colors"
+                                                                title="Edit Section"
+                                                            >
+                                                                <Edit size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteSection(section.id)}
+                                                                className="p-1.5 text-cyber-400 hover:text-red-400 hover:bg-cyber-800 rounded-md transition-colors"
+                                                                title="Delete Section"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                            <div className="w-px h-4 bg-cyber-700 mx-1"></div>
+                                                            <div className="cursor-grab active:cursor-grabbing p-1.5 text-cyber-500 hover:text-cyber-300">
+                                                                <GripVertical size={14} />
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
