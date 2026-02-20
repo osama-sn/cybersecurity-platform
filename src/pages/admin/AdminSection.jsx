@@ -246,7 +246,7 @@ const AdminSection = () => {
                 <div className="space-y-2">
                     {modules.map((mod, index) => {
                         const isCreator = mod.createdBy?.uid === user?.uid;
-                        const canEditModule = isAdmin || isCreator;
+                        const canEditModule = isAdmin || isCreator || canManageSection;
 
                         // Even if user can manage section, they can ONLY edit the module itself if they created it (or are admin)
                         // However, they *can* always Unlink it from their section if they can manage the section (handled in handleUnlinkModule)

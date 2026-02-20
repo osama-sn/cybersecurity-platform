@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext'; // We might need more specific
 import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
 import BlockRenderer from '../components/BlockRenderer'; // Ensure imports are correct
-import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
+import { ChevronRight, ChevronLeft, CheckCircle, User } from 'lucide-react';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -121,6 +121,15 @@ const TopicPage = () => {
 
       <div className="mb-10 border-b border-cyber-700 pb-6">
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{topic.title}</h1>
+
+        {topic.createdBy && (
+          <div className="flex items-center gap-2 text-sm text-cyber-500 mb-4 font-mono">
+            <User size={14} />
+            <span>{isRTL ? 'بواسطة:' : 'Created by:'}</span>
+            <span className="text-cyber-300">{topic.createdBy.displayName || topic.createdBy.email}</span>
+          </div>
+        )}
+
         {topic.description && <p className="text-cyber-400 text-lg">{topic.description}</p>}
       </div>
 
