@@ -112,6 +112,20 @@
     @apply bg-cyber-900 text-cyber-200 font-sans antialiased;
   }
 
+  /* Enable text selection across all topic content blocks */
+  .select-text,
+  .select-text * {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    cursor: text;
+  }
+
+  .select-text a,
+  .select-text button,
+  .select-text [role="button"] {
+    cursor: pointer;
+  }
+
   ::selection {
     background-color: rgba(16, 185, 129, 0.3);
     color: #fff;
