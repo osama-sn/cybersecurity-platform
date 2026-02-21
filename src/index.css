@@ -112,6 +112,11 @@
     @apply bg-cyber-900 text-cyber-200 font-sans antialiased;
   }
 
+  ::selection {
+    background-color: rgba(16, 185, 129, 0.3);
+    color: #fff;
+  }
+
   h1,
   h2,
   h3,

@@ -109,7 +109,7 @@ const TopicPage = () => {
   if (!topic) return <div className="p-10 text-center text-red-500">{t('topic.notFound')}</div>;
 
   return (
-    <div className="max-w-3xl mx-auto pb-20 animate-fade-in">
+    <div className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-cyber-500 mb-6 font-mono">
         <Link to="/sections" className="hover:text-cyber-primary">{t('topic.breadcrumb.sections')}</Link>
