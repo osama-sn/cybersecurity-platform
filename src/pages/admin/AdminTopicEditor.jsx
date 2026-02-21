@@ -409,24 +409,15 @@ const AdminTopicEditor = () => {
 
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // Only handle paste if we are NOT inside a specific input/textarea (unless it's the main container or a block that wants to accept full paste)
-        // Actually, we usually want to intercept paste on the container or the focused block.
-        // For simplicity, let's parse the clipboard data.
+        // If a block is currently active/focused, let the browser paste
+        // raw text directly into it — no markdown parsing
+        if (activeBlockId) return;
+
+        // Only parse markdown when pasting on the container (no active block)
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
         if (!pastedText) return;
-
-        // If pasting into a non-text block (code, table, quote, etc.),
-        // let the browser paste raw text without markdown parsing
-        const activeBlock = blocks.find(b => b.id === activeBlockId);
-        if (activeBlock && activeBlock.type !== 'text') {
-            return; // Default paste — raw text goes into the block as-is
-        }
-
-        // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
-        const isMultiLine = pastedText.includes('\n');
-        // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
 
         e.preventDefault();
 
