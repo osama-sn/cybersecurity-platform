@@ -202,6 +202,26 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
         );
     }
 
+    if (block.type === 'paste') {
+        return (
+            <div className="relative my-2">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-cyan-400 font-mono uppercase tracking-widest">📋 Smart Paste Zone</span>
+                </div>
+                <textarea
+                    ref={inputRef}
+                    className={`${baseClass} font-mono text-sm text-cyan-300 bg-cyan-500/5 border-2 border-dashed border-cyan-500/30 rounded-lg p-4 min-h-[80px] focus:border-cyan-400/50`}
+                    value={block.content}
+                    onChange={e => onChange({ ...block, content: e.target.value })}
+                    onKeyDown={onKeyDown}
+                    placeholder="Paste your content here (Ctrl+V)... It will be parsed into proper blocks."
+                    rows={3}
+                    dir={getDirection(block.content)}
+                />
+            </div>
+        );
+    }
+
     const styleMap = {
         h1: `${baseClass} text-4xl font-bold text-white`,
         h2: `${baseClass} text-3xl font-bold text-white`,

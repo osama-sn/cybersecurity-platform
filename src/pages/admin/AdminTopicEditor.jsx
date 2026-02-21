@@ -409,29 +409,29 @@ const AdminTopicEditor = () => {
 
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // If pasting into a non-text block (code, table, quote, etc.),
-        // let the browser paste raw text — no markdown parsing
-        const activeBlock = blocks.find(b => b.id === activeBlockId);
-        if (activeBlock && activeBlock.type !== 'text') {
-            return; // Raw paste into the block
-        }
-
-        // Only parse markdown when pasting on the container (no active block)
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
         if (!pastedText) return;
 
+        // Find the active block
+        const activeBlock = blocks.find(b => b.id === activeBlockId);
+
+        // Only parse markdown when pasting into a "paste" block
+        // All other blocks get raw text (default browser behavior)
+        if (!activeBlock || activeBlock.type !== 'paste') {
+            return; // Let the browser handle the paste as raw text
+        }
+
         e.preventDefault();
 
         const newBlocksData = parseMarkdownToBlocks(pastedText);
-
         if (newBlocksData.length === 0) return;
 
-        // Insert blocks after the active block, or at the end
+        // Replace the paste block with the parsed blocks
         setBlocks(prev => {
-            const activeIndex = prev.findIndex(b => b.id === activeBlockId);
-            const insertIndex = activeIndex >= 0 ? activeIndex + 1 : prev.length;
+            const pasteIndex = prev.findIndex(b => b.id === activeBlockId);
+            if (pasteIndex < 0) return prev;
 
             const newBlocks = newBlocksData.map(data => ({
                 ...newBlock(data.type, data.content),
@@ -439,12 +439,13 @@ const AdminTopicEditor = () => {
             }));
 
             const next = [...prev];
-            next.splice(insertIndex, 0, ...newBlocks);
+            // Remove the paste block and insert parsed blocks in its place
+            next.splice(pasteIndex, 1, ...newBlocks);
 
             persistBlocks(next);
 
-            // Focus the last pasted block
-            /* setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50); */
+            // Focus the last parsed block
+            setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50);
             return next;
         });
     };
