@@ -407,20 +407,18 @@ const AdminTopicEditor = () => {
         </div>
     );
 
-    // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // Let native paste work inside any focused input/textarea (code blocks, URL fields, etc.)
-        const activeEl = document.activeElement;
-        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
+        // If pasting inside an active input or textarea, let the browser handle it normally
+        const target = e.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+            // Let default paste behavior happen inside the focused field
+            return;
+        }
 
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
         if (!pastedText) return;
-
-        // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
-        const isMultiLine = pastedText.includes('\n');
-        // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
 
         e.preventDefault();
 
@@ -443,8 +441,6 @@ const AdminTopicEditor = () => {
 
             persistBlocks(next);
 
-            // Focus the last pasted block
-            /* setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50); */
             return next;
         });
     };
