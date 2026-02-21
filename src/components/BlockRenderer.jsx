@@ -107,7 +107,7 @@ const FlagInput = ({ pattern, value, onChange, disabled, isCorrect, showResult }
 
 const CodeBlock = ({ content, language = 'bash' }) => {
     return (
-        <div className="relative group my-6 overflow-hidden rounded-lg border border-cyber-700 bg-[#1e1e1e]" dir="ltr">
+        <div className="relative group my-6 overflow-hidden rounded-lg border border-cyber-700 bg-[#1e1e1e] select-text" dir="ltr">
             <div className="flex items-center px-4 py-2 bg-cyber-800 border-b border-cyber-700">
                 <Terminal size={14} className="text-cyber-400 mr-2" />
                 <span className="text-xs font-mono text-cyber-400">{language}</span>
@@ -151,7 +151,7 @@ const ChallengeBlock = ({ block }) => {
         : flagInput.trim().toLowerCase() === correctFlag.trim().toLowerCase();
 
     return (
-        <div className="card my-8 border-s-4 border-s-cyber-primary p-0 bg-cyber-900/40 backdrop-blur-md overflow-hidden shadow-[0_0_30px_rgba(0,243,255,0.05)]">
+        <div className="card my-8 border-s-4 border-s-cyber-primary p-0 bg-cyber-900/40 backdrop-blur-md overflow-hidden shadow-[0_0_30px_rgba(0,243,255,0.05)] select-text">
             {/* Header */}
             <div className="bg-cyber-800/50 px-6 py-4 border-b border-cyber-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -425,7 +425,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
-    const commonClasses = "text-start leading-relaxed";
+    const commonClasses = "text-start leading-relaxed select-text";
 
     // In editor mode, remove large margins to match the input fields
     const spacingClass = isEditor ? 'mb-1' : 'mb-6';
@@ -555,7 +555,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
 
         case 'quote':
             return (
-                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg ${commonClasses}`}>
+                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg select-text ${commonClasses}`}>
                     "{block.content}"
                 </blockquote>
             );
@@ -587,7 +587,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
 
         case 'warning':
             return (
-                <div dir="auto" className={`bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 ${blockSpacing} rounded-e-xl shadow-lg`}>
+                <div dir="auto" className={`bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text`}>
                     <strong className="text-cyber-danger flex items-center gap-2 mb-2">
                         <AlertCircle size={18} />
                         {t('renderer.warning')}
@@ -599,7 +599,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
         case 'tip':
         case 'info':
             return (
-                <div dir="auto" className={`bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 ${blockSpacing} rounded-e-xl shadow-lg`}>
+                <div dir="auto" className={`bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text`}>
                     <strong className="text-cyber-primary flex items-center gap-2 mb-2">
                         <Play size={18} className="fill-cyber-primary" />
                         {block.type.toUpperCase()}

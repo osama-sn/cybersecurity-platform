@@ -407,18 +407,19 @@ const AdminTopicEditor = () => {
         </div>
     );
 
+    // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // If pasting inside an active input or textarea, let the browser handle it normally
-        const target = e.target;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-            // Let default paste behavior happen inside the focused field
-            return;
-        }
-
+        // Only handle paste if we are NOT inside a specific input/textarea (unless it's the main container or a block that wants to accept full paste)
+        // Actually, we usually want to intercept paste on the container or the focused block.
+        // For simplicity, let's parse the clipboard data.
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
         if (!pastedText) return;
+
+        // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
+        const isMultiLine = pastedText.includes('\n');
+        // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
 
         e.preventDefault();
 
@@ -441,6 +442,8 @@ const AdminTopicEditor = () => {
 
             persistBlocks(next);
 
+            // Focus the last pasted block
+            /* setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50); */
             return next;
         });
     };
