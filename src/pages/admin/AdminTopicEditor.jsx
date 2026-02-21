@@ -409,41 +409,58 @@ const AdminTopicEditor = () => {
 
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // Only handle paste if we are NOT inside a specific input/textarea (unless it's the main container or a block that wants to accept full paste)
-        // Actually, we usually want to intercept paste on the container or the focused block.
-        // For simplicity, let's parse the clipboard data.
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
         if (!pastedText) return;
 
-        // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
-        const isMultiLine = pastedText.includes('\n');
-        // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
+        // Find the active block
+        const activeBlock = blocks.find(b => b.id === activeBlockId);
 
+        // If pasting into a NON-text block (code, table, quote, etc.),
+        // let the default paste behavior happen (raw text into that block)
+        if (activeBlock && activeBlock.type !== 'text') {
+            return; // Don't intercept — browser will paste into the textarea/input
+        }
+
+        // For text blocks: parse the markdown and create proper blocks
         e.preventDefault();
 
         const newBlocksData = parseMarkdownToBlocks(pastedText);
 
         if (newBlocksData.length === 0) return;
 
-        // Insert blocks after the active block, or at the end
         setBlocks(prev => {
             const activeIndex = prev.findIndex(b => b.id === activeBlockId);
-            const insertIndex = activeIndex >= 0 ? activeIndex + 1 : prev.length;
+            let insertIndex;
+            let next = [...prev];
 
-            const newBlocks = newBlocksData.map(data => ({
-                ...newBlock(data.type, data.content),
-                metadata: data.metadata || {}
-            }));
-
-            const next = [...prev];
-            next.splice(insertIndex, 0, ...newBlocks);
+            // If the active text block is empty, replace it with the first parsed block
+            if (activeIndex >= 0 && activeBlock && activeBlock.content === '') {
+                const firstParsed = newBlocksData[0];
+                next[activeIndex] = {
+                    ...next[activeIndex],
+                    type: firstParsed.type,
+                    content: firstParsed.content,
+                    metadata: firstParsed.metadata || {},
+                };
+                // Insert the remaining blocks after it
+                const remaining = newBlocksData.slice(1).map(data => ({
+                    ...newBlock(data.type, data.content),
+                    metadata: data.metadata || {}
+                }));
+                next.splice(activeIndex + 1, 0, ...remaining);
+            } else {
+                // Insert all parsed blocks after the active block
+                insertIndex = activeIndex >= 0 ? activeIndex + 1 : next.length;
+                const newBlocks = newBlocksData.map(data => ({
+                    ...newBlock(data.type, data.content),
+                    metadata: data.metadata || {}
+                }));
+                next.splice(insertIndex, 0, ...newBlocks);
+            }
 
             persistBlocks(next);
-
-            // Focus the last pasted block
-            /* setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50); */
             return next;
         });
     };
