@@ -417,6 +417,13 @@ const AdminTopicEditor = () => {
 
         if (!pastedText) return;
 
+        // If pasting into a non-text block (code, table, quote, etc.),
+        // let the browser paste raw text without markdown parsing
+        const activeBlock = blocks.find(b => b.id === activeBlockId);
+        if (activeBlock && activeBlock.type !== 'text') {
+            return; // Default paste — raw text goes into the block as-is
+        }
+
         // If the pasted text is just a short single line, let default behavior happen (unless it matches a pattern)
         const isMultiLine = pastedText.includes('\n');
         // if (!isMultiLine && pastedText.length < 50) return; // Optional: Allow valid short pastes
