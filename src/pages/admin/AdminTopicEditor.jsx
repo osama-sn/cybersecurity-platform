@@ -409,9 +409,12 @@ const AdminTopicEditor = () => {
 
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // If a block is currently active/focused, let the browser paste
-        // raw text directly into it — no markdown parsing
-        if (activeBlockId) return;
+        // If pasting into a non-text block (code, table, quote, etc.),
+        // let the browser paste raw text — no markdown parsing
+        const activeBlock = blocks.find(b => b.id === activeBlockId);
+        if (activeBlock && activeBlock.type !== 'text') {
+            return; // Raw paste into the block
+        }
 
         // Only parse markdown when pasting on the container (no active block)
         const clipboardData = e.clipboardData || window.clipboardData;
