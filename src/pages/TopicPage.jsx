@@ -153,7 +153,7 @@ const TopicPage = () => {
         {topic.description && <p className="text-cyber-400 text-lg">{topic.description}</p>}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 select-text">
         {(() => {
           let listIndex = 0;
           return blocks.map((block, index) => {
