@@ -129,7 +129,7 @@ const TopicPage = () => {
   if (!topic) return <div className="p-10 text-center text-red-500">{t('topic.notFound')}</div>;
 
   return (
-    <div ref={contentRef} className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
+    <div ref={contentRef} className="max-w-3xl mx-auto pb-20 animate-fade-in topic-content">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-cyber-500 mb-6 font-mono">
         <Link to="/sections" className="hover:text-cyber-primary">{t('topic.breadcrumb.sections')}</Link>
@@ -153,7 +153,7 @@ const TopicPage = () => {
         {topic.description && <p className="text-cyber-400 text-lg">{topic.description}</p>}
       </div>
 
-      <div className="space-y-2 select-text">
+      <div className="space-y-2">
         {(() => {
           let listIndex = 0;
           return blocks.map((block, index) => {

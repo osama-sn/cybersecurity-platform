@@ -112,25 +112,6 @@
     @apply bg-cyber-900 text-cyber-200 font-sans antialiased;
   }
 
-  /* Enable text selection across all topic content blocks */
-  .select-text,
-  .select-text * {
-    -webkit-user-select: text !important;
-    user-select: text !important;
-    cursor: text;
-  }
-
-  .select-text a,
-  .select-text button,
-  .select-text [role="button"] {
-    cursor: pointer;
-  }
-
-  ::selection {
-    background-color: rgba(16, 185, 129, 0.3);
-    color: #fff;
-  }
-
   h1,
   h2,
   h3,
@@ -143,6 +124,30 @@
   code {
     @apply font-mono text-cyber-primary;
   }
+}
+
+/* Force text selection on topic content — outside @layer for max specificity */
+.topic-content,
+.topic-content * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
+
+.topic-content {
+  cursor: text;
+}
+
+.topic-content a,
+.topic-content button,
+.topic-content input,
+.topic-content [role="button"] {
+  cursor: pointer;
+}
+
+::selection {
+  background-color: rgba(16, 185, 129, 0.3);
+  color: #fff;
 }
 
 @layer components {
