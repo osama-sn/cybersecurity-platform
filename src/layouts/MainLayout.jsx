@@ -62,30 +62,32 @@ const MainLayout = () => {
 
           <div className="flex-1 md:flex-none" />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 md:gap-4">
             {/* Language Toggle */}
             <button
               onClick={toggleLanguage}
-              className="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider bg-cyber-800 text-cyber-300 hover:bg-cyber-700 transition-colors border border-cyber-600"
+              className="px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold uppercase tracking-wider bg-cyber-800 text-cyber-300 hover:bg-cyber-700 transition-colors border border-cyber-600 shrink-0"
             >
-              {language === 'ar' ? 'English' : 'العربية'}
+              <span className="hidden sm:inline">{language === 'ar' ? 'English' : 'العربية'}</span>
+              <span className="sm:hidden">{language === 'ar' ? 'EN' : 'ع'}</span>
             </button>
 
             {/* Mode Toggle */}
             <button
               onClick={toggleMode}
               className={`
-                px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors
+                px-2 md:px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors shrink-0
                 ${isLearningMode
                   ? 'bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20'
                   : 'bg-cyber-secondary/10 text-cyber-secondary border border-cyber-secondary/20'}
               `}
             >
-              {mode} Mode
+              <span className="hidden sm:inline">{mode} Mode</span>
+              <span className="sm:hidden">{isLearningMode ? '📚' : '📖'}</span>
             </button>
 
             {/* Profile / Auth */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               {user ? (
                 <div className="relative" ref={profileMenuRef}>
                   {/* Profile Button */}
@@ -153,18 +155,19 @@ const MainLayout = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <button
-                    className="text-sm font-medium hover:text-cyber-primary px-3 py-1.5"
+                    className="hidden sm:block text-xs md:text-sm font-medium hover:text-cyber-primary px-2 md:px-3 py-1.5"
                     onClick={() => navigate('/login')}
                   >
                     {t('sidebar.login')}
                   </button>
                   <button
-                    className="text-sm font-medium bg-cyber-primary text-cyber-900 px-3 py-1.5 rounded-md hover:bg-cyber-primary/90 transition-colors"
+                    className="text-xs md:text-sm font-medium bg-cyber-primary text-cyber-900 px-2 md:px-3 py-1.5 rounded-md hover:bg-cyber-primary/90 transition-colors shrink-0"
                     onClick={() => navigate('/signup')}
                   >
-                    Sign Up
+                    <span className="hidden sm:inline">Sign Up</span>
+                    <span className="sm:hidden flex items-center gap-1"><User size={14} /> Sign Up</span>
                   </button>
                 </div>
               )}

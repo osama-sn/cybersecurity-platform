@@ -44,20 +44,20 @@ const Home = () => {
       className="space-y-8 pb-20"
     >
       {/* 1. Hero Section */}
-      <section className="relative min-h-[50vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden pt-10 md:pt-16">
+      <section className="relative min-h-[40vh] md:min-h-[50vh] flex flex-col items-center justify-center text-center px-3 md:px-4 overflow-hidden pt-6 md:pt-16">
         {/* Background Glow Only */}
         <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
-          <div className="absolute w-[600px] h-[600px] bg-cyber-primary/5 rounded-full blur-[120px] -z-10 animate-pulse-slow"></div>
+          <div className="absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-cyber-primary/5 rounded-full blur-[80px] md:blur-[120px] -z-10 animate-pulse-slow"></div>
         </div>
 
         {/* Content Layer */}
-        <div className="relative z-10 space-y-8 max-w-5xl mx-auto flex flex-col items-center">
+        <div className="relative z-10 space-y-5 md:space-y-8 max-w-5xl mx-auto flex flex-col items-center">
           {/* Small Professional Avatar */}
           <motion.div
             variants={itemVariants}
             className="relative"
           >
-            <div className="relative w-32 h-32 md:w-40 md:h-40">
+            <div className="relative w-24 h-24 md:w-40 md:h-40">
               <div className="absolute -inset-2 bg-cyber-primary/20 rounded-full blur-xl animate-pulse-slow"></div>
               <div className="relative w-full h-full rounded-full border-2 border-cyber-primary/50 overflow-hidden bg-cyber-800 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                 <img
@@ -75,21 +75,21 @@ const Home = () => {
           {/* Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center justify-center gap-3 px-4 py-1.5 bg-cyber-900/60 rounded-full border border-cyber-primary/30 backdrop-blur-md"
+            className="inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-4 py-1 md:py-1.5 bg-cyber-900/60 rounded-full border border-cyber-primary/30 backdrop-blur-md"
           >
-            <span className="text-[10px] md:text-xs font-mono text-cyber-400 uppercase tracking-[0.4em] font-bold">Elite Cyber Authority</span>
+            <span className="text-[8px] md:text-xs font-mono text-cyber-400 uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold">Elite Cyber Authority</span>
           </motion.div>
 
           <div className="space-y-4">
             <motion.h1
               variants={itemVariants}
-              className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none font-arabic"
+              className="text-3xl sm:text-4xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none font-arabic"
             >
               {t('home.hero.title')}
             </motion.h1>
             <motion.h2
               variants={itemVariants}
-              className="text-xl md:text-3xl text-cyber-primary font-bold font-arabic tracking-wide"
+              className="text-base sm:text-lg md:text-3xl text-cyber-primary font-bold font-arabic tracking-wide"
             >
               {t('home.hero.subtitle')}
             </motion.h2>
@@ -97,19 +97,19 @@ const Home = () => {
 
           <motion.p
             variants={itemVariants}
-            className="text-lg md:text-xl text-cyber-300 max-w-3xl mx-auto leading-relaxed font-arabic"
+            className="text-sm sm:text-base md:text-xl text-cyber-300 max-w-3xl mx-auto leading-relaxed font-arabic px-2"
           >
             {t('home.hero.description')}
           </motion.p>
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap items-center justify-center gap-4 pt-4"
+            className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 md:gap-4 pt-2 md:pt-4 w-full sm:w-auto px-2"
           >
             <Link
               to="/sections"
               onClick={() => setMode('learning')}
-              className="btn btn-primary flex items-center gap-2 text-lg px-8 py-3 group shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all font-bold uppercase"
+              className="btn btn-primary flex items-center justify-center gap-2 text-sm md:text-lg px-6 md:px-8 py-2.5 md:py-3 group shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all font-bold uppercase w-full sm:w-auto"
             >
               <Terminal size={20} />
               {t('home.hero.buttons.learning')}
@@ -117,7 +117,7 @@ const Home = () => {
             </Link>
             <Link
               to="/about"
-              className="btn btn-outline flex items-center gap-2 text-lg px-8 py-3 group hover:border-cyber-secondary hover:text-cyber-secondary transition-all font-bold uppercase"
+              className="btn btn-outline flex items-center justify-center gap-2 text-sm md:text-lg px-6 md:px-8 py-2.5 md:py-3 group hover:border-cyber-secondary hover:text-cyber-secondary transition-all font-bold uppercase w-full sm:w-auto"
             >
               <User size={20} />
               {t('home.hero.buttons.profile')}
@@ -145,12 +145,12 @@ const Home = () => {
       {/* 3. Core Skills */}
       <section>
         <ScrollReveal>
-          <h3 className="text-3xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3 font-arabic">
+          <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 text-center flex items-center justify-center gap-3 font-arabic">
             <Cpu className="text-cyber-accent" />
             {t('home.coreSkills.title')}
           </h3>
         </ScrollReveal>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Network Enum */}
           <ScrollReveal delay={0.1}>
             <div className="card h-full group hover:bg-cyber-800/50 hover:border-cyber-secondary/50 transition-all duration-300 transform hover:-translate-y-1">
@@ -217,7 +217,7 @@ const Home = () => {
       <section className="space-y-8">
         <ScrollReveal>
           <div className="text-center">
-            <h3 className="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3 font-arabic">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3 font-arabic">
               <Layers className="text-cyber-primary" />
               {t('home.platformSections.title')}
             </h3>
@@ -225,7 +225,7 @@ const Home = () => {
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(sections || []).length > 0 ? (
             sections.map((section, i) => {
               const style = getSectionStyle(section.themeColor);
@@ -262,7 +262,7 @@ const Home = () => {
       {/* 5. Philosophy */}
       <ScrollReveal direction="up">
         <section className="card bg-gradient-to-br from-cyber-900 via-cyber-800 to-cyber-900 border border-cyber-700">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
             <div>
               <h3 className="text-2xl font-bold text-white mb-4 font-arabic">{t('home.philosophy.title')}</h3>
               <p className="text-cyber-200 mb-6 font-arabic">{t('home.philosophy.content')}</p>
@@ -324,7 +324,7 @@ const Home = () => {
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {t('home.builtTools.items', { returnObjects: true }).map((tool, i) => (
             <ScrollReveal key={i} delay={i * 0.1} direction="up">
               <div className="card h-full group hover:bg-cyber-800/50 hover:border-cyber-primary/50 transition-all duration-300 flex flex-col">
@@ -359,7 +359,7 @@ const Home = () => {
 
       {/* 8. For Companies */}
       <ScrollReveal direction="up">
-        <section className="bg-cyber-800/30 p-8 rounded-2xl border border-cyber-700 text-center relative overflow-hidden group">
+        <section className="bg-cyber-800/30 p-4 md:p-8 rounded-2xl border border-cyber-700 text-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-cyber-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
           <Briefcase size={40} className="text-cyber-secondary mx-auto mb-4 group-hover:scale-110 transition-transform" />
           <h3 className="text-2xl font-bold text-white mb-4 font-arabic">{t('home.forCompanies.title')}</h3>
