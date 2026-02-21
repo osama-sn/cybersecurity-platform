@@ -409,9 +409,10 @@ const AdminTopicEditor = () => {
 
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
-        // Only handle paste if we are NOT inside a specific input/textarea (unless it's the main container or a block that wants to accept full paste)
-        // Actually, we usually want to intercept paste on the container or the focused block.
-        // For simplicity, let's parse the clipboard data.
+        // Let native paste work inside any focused input/textarea (code blocks, URL fields, etc.)
+        const target = e.target;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
 
