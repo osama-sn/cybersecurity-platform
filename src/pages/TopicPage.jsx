@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext'; // We might need more specific fetching here
 import { useMode } from '../context/ModeContext';
@@ -13,6 +13,7 @@ const TopicPage = () => {
   const navigate = useNavigate();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
+  const contentRef = useRef(null);
 
   const [topic, setTopic] = useState(null);
   const [blocks, setBlocks] = useState([]);
@@ -105,11 +106,30 @@ const TopicPage = () => {
     }
   };
 
+  // Ctrl+A selects only the topic content, not the whole page
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        if (contentRef.current) {
+          e.preventDefault();
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(contentRef.current);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (loading) return <div className="p-10 text-center animate-pulse">{t('topic.loading')}</div>;
   if (!topic) return <div className="p-10 text-center text-red-500">{t('topic.notFound')}</div>;
 
   return (
-    <div className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
+    <div ref={contentRef} className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-cyber-500 mb-6 font-mono">
         <Link to="/sections" className="hover:text-cyber-primary">{t('topic.breadcrumb.sections')}</Link>
