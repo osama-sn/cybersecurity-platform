@@ -410,8 +410,8 @@ const AdminTopicEditor = () => {
     // ─── Paste Handler ─────────────────────────────────────────────────────────
     const handlePaste = (e) => {
         // Let native paste work inside any focused input/textarea (code blocks, URL fields, etc.)
-        const target = e.target;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
 
         const clipboardData = e.clipboardData || window.clipboardData;
         const pastedText = clipboardData.getData('text');
