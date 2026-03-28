@@ -166,35 +166,7 @@ const SectionPage = () => {
     };
   }, [sectionId, user, getUserProgress]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!section) return <div>Section not found</div>;
-
-  // Access check
-  const hasAccess = () => {
-    if (!user) return false;
-    if (isAdmin || isSuperAdmin) return true;
-    if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
-    return userData.allowedSections.includes(sectionId);
-  };
-
-  if (!hasAccess()) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
-        <div className="p-6 bg-red-500/10 rounded-full border border-red-500/30">
-          <ShieldX size={48} className="text-red-400" />
-        </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-white">Access Denied</h1>
-          <p className="text-cyber-400 max-w-md">You do not have permission to view this section. Contact the administrator to request access.</p>
-        </div>
-        <Link to="/sections" className="btn btn-outline flex items-center gap-2">
-          &larr; Back to Sections
-        </Link>
-      </div>
-    );
-  }
-
-  // Calculate Progress Stats
+  // Calculate Progress Stats (MUST be before any early returns to respect Rules of Hooks)
   const { totalTopics, completedTopics, progressPercentage, firstUncompletedTopicId } = useMemo(() => {
     let total = 0;
     let completed = 0;
@@ -233,6 +205,34 @@ const SectionPage = () => {
       firstUncompletedTopicId: firstUncompletedId
     };
   }, [modules, progressData]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!section) return <div>Section not found</div>;
+
+  // Access check
+  const hasAccess = () => {
+    if (!user) return false;
+    if (isAdmin || isSuperAdmin) return true;
+    if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
+    return userData.allowedSections.includes(sectionId);
+  };
+
+  if (!hasAccess()) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
+        <div className="p-6 bg-red-500/10 rounded-full border border-red-500/30">
+          <ShieldX size={48} className="text-red-400" />
+        </div>
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-white">Access Denied</h1>
+          <p className="text-cyber-400 max-w-md">You do not have permission to view this section. Contact the administrator to request access.</p>
+        </div>
+        <Link to="/sections" className="btn btn-outline flex items-center gap-2">
+          &larr; Back to Sections
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
