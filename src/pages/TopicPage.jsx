@@ -5,7 +5,7 @@ import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useProgress } from '../hooks/useProgress';
 import BlockRenderer from '../components/BlockRenderer';
-import { ChevronRight, ChevronLeft, CheckCircle, User, Award } from 'lucide-react';
+import { ChevronRight, ChevronLeft, CheckCircle, User, Award, Box, ShieldAlert } from 'lucide-react';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
