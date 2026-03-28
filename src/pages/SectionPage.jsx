@@ -146,16 +146,20 @@ const SectionPage = () => {
       });
       unsubscribers.push(unsubJunction);
 
-      // 3. Fetch user progress
-      const fetchProgress = async () => {
-        const progress = await getUserProgress();
-        if (progress && progress.completedTopics) {
-          setProgressData(progress.completedTopics);
-        }
-      };
-      
+      // 3. Real-time listener for user progress
       if (user) {
-        fetchProgress();
+        const progressRef = doc(db, 'userProgress', user.uid);
+        const unsubProgress = onSnapshot(progressRef, (progressSnap) => {
+          if (progressSnap.exists()) {
+            const data = progressSnap.data();
+            if (data.completedTopics) {
+              setProgressData(data.completedTopics);
+            }
+          }
+        }, (error) => {
+          console.error('Error listening to progress:', error);
+        });
+        unsubscribers.push(unsubProgress);
       }
 
     } catch (err) {

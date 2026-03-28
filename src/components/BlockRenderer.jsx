@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight } from 'lucide-react';
@@ -125,7 +125,7 @@ const CodeBlock = ({ content, language = 'bash' }) => {
     );
 };
 
-const ChallengeBlock = ({ block, onSuccess }) => {
+const ChallengeBlock = ({ block, onSuccess, isPassed }) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [flagInput, setFlagInput] = useState('');
     const [showResult, setShowResult] = useState(false);
@@ -141,6 +141,17 @@ const ChallengeBlock = ({ block, onSuccess }) => {
     const explanation = metadata.explanation || "";
     const hint = metadata.hint || "";
     const flagPattern = metadata.flagPattern || "FLAG{...}";
+
+    useEffect(() => {
+        if (isPassed) {
+            setShowResult(true);
+            if (challengeType === 'multiple_choice') {
+                setSelectedOption(correctOption);
+            } else {
+                setFlagInput(correctFlag);
+            }
+        }
+    }, [isPassed, challengeType, correctOption, correctFlag]);
 
     const handleSubmit = () => {
         setShowResult(true);
@@ -398,7 +409,7 @@ const TableBlock = ({ content }) => {
     );
 };
 
-const BlockRenderer = ({ block, index, onToggle, isEditor = false, onChallengeSuccess }) => {
+const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, isPassed }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
@@ -441,7 +452,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onChallengeSu
             return <TableBlock content={block.content} />;
 
         case 'quiz':
-            return <ChallengeBlock block={block} onSuccess={onChallengeSuccess} />;
+            return <ChallengeBlock block={block} onSuccess={onSuccess} isPassed={isPassed} />;
         case 'heading':
         case 'h1':
         case 'h2':

@@ -27,7 +27,7 @@ const TopicPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const quizBlocks = blocks.filter(b => b.type === 'quiz');
   const totalChallenges = quizBlocks.length;
-  const allPassed = totalChallenges > 0 && passedChallenges.size === totalChallenges;
+  const allPassed = totalChallenges > 0 && quizBlocks.every(block => passedChallenges.has(block.id));
 
   useEffect(() => {
     if (!topicId) return;
@@ -110,6 +110,9 @@ const TopicPage = () => {
       const progress = await getUserProgress();
       if (progress?.completedTopics?.[topicId]) {
         setIsCompleted(true);
+      }
+      if (progress?.scoredBlocks) {
+        setPassedChallenges(new Set(Object.keys(progress.scoredBlocks)));
       }
     };
     checkProgress();
@@ -244,7 +247,8 @@ const TopicPage = () => {
                 block={block}
                 index={block.type === 'numbered' ? listIndex : undefined}
                 onToggle={handleUpdate}
-                onChallengeSuccess={handleChallengeSuccess}
+                onSuccess={handleChallengeSuccess}
+                isPassed={passedChallenges.has(block.id)}
               />
             );
           });
