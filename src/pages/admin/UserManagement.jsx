@@ -11,6 +11,7 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isResetting, setIsResetting] = useState(false);
 
     // Modal State for Permissions
     const [editingUser, setEditingUser] = useState(null);
@@ -76,6 +77,36 @@ const UserManagement = () => {
         }
     };
 
+    const handleResetTestingData = async () => {
+        if (!isSuperAdmin) return;
+        
+        const confirmMsg = "⚠️ WARNING: This will permanently DELETE all user progress, scores, and leaderboards data across the entire platform. This is strictly for testing purposes.\n\nType 'RESET' to confirm:";
+        const userInput = window.prompt(confirmMsg);
+        
+        if (userInput !== 'RESET') {
+            if (userInput !== null) alert("Reset cancelled. You didn't type 'RESET'.");
+            return;
+        }
+
+        setIsResetting(true);
+        try {
+            const progressSnap = await getDocs(collection(db, 'userProgress'));
+            const progressDeletePromises = progressSnap.docs.map(docSnap => deleteDoc(doc(db, 'userProgress', docSnap.id)));
+            
+            const leaderboardsSnap = await getDocs(collection(db, 'leaderboards'));
+            const leaderboardsDeletePromises = leaderboardsSnap.docs.map(docSnap => deleteDoc(doc(db, 'leaderboards', docSnap.id)));
+            
+            await Promise.all([...progressDeletePromises, ...leaderboardsDeletePromises]);
+            
+            alert("✅ Successfully wiped all user progress and leaderboard data!");
+        } catch (error) {
+            console.error("Error resetting data:", error);
+            alert("Failed to reset data: " + error.message);
+        } finally {
+            setIsResetting(false);
+        }
+    };
+
     const openPermissionsModal = (user) => {
         setEditingUser(user);
         setSelectedSections(user.allowedSections || []);
@@ -120,15 +151,27 @@ const UserManagement = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-white">User Management</h3>
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        className="input pl-10"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex items-center gap-4">
+                    {isSuperAdmin && (
+                        <button 
+                            onClick={handleResetTestingData}
+                            disabled={isResetting}
+                            className="bg-red-500/20 text-red-500 hover:bg-red-500/30 border border-red-500/50 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+                        >
+                            <Trash2 size={16} />
+                            {isResetting ? "Wiping Data..." : "Reset All Progress Data"}
+                        </button>
+                    )}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            className="input pl-10"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 
