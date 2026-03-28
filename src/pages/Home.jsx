@@ -5,11 +5,20 @@ import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
 import ScrollReveal from '../components/animations/ScrollReveal';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
   const { setMode } = useMode();
   const { t, isRTL, language } = useLanguage();
   const { sections } = useData();
+  const { user, userData, isAdmin, isSuperAdmin } = useAuth();
+
+  const hasAccess = (sectionId) => {
+    if (!user) return false;
+    if (isAdmin || isSuperAdmin) return true;
+    if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
+    return userData.allowedSections.includes(sectionId);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -226,8 +235,8 @@ const Home = () => {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(sections || []).length > 0 ? (
-            sections.map((section, i) => {
+          {(sections || []).filter(s => hasAccess(s.id)).length > 0 ? (
+            sections.filter(s => hasAccess(s.id)).map((section, i) => {
               const style = getSectionStyle(section.themeColor);
               return (
                 <ScrollReveal key={section.id} delay={i * 0.05} direction="none">

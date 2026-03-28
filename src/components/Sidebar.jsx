@@ -48,8 +48,15 @@ const SidebarItem = ({ item, depth = 0 }) => {
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { sections } = useData();
-  const { isAdmin, userData } = useAuth();
+  const { user, userData, isAdmin, isSuperAdmin } = useAuth();
   const { t } = useLanguage();
+
+  const hasAccess = (sectionId) => {
+    if (!user) return false;
+    if (isAdmin || isSuperAdmin) return true;
+    if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
+    return userData.allowedSections.includes(sectionId);
+  };
 
   return (
     <>
@@ -89,13 +96,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             {t('sidebar.learningPath')}
           </div>
 
-          {sections.map(section => (
+          {sections.filter(s => hasAccess(s.id)).map(section => (
             <div key={section.id} className="mb-2">
               <div className="text-cyber-200 font-bold px-2 py-1">{section.title}</div>
             </div>
           ))}
 
-          {sections.length === 0 && (
+          {sections.filter(s => hasAccess(s.id)).length === 0 && (
             <p className="text-sm text-cyber-500 text-center py-4">{t('sidebar.noSections')}</p>
           )}
 
