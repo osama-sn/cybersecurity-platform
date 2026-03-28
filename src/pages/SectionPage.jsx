@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { Box, ChevronRight, Lock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Box, ChevronRight, Lock, ShieldX } from 'lucide-react';
 
 // Helper Component
 const TopicCard = ({ topic }) => (
@@ -26,6 +27,7 @@ const TopicCard = ({ topic }) => (
 
 const SectionPage = () => {
   const { sectionId } = useParams();
+  const { user, userData, isAdmin, isSuperAdmin } = useAuth();
   const [section, setSection] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,6 +141,31 @@ const SectionPage = () => {
 
   if (loading) return <div>Loading...</div>;
   if (!section) return <div>Section not found</div>;
+
+  // Access check
+  const hasAccess = () => {
+    if (!user) return false;
+    if (isAdmin || isSuperAdmin) return true;
+    if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
+    return userData.allowedSections.includes(sectionId);
+  };
+
+  if (!hasAccess()) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
+        <div className="p-6 bg-red-500/10 rounded-full border border-red-500/30">
+          <ShieldX size={48} className="text-red-400" />
+        </div>
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-white">Access Denied</h1>
+          <p className="text-cyber-400 max-w-md">You do not have permission to view this section. Contact the administrator to request access.</p>
+        </div>
+        <Link to="/sections" className="btn btn-outline flex items-center gap-2">
+          &larr; Back to Sections
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">

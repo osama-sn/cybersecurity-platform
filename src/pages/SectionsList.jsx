@@ -1,11 +1,20 @@
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Folder, ArrowRight, Lock } from 'lucide-react';
 
 const SectionsList = () => {
     const { sections, loading } = useData();
+    const { user, userData, isAdmin, isSuperAdmin } = useAuth();
     const { t } = useLanguage();
+
+    const hasAccess = (sectionId) => {
+        if (!user) return false;
+        if (isAdmin || isSuperAdmin) return true;
+        if (!userData?.allowedSections || userData.allowedSections.length === 0) return true;
+        return userData.allowedSections.includes(sectionId);
+    };
 
     if (loading) {
         return <div className="text-center py-20 text-cyber-400 animate-pulse">{t('sections.loading')}</div>;
@@ -19,7 +28,46 @@ const SectionsList = () => {
             </div>
 
             <div className="grid gap-6">
-                {sections.map((section, index) => (
+                {sections.map((section, index) => {
+                    const accessible = hasAccess(section.id);
+
+                    if (!accessible) {
+                        return (
+                            <div
+                                key={section.id}
+                                className="card group relative overflow-hidden opacity-50 cursor-not-allowed"
+                            >
+                                <div className="absolute top-0 left-0 w-1 h-full bg-cyber-700" />
+
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-start gap-4">
+                                        <div className="p-3 bg-cyber-900 rounded-lg border border-cyber-700 text-red-500">
+                                            <Lock size={24} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-cyber-500 mb-1">
+                                                {section.title}
+                                            </h2>
+                                            <p className="text-red-400/70 text-sm">
+                                                {t('sections.noAccess') || 'You do not have access to this section'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center text-red-500">
+                                        <Lock size={20} />
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 flex items-center gap-4 text-xs font-mono text-cyber-500">
+                                    <span className="bg-cyber-900 px-2 py-1 rounded border border-cyber-700">
+                                        {t('sections.modulePrefix')}{index + 1}
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
                     <Link
                         key={section.id}
                         to={`/sections/${section.id}`}
@@ -54,7 +102,8 @@ const SectionsList = () => {
                             <span>{t('sections.topicsCount').replace('{count}', section.modulesCount || 0)}</span>
                         </div>
                     </Link>
-                ))}
+                    );
+                })}
 
                 {sections.length === 0 && (
                     <div className="text-center py-10 border border-dashed border-cyber-700 rounded-lg">
