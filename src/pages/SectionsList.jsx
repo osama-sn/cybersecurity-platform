@@ -24,48 +24,12 @@ const SectionsList = () => {
         <div className="space-y-8 animate-fade-in">
             <div className="flex items-center justify-between border-b border-cyber-700 pb-4">
                 <h1 className="text-3xl font-bold text-white">{t('sections.title')}</h1>
-                <span className="text-cyber-400 text-sm">{t('sections.available').replace('{count}', sections.length)}</span>
+                <span className="text-cyber-400 text-sm">{t('sections.available').replace('{count}', sections.filter(s => hasAccess(s.id)).length)}</span>
             </div>
 
             <div className="grid gap-6">
                 {sections.map((section, index) => {
-                    const accessible = hasAccess(section.id);
-
-                    if (!accessible) {
-                        return (
-                            <div
-                                key={section.id}
-                                className="card group relative overflow-hidden opacity-50 cursor-not-allowed"
-                            >
-                                <div className="absolute top-0 left-0 w-1 h-full bg-cyber-700" />
-
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 bg-cyber-900 rounded-lg border border-cyber-700 text-red-500">
-                                            <Lock size={24} />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl font-bold text-cyber-500 mb-1">
-                                                {section.title}
-                                            </h2>
-                                            <p className="text-red-400/70 text-sm">
-                                                {t('sections.noAccess') || 'You do not have access to this section'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center text-red-500">
-                                        <Lock size={20} />
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 flex items-center gap-4 text-xs font-mono text-cyber-500">
-                                    <span className="bg-cyber-900 px-2 py-1 rounded border border-cyber-700">
-                                        {t('sections.modulePrefix')}{index + 1}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    }
+                    if (!hasAccess(section.id)) return null;
 
                     return (
                     <Link
