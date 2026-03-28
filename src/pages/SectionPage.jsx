@@ -46,6 +46,13 @@ const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
           ) : (
             <span className="text-[10px] font-bold text-cyber-500 uppercase tracking-[0.2em] mt-1">Status: Available</span>
           )}
+          {topic.description && (
+            <p className={`text-[11px] mt-2 line-clamp-1 h-4 transition-colors
+              ${isDisabled ? 'text-cyber-700' : 'text-cyber-400 group-hover:text-cyber-300'}
+            `}>
+              {topic.description}
+            </p>
+          )}
         </div>
       </div>
 
@@ -474,6 +481,11 @@ const SectionSkeleton = () => (
                         <div className="flex items-center gap-1.5 text-[9px] font-black px-2.5 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full tracking-widest mt-1">
                           <Lock size={10} /> {isAdmin || isSuperAdmin ? 'HIDDEN_FROM_STUDENTS' : 'LOCKED_BY_ADMIN'}
                         </div>
+                      )}
+                      {module.description && (
+                        <p className="text-sm text-cyber-500 font-medium mt-3 max-w-2xl leading-relaxed whitespace-pre-wrap border-l border-cyber-800 pl-4">
+                          {module.description}
+                        </p>
                       )}
                     </div>
                   </div>

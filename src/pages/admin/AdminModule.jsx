@@ -83,12 +83,20 @@ const AdminModule = () => {
     const [isDraggingGroup, setIsDraggingGroup] = useState(false);
     const [editingGroupId, setEditingGroupId] = useState(null);
     const [editGroupTitle, setEditGroupTitle] = useState('');
+    
+    // Module details editing
+    const [isEditingModule, setIsEditingModule] = useState(false);
+    const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
 
     const fetchData = async () => {
         if (!moduleId) return;
         const docRef = doc(db, 'modules', moduleId);
         const snap = await getDoc(docRef);
-        if (snap.exists()) setModuleData({ id: snap.id, ...snap.data() });
+        if (snap.exists()) {
+            const data = snap.data();
+            setModuleData({ id: snap.id, ...data });
+            setModuleForm({ title: data.title || '', description: data.description || '' });
+        }
 
         await Promise.all([fetchGroups(), fetchTopics()]);
     };
@@ -236,6 +244,22 @@ const AdminModule = () => {
         } catch (error) {
             console.error("Error toggling lock:", error);
             alert("Failed to update module status.");
+        }
+    };
+
+    const handleSaveModuleDetails = async () => {
+        if (!isAdmin) return;
+        try {
+            const moduleRef = doc(db, 'modules', moduleId);
+            await updateDoc(moduleRef, {
+                title: moduleForm.title,
+                description: moduleForm.description
+            });
+            setModuleData(prev => ({ ...prev, title: moduleForm.title, description: moduleForm.description }));
+            setIsEditingModule(false);
+        } catch (error) {
+            console.error("Error saving module details:", error);
+            alert("Failed to update module details.");
         }
     };
 
@@ -432,19 +456,85 @@ const AdminModule = () => {
                 <ArrowLeft size={16} /> Back
             </button>
 
-            <div className="flex items-center justify-between bg-cyber-800 p-4 rounded-lg border border-cyber-700">
-                <h1 className="text-3xl font-bold flex items-center gap-3">
-                    Module: {moduleData.title}
-                    {moduleData.isLocked && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded-full border border-red-500/30 uppercase tracking-widest font-bold">Locked</span>}
-                </h1>
-                {isAdmin && (
-                    <button
-                        onClick={handleToggleLock}
-                        className={`btn flex items-center gap-2 ${moduleData.isLocked ? 'btn-outline text-red-500 border-red-500/50 hover:bg-red-500/10' : 'btn-outline text-emerald-500 border-emerald-500/50 hover:bg-emerald-500/10'}`}
-                    >
-                        {moduleData.isLocked ? <><Unlock size={18} /> Unlock Module</> : <><Lock size={18} /> Lock Module</>}
-                    </button>
-                )}
+            <div className="bg-cyber-800 p-6 rounded-lg border border-cyber-700 shadow-xl relative overflow-hidden">
+                {/* Background Accent */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-primary/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 relative z-10">
+                    <div className="flex-1 space-y-4">
+                        {isEditingModule ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[10px] font-black text-cyber-500 uppercase tracking-widest mb-1.5 block">Module Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={moduleForm.title}
+                                        onChange={(e) => setModuleForm(prev => ({ ...prev, title: e.target.value }))}
+                                        className="input bg-cyber-900 border-cyber-700 text-white font-bold text-2xl w-full"
+                                        placeholder="Enter module title..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-cyber-500 uppercase tracking-widest mb-1.5 block">Learning Description</label>
+                                    <textarea 
+                                        value={moduleForm.description}
+                                        onChange={(e) => setModuleForm(prev => ({ ...prev, description: e.target.value }))}
+                                        className="input bg-cyber-900 border-cyber-700 text-cyber-300 w-full min-h-[100px] resize-y"
+                                        placeholder="What will students learn in this module?"
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={handleSaveModuleDetails} className="btn btn-primary flex items-center gap-2 text-sm">
+                                        <Save size={16} /> Save Changes
+                                    </button>
+                                    <button onClick={() => setIsEditingModule(false)} className="btn btn-outline text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">
+                                        {moduleData.title}
+                                    </h1>
+                                    {moduleData.isLocked && (
+                                        <span className="text-[9px] px-2.5 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 uppercase tracking-[0.2em] font-black">
+                                            Locked
+                                        </span>
+                                    )}
+                                    {isAdmin && (
+                                        <button 
+                                            onClick={() => setIsEditingModule(true)}
+                                            className="p-1.5 text-cyber-500 hover:text-cyber-primary hover:bg-cyber-900 rounded-lg transition-all"
+                                            title="Edit Title & Description"
+                                        >
+                                            <Pencil size={18} />
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="text-cyber-400 font-medium leading-relaxed max-w-2xl whitespace-pre-wrap">
+                                    {moduleData.description || "No description provided. Add one to help students understand what they will learn in this module."}
+                                </p>
+                            </>
+                        )}
+                    </div>
+
+                    {isAdmin && !isEditingModule && (
+                        <div className="shrink-0">
+                            <button
+                                onClick={handleToggleLock}
+                                className={`btn flex items-center gap-2 group transition-all px-6 py-3 rounded-xl border-2 font-black uppercase tracking-widest text-[10px]
+                                    ${moduleData.isLocked 
+                                        ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' 
+                                        : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500 hover:text-white'}
+                                `}
+                            >
+                                {moduleData.isLocked ? <><Unlock size={16} className="group-hover:rotate-12 transition-transform" /> Unlock Module</> : <><Lock size={16} className="group-hover:-rotate-12 transition-transform" /> Lock Module</>}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="card">

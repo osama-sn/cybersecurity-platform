@@ -9,6 +9,42 @@ import { ChevronRight, ChevronLeft, CheckCircle, User, Award, Box, ShieldAlert }
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+const TopicSkeleton = () => (
+  <div className="max-w-5xl mx-auto space-y-12 pb-32 pt-8 animate-fade-in">
+    {/* Skeleton Breadcrumb */}
+    <div className="w-64 h-4 bg-cyber-800/50 rounded animate-pulse"></div>
+
+    {/* Skeleton Header */}
+    <div className="space-y-6">
+      <div className="w-1/2 h-16 bg-cyber-800 rounded-xl animate-pulse"></div>
+      <div className="w-full h-24 bg-cyber-800/40 border border-cyber-700/30 rounded-2xl p-6 animate-pulse">
+        <div className="space-y-3">
+          <div className="w-full h-3 bg-cyber-700/50 rounded"></div>
+          <div className="w-5/6 h-3 bg-cyber-700/50 rounded"></div>
+          <div className="w-4/6 h-3 bg-cyber-700/50 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Skeleton Progress Bar */}
+    <div className="w-full h-1 bg-cyber-800 rounded-full overflow-hidden">
+      <div className="w-1/3 h-full bg-cyber-primery/20 animate-pulse"></div>
+    </div>
+
+    {/* Skeleton Blocks */}
+    <div className="space-y-10">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="space-y-4">
+          <div className="w-1/3 h-8 bg-cyber-800 rounded animate-pulse"></div>
+          <div className="w-full h-32 bg-cyber-900/40 border border-cyber-800 rounded-2xl animate-pulse shimmer-wrapper">
+             <div className="shimmer"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const TopicPage = () => {
   const { sectionId, topicId } = useParams();
   const navigate = useNavigate();
@@ -209,14 +245,7 @@ const TopicPage = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (loading || sectionLoading) return (
-    <div className="flex flex-col items-center justify-center py-40 animate-pulse">
-      <div className="w-16 h-16 bg-cyber-800 rounded-full border border-cyber-700 mb-4 flex items-center justify-center">
-        <Box size={24} className="text-cyber-primary rotate-12" />
-      </div>
-      <p className="text-cyber-500 font-mono text-xs tracking-[0.3em] uppercase">Initialising_Sector...</p>
-    </div>
-  );
+  if (loading || sectionLoading) return <TopicSkeleton />;
 
   const isUserAdmin = isAdmin || isSuperAdmin;
   const isLocked = (topic?.isLocked || section?.isLocked) && !isUserAdmin;
@@ -262,26 +291,34 @@ const TopicPage = () => {
         <span className="text-cyber-primary truncate">Current_Node</span>
       </div>
 
-      <div className="mb-10 border-b border-cyber-700 pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-          <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight">{topic.title}</h1>
+      <div className="mb-12 border-b border-cyber-800/50 pb-10">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
+          <div className="space-y-4">
+            <h1 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter uppercase italic">{topic.title}</h1>
+            {topic.createdBy && (
+              <div className="flex items-center gap-2 text-[10px] text-cyber-500 font-black uppercase tracking-widest">
+                <User size={12} />
+                <span>Authorised_by:</span>
+                <span className="text-cyber-300">{topic.createdBy.displayName || topic.createdBy.email}</span>
+              </div>
+            )}
+          </div>
           {isCompleted && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full shrink-0">
-              <CheckCircle size={16} />
-              <span className="text-xs font-bold tracking-wider uppercase">Passed</span>
+            <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+              <CheckCircle size={18} strokeWidth={2.5} />
+              <span className="text-xs font-black tracking-[0.1em] uppercase">Mission_Accomplished</span>
             </div>
           )}
         </div>
 
-        {topic.createdBy && (
-          <div className="flex items-center gap-2 text-sm text-cyber-500 mb-4 font-mono">
-            <User size={14} />
-            <span>{isRTL ? 'بواسطة:' : 'Created by:'}</span>
-            <span className="text-cyber-300">{topic.createdBy.displayName || topic.createdBy.email}</span>
+        {topic.description && (
+          <div className="relative p-6 bg-cyber-900/40 border border-cyber-800/60 rounded-2xl backdrop-blur-xl group/desc overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-cyber-primary scale-y-0 group-hover/desc:scale-y-100 transition-transform duration-700 origin-top"></div>
+            <p className="text-cyber-400 font-medium text-lg md:text-xl leading-relaxed italic whitespace-pre-wrap relative z-10">
+              {topic.description}
+            </p>
           </div>
         )}
-
-        {topic.description && <p className="text-cyber-400 text-lg">{topic.description}</p>}
       </div>
 
       <div className="space-y-2 select-text">

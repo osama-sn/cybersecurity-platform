@@ -62,6 +62,7 @@ const AdminDashboard = () => {
                 // Update
                 await updateDoc(doc(db, 'sections', editingSection.id), {
                     title: formData.title,
+                    description: formData.descriptionEn, // Main description for compatibility
                     descriptionEn: formData.descriptionEn,
                     descriptionAr: formData.descriptionAr,
                     themeColor: formData.themeColor
@@ -70,10 +71,11 @@ const AdminDashboard = () => {
                 // Create
                 await addDoc(collection(db, 'sections'), {
                     title: formData.title,
+                    description: formData.descriptionEn, // Main description for compatibility
                     descriptionEn: formData.descriptionEn,
                     descriptionAr: formData.descriptionAr,
                     themeColor: formData.themeColor,
-                    order: sections.length,
+                    order: displaySections.length,
                     isLocked: false, // Default to unlocked
                     createdAt: serverTimestamp()
                 });

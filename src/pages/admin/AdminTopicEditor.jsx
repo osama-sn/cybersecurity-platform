@@ -41,6 +41,10 @@ const AdminTopicEditor = () => {
     const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
     const [selectedBlockIds, setSelectedBlockIds] = useState(new Set());
 
+    // Topic details editing
+    const [isEditingTopic, setIsEditingTopic] = useState(false);
+    const [topicForm, setTopicForm] = useState({ title: '', description: '' });
+
     // Slash menu state
     const [slashMenu, setSlashMenu] = useState({ open: false, blockId: null, query: '', position: { top: 0, left: 0 } });
 
@@ -59,7 +63,11 @@ const AdminTopicEditor = () => {
 
         const fetchTopic = async () => {
             const snap = await getDoc(doc(db, 'topics', topicId));
-            if (snap.exists()) setTopic({ id: snap.id, ...snap.data() });
+            if (snap.exists()) {
+                const data = snap.data();
+                setTopic({ id: snap.id, ...data });
+                setTopicForm({ title: data.title || '', description: data.description || '' });
+            }
         };
         fetchTopic();
 
@@ -134,6 +142,23 @@ const AdminTopicEditor = () => {
         } catch (err) {
             console.error('Save error:', err);
             setSaveStatus('idle');
+        }
+    };
+
+    const handleSaveTopicDetails = async () => {
+        try {
+            const topicRef = doc(db, 'topics', topicId);
+            await updateDoc(topicRef, {
+                title: topicForm.title,
+                description: topicForm.description
+            });
+            setTopic(prev => ({ ...prev, title: topicForm.title, description: topicForm.description }));
+            setIsEditingTopic(false);
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+        } catch (error) {
+            console.error("Error saving topic details:", error);
+            alert("Failed to update topic details.");
         }
     };
 
@@ -579,34 +604,90 @@ const AdminTopicEditor = () => {
     return (
         <div className="max-w-full mx-auto pb-40 animate-fade-in px-8 lg:px-12">
             {/* ── Header ── */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-cyber-700/50 pb-6 mb-8">
-                <div className="space-y-2">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-cyber-700/50 pb-8 mb-10 relative overflow-hidden group/header">
+                {/* Background Glow */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-primary/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000"></div>
+
+                <div className="flex-1 space-y-4 relative z-10">
                     <button
                         onClick={() => window.history.back()}
-                        className="flex items-center gap-2 text-cyber-500 hover:text-cyber-primary transition-colors text-sm font-mono uppercase tracking-wider"
+                        className="flex items-center gap-2 text-cyber-500 hover:text-cyber-primary transition-colors text-[10px] font-black uppercase tracking-[0.2em]"
                     >
-                        <ArrowLeft size={14} /> Back
+                        <ArrowLeft size={12} /> Return_to_Sector
                     </button>
-                    <h1 className="text-3xl font-bold text-white">
-                        {topic.title}
-                    </h1>
-                    <p className="text-cyber-600 font-mono text-xs">ID: {topicId}</p>
-                </div>
 
-                {/* Save status indicator */}
-                <div className="flex items-center gap-2 text-xs font-mono">
-                    {saveStatus === 'saving' && (
-                        <span className="flex items-center gap-1.5 text-cyber-500">
-                            <Loader2 size={12} className="animate-spin" /> Saving...
-                        </span>
-                    )}
-                    {saveStatus === 'saved' && (
-                        <span className="flex items-center gap-1.5 text-green-400">
-                            <CheckCircle size={12} /> Saved
-                        </span>
-                    )}
-                    {saveStatus === 'idle' && (
-                        <span className="text-cyber-700">Auto-save on</span>
+                    {isEditingTopic ? (
+                        <div className="space-y-4 max-w-2xl bg-cyber-900/50 p-6 rounded-2xl border border-cyber-700/50">
+                            <div>
+                                <label className="text-[9px] font-black text-cyber-600 uppercase tracking-widest mb-1.5 block">Topic Title</label>
+                                <input 
+                                    type="text" 
+                                    value={topicForm.title}
+                                    onChange={(e) => setTopicForm(prev => ({ ...prev, title: e.target.value }))}
+                                    className="input bg-cyber-950 border-cyber-700 text-white font-bold text-2xl w-full focus:border-cyber-primary/50 transition-all"
+                                    placeholder="Enter topic title..."
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[9px] font-black text-cyber-600 uppercase tracking-widest mb-1.5 block">Brief Description (Learning Objectives)</label>
+                                <textarea 
+                                    value={topicForm.description}
+                                    onChange={(e) => setTopicForm(prev => ({ ...prev, description: e.target.value }))}
+                                    className="input bg-cyber-950 border-cyber-700 text-cyber-300 w-full min-h-[80px] text-sm leading-relaxed"
+                                    placeholder="What will students learn in this specific topic?"
+                                />
+                            </div>
+                            <div className="flex gap-3">
+                                <button onClick={handleSaveTopicDetails} className="px-6 py-2 bg-cyber-primary text-black font-black text-xs uppercase tracking-widest rounded-lg hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] transition-all">
+                                    Apply Changes
+                                </button>
+                                <button onClick={() => setIsEditingTopic(false)} className="px-6 py-2 border border-cyber-700 text-cyber-400 font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-cyber-800 transition-all">
+                                    Discard
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                                    {topic.title}
+                                </h1>
+                                <button 
+                                    onClick={() => setIsEditingTopic(true)}
+                                    className="p-2 text-cyber-600 hover:text-cyber-primary hover:bg-cyber-900 rounded-xl transition-all border border-transparent hover:border-cyber-primary/20"
+                                    title="Edit Metadata"
+                                >
+                                    <Plus size={20} className="rotate-45" /> {/* Using Plus rotated as an X/Edit placeholder or just use Pencil if available */}
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2 bg-cyber-950 border border-cyber-800 px-3 py-1 rounded-full">
+                                    <span className="text-[10px] font-black text-cyber-600 uppercase tracking-widest">NodeID:</span>
+                                    <span className="text-[10px] font-mono text-cyber-400">{topicId.substring(0, 12)}</span>
+                                </div>
+                                <div className="w-1 h-1 rounded-full bg-cyber-800"></div>
+                                <div className="flex gap-2">
+                                    {saveStatus === 'saving' && (
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-cyber-500 uppercase tracking-widest">
+                                            <Loader2 size={12} className="animate-spin text-cyber-primary" /> Syncing...
+                                        </div>
+                                    )}
+                                    {saveStatus === 'saved' && (
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                                            <CheckCircle size={12} /> Synced
+                                        </div>
+                                    )}
+                                    {saveStatus === 'idle' && (
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-cyber-700 uppercase tracking-widest opacity-40">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-cyber-700 animate-pulse"></div> Local Link Stable
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <p className="text-cyber-400 font-medium text-lg leading-relaxed max-w-3xl border-l-2 border-cyber-800 pl-6 italic">
+                                {topic.description || "No metadata description synchronised. Recommend adding learning objectives for better student alignment."}
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
