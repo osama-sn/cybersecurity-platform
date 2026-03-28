@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, Lock, Mail, LogIn, Shield, ArrowLeft, Eye, EyeOff } from 'lucide-react';
@@ -10,7 +10,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const { login, loginWithGoogle } = useAuth();
+    const { login, loginWithGoogle, accountDisabled, clearDisabledFlag } = useAuth();
     const navigate = useNavigate();
     const { language } = useLanguage ? useLanguage() : { language: 'en' };
     const isRTL = language === 'ar';
@@ -42,6 +42,11 @@ const Login = () => {
         }
         setLoading(false);
     };
+
+    // Clear the disabled flag when user starts typing (re-trying)
+    useEffect(() => {
+        return () => clearDisabledFlag();
+    }, []);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-cyber-900 px-4 relative overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -88,6 +93,21 @@ const Login = () => {
                     <div className="h-px bg-gradient-to-r from-transparent via-cyber-primary/50 to-transparent"></div>
 
                     <div className="p-8">
+                        {/* Account Disabled Alert */}
+                        {accountDisabled && (
+                            <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 animate-fade-in">
+                                <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="text-red-300 text-sm font-bold block">
+                                        {isRTL ? 'تم تعطيل حسابك' : 'Your account has been disabled'}
+                                    </span>
+                                    <span className="text-red-400/80 text-xs">
+                                        {isRTL ? 'تواصل مع المسؤول لإعادة تفعيل حسابك' : 'Contact the administrator to reactivate your account'}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Error Alert */}
                         {error && (
                             <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 animate-fade-in">

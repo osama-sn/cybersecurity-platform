@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+    const [accountDisabled, setAccountDisabled] = useState(false);
 
     // Specific super admin email
     const SUPER_ADMIN_EMAIL = "osamaessamkhalifa@gmail.com";
@@ -37,12 +38,26 @@ export const AuthProvider = ({ children }) => {
                         data = {
                             email: currentUser.email,
                             role: 'user',
+                            isActive: true,
                             createdAt: serverTimestamp(),
                             allowedSections: []
                         };
                         await setDoc(userRef, data);
                     }
 
+                    // Check if account is disabled
+                    if (data.isActive === false) {
+                        await signOut(auth);
+                        setUser(null);
+                        setUserData(null);
+                        setIsAdmin(false);
+                        setIsSuperAdmin(false);
+                        setAccountDisabled(true);
+                        setLoading(false);
+                        return;
+                    }
+
+                    setAccountDisabled(false);
                     setUserData(data);
 
                     // Determine Roles
@@ -61,6 +76,7 @@ export const AuthProvider = ({ children }) => {
                 setUserData(null);
                 setIsAdmin(false);
                 setIsSuperAdmin(false);
+                // Don't reset accountDisabled here so the login page can read it
             }
 
             setLoading(false);
@@ -91,11 +107,15 @@ export const AuthProvider = ({ children }) => {
         return signOut(auth);
     };
 
+    const clearDisabledFlag = () => setAccountDisabled(false);
+
     const value = {
         user,
         userData, // Expose full firestore data (includes allowedSections)
         isAdmin,
         isSuperAdmin,
+        accountDisabled,
+        clearDisabledFlag,
         signup,
         login,
         loginWithGoogle,

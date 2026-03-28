@@ -3,7 +3,7 @@ import { db } from '../../firebase/config';
 import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Shield, User, Trash2, Edit, Check, X, Search, Lock } from 'lucide-react';
+import { Shield, User, Trash2, Edit, Check, X, Search, Lock, Power, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const UserManagement = () => {
     const { sections } = useData();
@@ -47,6 +47,20 @@ const UserManagement = () => {
         } catch (error) {
             console.error("Error updating role:", error);
             alert("Failed to update role");
+        }
+    };
+
+    const handleToggleStatus = async (userId, currentStatus) => {
+        const newStatus = currentStatus === false ? true : false;
+        const action = newStatus ? 'activate' : 'deactivate';
+        if (!window.confirm(`Are you sure you want to ${action} this account?`)) return;
+
+        try {
+            await updateDoc(doc(db, 'users', userId), { isActive: newStatus });
+            setUsers(users.map(u => u.id === userId ? { ...u, isActive: newStatus } : u));
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Failed to update account status");
         }
     };
 
@@ -123,6 +137,7 @@ const UserManagement = () => {
                     <thead className="bg-cyber-900 text-cyber-300 uppercase text-xs">
                         <tr>
                             <th className="px-6 py-4">User</th>
+                            <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4">Role</th>
                             <th className="px-6 py-4">Permissions</th>
                             <th className="px-6 py-4 text-right">Actions</th>
@@ -134,6 +149,36 @@ const UserManagement = () => {
                                 <td className="px-6 py-4">
                                     <div className="text-sm text-white font-medium">{user.email}</div>
                                     <div className="text-xs text-cyber-500 font-mono">{user.id}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    {user.role === 'super_admin' ? (
+                                        <span className="text-xs text-green-400 flex items-center gap-1">
+                                            <Power size={12} /> Always Active
+                                        </span>
+                                    ) : isSuperAdmin ? (
+                                        <button
+                                            onClick={() => handleToggleStatus(user.id, user.isActive)}
+                                            className={`flex items-center gap-2 transition-colors rounded-full px-3 py-1.5 text-xs font-medium ${
+                                                user.isActive !== false
+                                                    ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30'
+                                                    : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30'
+                                            }`}
+                                            title={user.isActive !== false ? 'Click to deactivate' : 'Click to activate'}
+                                        >
+                                            {user.isActive !== false ? (
+                                                <><ToggleRight size={16} /> Active</>
+                                            ) : (
+                                                <><ToggleLeft size={16} /> Disabled</>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <span className={`text-xs flex items-center gap-1 ${
+                                            user.isActive !== false ? 'text-green-400' : 'text-red-400'
+                                        }`}>
+                                            <Power size={12} />
+                                            {user.isActive !== false ? 'Active' : 'Disabled'}
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4">
                                     {user.role === 'super_admin' ? (
