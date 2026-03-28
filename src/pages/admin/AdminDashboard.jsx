@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase/config';
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
-import { Plus, Trash2, Edit, Folder, Layers, GripVertical, Database, Users, Layout } from 'lucide-react';
+import { Plus, Trash2, Edit, Folder, Layers, GripVertical, Database, Users, Layout, Lock, Unlock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { migrateToJunctionCollections } from '../../utils/migrateData';
 import UserManagement from './UserManagement';
@@ -74,6 +74,7 @@ const AdminDashboard = () => {
                     descriptionAr: formData.descriptionAr,
                     themeColor: formData.themeColor,
                     order: sections.length,
+                    isLocked: false, // Default to unlocked
                     createdAt: serverTimestamp()
                 });
             }
@@ -81,6 +82,17 @@ const AdminDashboard = () => {
         } catch (error) {
             console.error("Error saving section:", error);
             alert("Failed to save section: " + error.message);
+        }
+    };
+
+    const handleToggleSectionLock = async (sectionId, currentStatus) => {
+        try {
+            await updateDoc(doc(db, 'sections', sectionId), {
+                isLocked: !currentStatus
+            });
+        } catch (error) {
+            console.error("Error toggling section lock:", error);
+            alert("Failed to update section status.");
         }
     };
 
@@ -235,6 +247,13 @@ const AdminDashboard = () => {
                                                 <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-cyber-950/50 rounded-lg p-1 border border-cyber-800">
                                                     {isAdmin && (
                                                         <>
+                                                            <button
+                                                                onClick={() => handleToggleSectionLock(section.id, section.isLocked)}
+                                                                className={`p-1.5 rounded-md transition-colors ${section.isLocked ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                                                                title={section.isLocked ? "Unlock Section" : "Lock Section"}
+                                                            >
+                                                                {section.isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                                                            </button>
                                                             <button
                                                                 onClick={() => openModal(section)}
                                                                 className="p-1.5 text-cyber-400 hover:text-white hover:bg-cyber-800 rounded-md transition-colors"

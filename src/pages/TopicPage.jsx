@@ -18,8 +18,10 @@ const TopicPage = () => {
   const contentRef = useRef(null);
 
   const [topic, setTopic] = useState(null);
+  const [section, setSection] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sectionLoading, setSectionLoading] = useState(true);
   const [nextTopicId, setNextTopicId] = useState(null);
   
   // Progress state
@@ -97,12 +99,32 @@ const TopicPage = () => {
       setLoading(false);
     }
 
+    // 4. Fetch Section Details to check for section-level lock
+    const fetchSection = async () => {
+      if (!sectionId) {
+        setSectionLoading(false);
+        return;
+      }
+      try {
+        const sRef = doc(db, 'sections', sectionId);
+        const sSnap = await getDoc(sRef);
+        if (sSnap.exists()) {
+          setSection({ id: sSnap.id, ...sSnap.data() });
+        }
+      } catch (err) {
+        console.error("Error fetching section for lock check:", err);
+      } finally {
+        setSectionLoading(false);
+      }
+    };
+    fetchSection();
+
     // Cleanup function to unsubscribe from all listeners
     return () => {
       console.log('🔌 Unsubscribing from real-time listeners');
       unsubscribers.forEach(unsub => unsub());
     };
-  }, [topicId]);
+  }, [topicId, sectionId]);
 
   // Check if topic is already completed
   useEffect(() => {
@@ -187,7 +209,7 @@ const TopicPage = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (loading) return (
+  if (loading || sectionLoading) return (
     <div className="flex flex-col items-center justify-center py-40 animate-pulse">
       <div className="w-16 h-16 bg-cyber-800 rounded-full border border-cyber-700 mb-4 flex items-center justify-center">
         <Box size={24} className="text-cyber-primary rotate-12" />
@@ -195,6 +217,30 @@ const TopicPage = () => {
       <p className="text-cyber-500 font-mono text-xs tracking-[0.3em] uppercase">Initialising_Sector...</p>
     </div>
   );
+
+  const isUserAdmin = isAdmin || isSuperAdmin;
+  const isLocked = (topic?.isLocked || section?.isLocked) && !isUserAdmin;
+
+  if (isLocked) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40 px-6">
+        <div className="w-20 h-20 bg-amber-500/10 rounded-3xl border border-amber-500/30 mb-8 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.1)]">
+          <Lock size={40} className="text-amber-500" />
+        </div>
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Sector Encrypted</h1>
+          <p className="text-cyber-400 leading-relaxed">
+            This sector's data stream is currently offline or hasn't been authorised for your clearance level yet.
+          </p>
+          <div className="pt-4">
+            <Link to={`/sections/${sectionId}`} className="btn btn-outline border-amber-500/30 text-amber-500 hover:bg-amber-500/10 px-8 py-3 text-xs uppercase tracking-[0.2em] font-black">
+              Return to Sector Base
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!topic) return (
     <div className="flex flex-col items-center justify-center py-40">
       <div className="w-16 h-16 bg-red-500/10 rounded-full border border-red-500/30 mb-4 flex items-center justify-center">

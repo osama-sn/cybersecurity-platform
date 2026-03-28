@@ -29,6 +29,15 @@ const TopicItem = ({ topic, onDragStart, onUnlink, onDelete, currentUser, isAdmi
                 </div>
             </div>
             <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                {isAdmin && (
+                    <button
+                        onClick={() => topic.onToggleLock(topic.topicId, topic.isLocked)}
+                        className={`p-1 rounded transition-colors ${topic.isLocked ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                        title={topic.isLocked ? "Unlock Topic" : "Lock Topic"}
+                    >
+                        {topic.isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                    </button>
+                )}
                 {canManage ? (
                     <>
                         <Link to={`/admin/topics/${topic.topicId}`} className="text-xs text-cyber-primary hover:underline">
@@ -124,6 +133,7 @@ const AdminModule = () => {
                     topicId: topicSnap.id,
                     order: jData.order || 0,
                     title: topicData.title,
+                    isLocked: topicData.isLocked || false,
                     groupId: jData.groupId || 'ungrouped',
                     createdAt: topicData.createdAt,
                     createdBy: topicData.createdBy // { uid, email, displayName }
@@ -226,6 +236,20 @@ const AdminModule = () => {
         } catch (error) {
             console.error("Error toggling lock:", error);
             alert("Failed to update module status.");
+        }
+    };
+
+    const handleToggleTopicLock = async (topicId, currentStatus) => {
+        if (!isAdmin) return;
+        try {
+            await updateDoc(doc(db, 'topics', topicId), {
+                isLocked: !currentStatus
+            });
+            // Update local state
+            setTopics(prev => prev.map(t => t.topicId === topicId ? { ...t, isLocked: !currentStatus } : t));
+        } catch (error) {
+            console.error("Error toggling topic lock:", error);
+            alert("Failed to update topic status.");
         }
     };
 
@@ -543,7 +567,7 @@ const AdminModule = () => {
                                     {getGroupTopics(group.id).map((topic, index) => (
                                         <TopicItem
                                             key={topic.junctionId}
-                                            topic={topic}
+                                            topic={{ ...topic, onToggleLock: handleToggleTopicLock }}
                                             onDragStart={onDragTopicStart}
                                             onUnlink={handleUnlinkTopic}
                                             onDelete={handleDeleteTopicGlobally}
@@ -577,7 +601,7 @@ const AdminModule = () => {
                             {getGroupTopics('ungrouped').map((topic, index) => (
                                 <TopicItem
                                     key={topic.junctionId}
-                                    topic={topic}
+                                    topic={{ ...topic, onToggleLock: handleToggleTopicLock }}
                                     onDragStart={onDragTopicStart}
                                     onUnlink={handleUnlinkTopic}
                                     onDelete={handleDeleteTopicGlobally}

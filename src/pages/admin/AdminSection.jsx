@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink, User } from 'lucide-react';
+import { Plus, Folder, ArrowLeft, GripVertical, Import, X, Search, Unlink, User, Lock, Unlock } from 'lucide-react';
 
 const AdminSection = () => {
     const { sectionId } = useParams();
@@ -62,6 +62,7 @@ const AdminSection = () => {
                     moduleId: moduleSnap.id,
                     order: jData.order || 0,
                     title: modData.title,
+                    isLocked: modData.isLocked || false,
                     createdAt: modData.createdAt,
                     createdBy: modData.createdBy // { uid, email, displayName }
                 });
@@ -70,6 +71,20 @@ const AdminSection = () => {
 
         modulesData.sort((a, b) => a.order - b.order);
         setModules(modulesData);
+    };
+
+    const handleToggleModuleLock = async (moduleId, currentStatus) => {
+        if (!isAdmin) return;
+        try {
+            await updateDoc(doc(db, 'modules', moduleId), {
+                isLocked: !currentStatus
+            });
+            // Update local state
+            setModules(prev => prev.map(m => m.moduleId === moduleId ? { ...m, isLocked: !currentStatus } : m));
+        } catch (error) {
+            console.error("Error toggling module lock:", error);
+            alert("Failed to update module status.");
+        }
     };
 
     useEffect(() => {
@@ -280,6 +295,15 @@ const AdminSection = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleToggleModuleLock(mod.moduleId, mod.isLocked)}
+                                            className={`p-1 rounded transition-colors ${mod.isLocked ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                                            title={mod.isLocked ? "Unlock Module" : "Lock Module"}
+                                        >
+                                            {mod.isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                                        </button>
+                                    )}
                                     {canEditModule ? (
                                         <Link to={`/admin/modules/${mod.moduleId}`} className="text-sm text-cyber-primary hover:underline">
                                             Manage Topics

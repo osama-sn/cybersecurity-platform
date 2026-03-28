@@ -9,57 +9,134 @@ import LeaderboardView from '../components/LeaderboardView';
 
 // Helper Component
 // Helper Component: TopicCard with premium styling
-const TopicCard = ({ topic, isCompleted, sectionId }) => (
-  <Link
-    to={`/sections/${sectionId}/topics/${topic.id}`}
-    className={`relative group overflow-hidden border rounded-2xl p-5 flex items-center justify-between transition-all duration-300
-      ${isCompleted 
-        ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
-        : 'bg-cyber-900/40 border-cyber-700/50 hover:bg-cyber-800/60 hover:border-cyber-primary/50 hover:shadow-[0_0_20px_rgba(0,243,255,0.05)]'}
-    `}
-  >
-    {/* Hover Glow Effect */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyber-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
+  const content = (
+    <div
+      className={`relative group overflow-hidden border rounded-2xl p-5 flex items-center justify-between transition-all duration-300
+        ${isDisabled
+          ? 'bg-cyber-900/20 border-cyber-800/50 cursor-not-allowed opacity-60'
+          : isCompleted 
+            ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
+            : 'bg-cyber-900/40 border-cyber-700/50 hover:bg-cyber-800/60 hover:border-cyber-primary/50 hover:shadow-[0_0_20px_rgba(0,243,255,0.05)]'}
+      `}
+    >
+      {/* Hover Glow Effect */}
+      {!isDisabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyber-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>}
 
-    <div className="flex items-center gap-5 relative z-10">
-      <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-500 shadow-inner
-        ${isCompleted 
-          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400 group-hover:scale-110' 
-          : 'bg-cyber-800/80 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary group-hover:shadow-[0_0_10px_rgba(0,243,255,0.2)]'}
-      `}>
-        {isCompleted ? <CheckCircle size={22} strokeWidth={2.5} /> : <Box size={22} />}
-      </div>
-      <div className="flex flex-col">
-        <span className={`text-[17px] font-bold tracking-tight transition-colors
-          ${isCompleted ? 'text-emerald-100/60' : 'text-white group-hover:text-cyber-primary'}
+      <div className="flex items-center gap-5 relative z-10">
+        <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-500 shadow-inner
+          ${isDisabled
+            ? 'bg-cyber-950 border-cyber-800 text-cyber-700'
+            : isCompleted 
+              ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400 group-hover:scale-110' 
+              : 'bg-cyber-800/80 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary group-hover:shadow-[0_0_10px_rgba(0,243,255,0.2)]'}
         `}>
-          {topic.title}
-        </span>
-        {isCompleted ? (
-          <span className="text-[10px] font-black text-emerald-500/70 uppercase tracking-[0.2em] mt-1">Status: Completed</span>
-        ) : (
-          <span className="text-[10px] font-bold text-cyber-500 uppercase tracking-[0.2em] mt-1">Status: Available</span>
-        )}
-      </div>
-    </div>
-
-    <div className="flex items-center gap-4 relative z-10">
-      {isCompleted && (
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-          <Award size={12} className="text-emerald-400" />
-          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Passed</span>
+          {isDisabled ? <Lock size={20} /> : isCompleted ? <CheckCircle size={22} strokeWidth={2.5} /> : <Box size={22} />}
         </div>
-      )}
-      <div className={`p-2 rounded-lg transition-all duration-300
-        ${isCompleted ? 'text-emerald-500/40' : 'text-cyber-700 group-hover:text-cyber-primary group-hover:bg-cyber-primary/10'}
-      `}>
-        <ChevronRight size={20} />
+        <div className="flex flex-col">
+          <span className={`text-[17px] font-bold tracking-tight transition-colors
+            ${isDisabled ? 'text-cyber-600' : isCompleted ? 'text-emerald-100/60' : 'text-white group-hover:text-cyber-primary'}
+          `}>
+            {topic.title}
+          </span>
+          {isDisabled ? (
+             <span className="text-[10px] font-black text-red-500/50 uppercase tracking-[0.2em] mt-1">Status: Encrypted</span>
+          ) : isCompleted ? (
+            <span className="text-[10px] font-black text-emerald-500/70 uppercase tracking-[0.2em] mt-1">Status: Completed</span>
+          ) : (
+            <span className="text-[10px] font-bold text-cyber-500 uppercase tracking-[0.2em] mt-1">Status: Available</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 relative z-10">
+        {isCompleted && !isDisabled && (
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <Award size={12} className="text-emerald-400" />
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Passed</span>
+          </div>
+        )}
+        <div className={`p-2 rounded-lg transition-all duration-300
+          ${isDisabled ? 'text-cyber-800' : isCompleted ? 'text-emerald-500/40' : 'text-cyber-700 group-hover:text-cyber-primary group-hover:bg-cyber-primary/10'}
+        `}>
+          <ChevronRight size={20} />
+        </div>
       </div>
     </div>
-  </Link>
-);
+  );
 
-const SectionPage = () => {
+  if (isDisabled) return content;
+
+  return (
+    <Link to={`/sections/${sectionId}/topics/${topic.id}`}>
+      {content}
+    </Link>
+  );
+};
+
+const SectionSkeleton = () => (
+    <div className="max-w-7xl mx-auto space-y-10 animate-fade-in pb-32 pt-8">
+      {/* Skeleton Breadcrumb */}
+      <div className="w-48 h-4 bg-cyber-800/50 rounded animate-pulse mb-6"></div>
+      
+      {/* Skeleton Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-cyber-900/40 border border-cyber-800/50 p-8 md:p-12 rounded-[2rem] backdrop-blur-3xl relative overflow-hidden h-[400px] lg:h-auto">
+        <div className="flex-1 space-y-6">
+          <div className="w-40 h-6 bg-cyber-800 rounded-full animate-pulse"></div>
+          <div className="w-3/4 h-16 bg-cyber-800 rounded-xl animate-pulse"></div>
+          <div className="w-1/2 h-6 bg-cyber-800 rounded animate-pulse"></div>
+        </div>
+        
+        <div className="w-full lg:w-[22rem] h-64 bg-cyber-800/40 border border-cyber-700/50 rounded-3xl p-8 animate-pulse">
+          <div className="flex justify-between mb-6">
+            <div className="space-y-2">
+              <div className="w-20 h-3 bg-cyber-700 rounded"></div>
+              <div className="w-16 h-8 bg-cyber-700 rounded"></div>
+            </div>
+            <div className="w-16 h-16 bg-cyber-700 rounded-2xl"></div>
+          </div>
+          <div className="w-full h-3 bg-cyber-900 rounded-full mb-4"></div>
+          <div className="mt-8 w-full h-12 bg-cyber-700 rounded-xl"></div>
+        </div>
+      </div>
+  
+      {/* Skeleton Tabs */}
+      <div className="flex gap-12 border-b border-cyber-800/80 px-8">
+        <div className="w-32 h-12 border-b-2 border-cyber-primary animate-pulse"></div>
+        <div className="w-32 h-12 border-b-2 border-transparent"></div>
+      </div>
+  
+      {/* Skeleton Content */}
+      <div className="space-y-12 px-4 md:px-0">
+        {[1, 2].map(i => (
+          <div key={i} className="space-y-8">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-cyber-800 rounded-2xl border border-cyber-700 animate-pulse"></div>
+              <div className="w-64 h-8 bg-cyber-800 rounded animate-pulse"></div>
+            </div>
+            <div className="bg-cyber-900/20 border border-cyber-800/40 rounded-[2.5rem] p-8 md:p-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map(j => (
+                  <div key={j} className="h-24 bg-cyber-800/40 border border-cyber-700/50 rounded-2xl animate-pulse shimmer-wrapper">
+                    <div className="shimmer"></div>
+                    <div className="flex items-center p-5 gap-5">
+                      <div className="w-12 h-12 bg-cyber-700 rounded-xl"></div>
+                      <div className="space-y-2 flex-1">
+                        <div className="w-3/4 h-4 bg-cyber-700 rounded"></div>
+                        <div className="w-1/4 h-2 bg-cyber-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  
+  const SectionPage = () => {
   const { sectionId } = useParams();
   const { user, userData, isAdmin, isSuperAdmin } = useAuth();
   const { getUserProgress } = useProgress();
@@ -233,7 +310,7 @@ const SectionPage = () => {
     };
   }, [modules, progressData]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <SectionSkeleton />;
   if (!section) return <div>Section not found</div>;
 
   // Access check
@@ -244,15 +321,21 @@ const SectionPage = () => {
     return userData.allowedSections.includes(sectionId);
   };
 
-  if (!hasAccess()) {
+  const isSectionLocked = section.isLocked && !isAdmin && !isSuperAdmin;
+
+  if (!hasAccess() || isSectionLocked) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
-        <div className="p-6 bg-red-500/10 rounded-full border border-red-500/30">
-          <ShieldX size={48} className="text-red-400" />
+        <div className={`p-6 ${isSectionLocked ? 'bg-amber-500/10 border-amber-500/30' : 'bg-red-500/10 border-red-500/30'} rounded-full border`}>
+          {isSectionLocked ? <Lock size={48} className="text-amber-400" /> : <ShieldX size={48} className="text-red-400" />}
         </div>
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-white">Access Denied</h1>
-          <p className="text-cyber-400 max-w-md">You do not have permission to view this section. Contact the administrator to request access.</p>
+          <h1 className="text-2xl font-bold text-white">{isSectionLocked ? 'Section Encrypted' : 'Access Denied'}</h1>
+          <p className="text-cyber-400 max-w-md">
+            {isSectionLocked 
+              ? 'This sector is currently under maintenance or hasn\'t been unlocked by the command center yet.' 
+              : 'You do not have permission to view this section. Contact the administrator to request access.'}
+          </p>
         </div>
         <Link to="/sections" className="btn btn-outline flex items-center gap-2">
           &larr; Back to Sections
@@ -429,6 +512,7 @@ const SectionPage = () => {
                                   topic={topic} 
                                   isCompleted={!!progressData[topic.id]} 
                                   sectionId={sectionId}
+                                  isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
                                 />
                               ))}
                             </div>
@@ -447,7 +531,13 @@ const SectionPage = () => {
                             </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {module.ungroupedTopics.map(topic => (
-                              <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} />
+                              <TopicCard 
+                                key={topic.id} 
+                                topic={topic} 
+                                isCompleted={!!progressData[topic.id]} 
+                                sectionId={sectionId} 
+                                isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
+                              />
                             ))}
                           </div>
                         </div>

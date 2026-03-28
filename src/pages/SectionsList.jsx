@@ -29,42 +29,54 @@ const SectionsList = () => {
 
             <div className="grid gap-6">
                 {sections.map((section, index) => {
-                    if (!hasAccess(section.id)) return null;
+                    const isLocked = section.isLocked && !isAdmin && !isSuperAdmin;
+
+                    const cardContent = (
+                        <div
+                            className={`card group hover:bg-cyber-800 transition-all hover:scale-[1.01] hover:shadow-lg hover:shadow-cyber-primary/5 relative overflow-hidden ${isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
+                        >
+                            <div className={`absolute top-0 left-0 w-1 h-full ${isLocked ? 'bg-amber-600' : 'bg-cyber-700 group-hover:bg-cyber-primary'} transition-colors`} />
+
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-4">
+                                    <div className={`p-3 bg-cyber-900 rounded-lg border transition-colors ${isLocked ? 'border-amber-900/50 text-amber-500' : 'border-cyber-700 text-cyber-400 group-hover:text-cyber-primary group-hover:border-cyber-primary/30'}`}>
+                                        {isLocked ? <Lock size={24} /> : <Folder size={24} />}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white mb-1 group-hover:text-cyber-primary transition-colors flex items-center gap-2">
+                                            {section.title}
+                                            {isLocked && <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-widest font-black">Locked</span>}
+                                        </h2>
+                                        <p className="text-cyber-400 text-sm line-clamp-2">
+                                            {section.description || t('sections.fallbackDesc')}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className={`flex items-center transition-transform rtl:group-hover:-translate-x-1 ${isLocked ? 'text-cyber-800' : 'text-cyber-500 group-hover:translate-x-1'}`}>
+                                    <ArrowRight size={20} className="rtl:rotate-180" />
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex items-center gap-4 text-xs font-mono text-cyber-500">
+                                <span className={`bg-cyber-900 px-2 py-1 rounded border ${isLocked ? 'border-amber-900/30' : 'border-cyber-700'}`}>
+                                    {t('sections.modulePrefix')}{index + 1}
+                                </span>
+                                <span>{t('sections.topicsCount').replace('{count}', section.modulesCount || 0)}</span>
+                            </div>
+                        </div>
+                    );
+
+                    if (isLocked) {
+                        return <div key={section.id}>{cardContent}</div>;
+                    }
 
                     return (
                     <Link
                         key={section.id}
                         to={`/sections/${section.id}`}
-                        className="card group hover:bg-cyber-800 transition-all hover:scale-[1.01] hover:shadow-lg hover:shadow-cyber-primary/5 cursor-pointer relative overflow-hidden"
                     >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-cyber-700 group-hover:bg-cyber-primary transition-colors" />
-
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-4">
-                                <div className="p-3 bg-cyber-900 rounded-lg border border-cyber-700 text-cyber-400 group-hover:text-cyber-primary group-hover:border-cyber-primary/30 transition-colors">
-                                    <Folder size={24} />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-white mb-1 group-hover:text-cyber-primary transition-colors">
-                                        {section.title}
-                                    </h2>
-                                    <p className="text-cyber-400 text-sm line-clamp-2">
-                                        {section.description || t('sections.fallbackDesc')}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center text-cyber-500 group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1">
-                                <ArrowRight size={20} className="rtl:rotate-180" />
-                            </div>
-                        </div>
-
-                        <div className="mt-4 flex items-center gap-4 text-xs font-mono text-cyber-500">
-                            <span className="bg-cyber-900 px-2 py-1 rounded border border-cyber-700">
-                                {t('sections.modulePrefix')}{index + 1}
-                            </span>
-                            <span>{t('sections.topicsCount').replace('{count}', section.modulesCount || 0)}</span>
-                        </div>
+                        {cardContent}
                     </Link>
                     );
                 })}
