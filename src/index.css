@@ -20,11 +20,20 @@
   --color-cyber-danger: #ef4444;
   --color-cyber-warning: #f59e0b;
 
-  --animate-pulse-slow: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-pulse-neon: pulseNeon 2s ease-in-out infinite;
-  --animate-scanline: scanline 8s linear infinite;
-  --animate-spin-slow: spinSlow 12s linear infinite;
   --animate-bounce-slow: bounceSlow 3s ease-in-out infinite;
+  --animate-gradient-x: gradientX 15s ease infinite;
+  --animate-fade-in-up: fadeInUp 0.6s ease-out forwards;
+
+  @keyframes gradientX {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   @keyframes fadeIn {
     0% {
@@ -164,6 +173,10 @@
 
   .card {
     @apply bg-cyber-800 border border-cyber-700 rounded-xl p-6;
+  }
+
+  .cyber-glass {
+    @apply bg-cyber-900/40 border border-cyber-800/50 backdrop-blur-3xl shadow-2xl;
   }
 
   .input {
