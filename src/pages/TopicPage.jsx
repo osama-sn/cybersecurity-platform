@@ -14,7 +14,7 @@ const TopicPage = () => {
   const navigate = useNavigate();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
-  const { markTopicComplete, updateLastAccessed, getUserProgress } = useProgress();
+  const { markTopicComplete, updateLastAccessed, getUserProgress, awardPoints } = useProgress();
   const contentRef = useRef(null);
 
   const [topic, setTopic] = useState(null);
