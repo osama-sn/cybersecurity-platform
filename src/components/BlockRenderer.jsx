@@ -196,9 +196,9 @@ const ChallengeBlock = ({ block, onSuccess, isPassed }) => {
                 )}
             </div>
 
-            <div className="p-6 space-y-8">
+            <div className="p-5 md:p-8 space-y-6 md:space-y-8">
                 {/* Question Text */}
-                <div dir="auto" className="text-white font-medium text-lg leading-relaxed whitespace-pre-wrap">
+                <div dir="auto" className="text-white font-medium text-base md:text-lg leading-relaxed whitespace-pre-wrap">
                     {question}
                 </div>
 
@@ -241,7 +241,7 @@ const ChallengeBlock = ({ block, onSuccess, isPassed }) => {
                                         `}>
                                             {String.fromCharCode(65 + index)}
                                         </div>
-                                        <span dir="auto" className="text-base">{option}</span>
+                                        <span dir="auto" className="text-sm md:text-base">{option}</span>
                                     </div>
                                     {showResult && index === correctOption && <Check size={18} className="text-emerald-400" />}
                                 </button>
@@ -256,7 +256,7 @@ const ChallengeBlock = ({ block, onSuccess, isPassed }) => {
                                     value={flagInput}
                                     onChange={(e) => setFlagInput(e.target.value)}
                                     placeholder={flagPattern || "FLAG{...}"}
-                                    className={`w-full bg-cyber-900/50 border rounded-lg py-3 px-4 font-mono text-lg focus:outline-none transition-colors
+                                    className={`w-full bg-cyber-900/50 border rounded-lg py-3 px-4 font-mono text-base md:text-lg focus:outline-none transition-colors
                                         ${showResult
                                             ? isCorrect ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'
                                             : 'border-cyber-700 focus:border-cyber-primary text-white'

@@ -206,19 +206,19 @@ const TopicPage = () => {
   );
 
   return (
-    <div ref={contentRef} className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
+    <div ref={contentRef} className="max-w-4xl mx-auto px-4 sm:px-6 md:px-0 pb-20 animate-fade-in select-text">
       {/* Premium Breadcrumb Link */}
-      <div className="flex items-center gap-3 text-cyber-500 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] font-black">
-        <Link to="/sections" className="hover:text-cyber-primary transition-colors">Sectors</Link>
-        <div className="w-1 h-1 rounded-full bg-cyber-800"></div>
-        <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors">Sector_{sectionId.substring(0,6)}</Link>
-        <div className="w-1 h-1 rounded-full bg-cyber-primary animate-pulse"></div>
-        <span className="text-cyber-primary">Current_Node</span>
+      <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-cyber-500 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] font-black">
+        <Link to="/sections" className="hover:text-cyber-primary transition-colors shrink-0">Sectors</Link>
+        <div className="w-1 h-1 rounded-full bg-cyber-800 shrink-0"></div>
+        <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors shrink-0">Sector_{sectionId.substring(0,6)}</Link>
+        <div className="w-1 h-1 rounded-full bg-cyber-primary animate-pulse shrink-0"></div>
+        <span className="text-cyber-primary truncate">Current_Node</span>
       </div>
 
       <div className="mb-10 border-b border-cyber-700 pb-6">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-white">{topic.title}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+          <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight">{topic.title}</h1>
           {isCompleted && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full shrink-0">
               <CheckCircle size={16} />
@@ -292,10 +292,10 @@ const TopicPage = () => {
       )}
 
       {/* Navigation Footer */}
-      <div className="mt-12 flex items-center justify-between border-t border-cyber-700 pt-8">
+      <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-cyber-700 pt-8">
         <button
           onClick={() => navigate(-1)}
-          className="btn btn-outline flex items-center gap-2 px-6"
+          className="btn btn-outline flex items-center justify-center gap-2 px-6 w-full sm:w-auto order-2 sm:order-1"
         >
           {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           Back
@@ -304,7 +304,7 @@ const TopicPage = () => {
         {isLearningMode && (
           <button
             onClick={handleManualComplete}
-            className={`btn flex items-center gap-2 px-8 ${isCompleted || allPassed ? 'btn-primary' : 'btn-outline border-cyber-700 text-cyber-400'}`}
+            className={`btn flex items-center justify-center gap-2 px-8 w-full sm:w-auto order-1 sm:order-2 ${isCompleted || allPassed ? 'btn-primary' : 'btn-outline border-cyber-700 text-cyber-400'}`}
           >
             {isCompleted || allPassed ? 'Next Topic' : 'Mark as Complete'}
             {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
