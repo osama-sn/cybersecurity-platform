@@ -460,13 +460,21 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             let LevelTag = 'h2';
             let sizeClass = 'text-3xl';
 
-            if (block.type === 'h1') { LevelTag = 'h1'; sizeClass = 'text-4xl'; }
-            else if (block.type === 'h3') { LevelTag = 'h3'; sizeClass = 'text-2xl'; }
+            if (block.type === 'h1') { LevelTag = 'h1'; sizeClass = 'text-xl md:text-4xl'; }
+            else if (block.type === 'h2') { LevelTag = 'h2'; sizeClass = 'text-lg md:text-3xl'; }
+            else if (block.type === 'h3') { LevelTag = 'h3'; sizeClass = 'text-base md:text-2xl'; }
             else if (block.type === 'heading') {
                 const level = block.metadata?.level || 2;
                 LevelTag = `h${level}`;
-                const sizes = { 1: 'text-4xl', 2: 'text-3xl', 3: 'text-2xl', 4: 'text-xl', 5: 'text-lg', 6: 'text-base' };
-                sizeClass = sizes[level] || 'text-2xl';
+                const sizes = { 
+                    1: 'text-xl md:text-4xl', 
+                    2: 'text-lg md:text-3xl', 
+                    3: 'text-base md:text-2xl', 
+                    4: 'text-sm md:text-xl', 
+                    5: 'text-xs md:text-lg', 
+                    6: 'text-[10px] md:text-base' 
+                };
+                sizeClass = sizes[level] || 'text-base md:text-2xl';
             }
 
             return (
@@ -481,7 +489,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             return (
                 <div
                     dir={getDirection(block.content)}
-                    className={`prose prose-invert max-w-none text-cyber-300 ${spacingClass} text-lg whitespace-pre-wrap ${commonClasses}`}
+                    className={`prose prose-invert max-w-none text-cyber-300 ${spacingClass} text-sm md:text-lg leading-relaxed whitespace-pre-wrap break-words ${commonClasses}`}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }}
                 />
             );
@@ -491,26 +499,23 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             // Handle both legacy 'list' (array of items) and new 'bullet' (single text content)
             if (block.type === 'list' && Array.isArray(block.items)) {
                 return (
-                    <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 ${listSpacing} marker:text-cyber-primary text-lg ${commonClasses}`}>
+                    <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 ${listSpacing} marker:text-cyber-primary text-base md:text-lg ${commonClasses}`}>
                         {block.items.map((item, i) => (
                             <li key={i} dir={getDirection(item)} dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
                         ))}
                     </ul>
                 );
             }
-            // For 'bullet', it's usually a single block per bullet in Notion-like editors, 
-            // BUT if we want to group them, we'd need a different approach in the parent.
-            // For now, let's render individual bullets.
             return (
-                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
-                    <span className="text-cyber-primary mt-1.5 shrink-0">•</span>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-2 md:gap-3 mb-2 text-cyber-300 text-sm md:text-lg break-words ${commonClasses}`}>
+                    <span className="text-cyber-primary mt-1 md:mt-1.5 shrink-0">•</span>
                     <span className="flex-1" dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }} />
                 </div>
             );
 
         case 'numbered':
             return (
-                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-cyber-300 text-lg ${commonClasses}`}>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-2 md:gap-3 mb-2 text-cyber-300 text-sm md:text-lg break-words ${commonClasses}`}>
                     <span className="text-cyber-primary font-mono mt-0.5 shrink-0">{index ? `${index}.` : '1.'}</span>
                     <span className="flex-1" dangerouslySetInnerHTML={{ __html: parseMarkdown(block.content) }} />
                 </div>
@@ -518,7 +523,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
         case 'todo':
             return (
-                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-lg ${commonClasses}`}>
+                <div dir={getDirection(block.content)} className={`flex items-start gap-3 mb-2 text-base md:text-lg ${commonClasses}`}>
                     <div
                         onClick={() => onToggle && onToggle(block.id, !block.metadata?.checked)}
                         className={`
@@ -543,7 +548,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
         case 'quote':
             return (
-                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg select-text ${commonClasses}`}>
+                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-lg md:text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg select-text ${commonClasses}`}>
                     "{block.content}"
                 </blockquote>
             );

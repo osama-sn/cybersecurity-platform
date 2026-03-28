@@ -206,7 +206,7 @@ const TopicPage = () => {
   );
 
   return (
-    <div ref={contentRef} className="max-w-4xl mx-auto px-4 sm:px-6 md:px-0 pb-20 animate-fade-in select-text">
+    <div ref={contentRef} className="max-w-4xl mx-auto px-2 sm:px-6 md:px-0 pb-20 animate-fade-in select-text overflow-x-hidden">
       {/* Premium Breadcrumb Link */}
       <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-cyber-500 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] font-black">
         <Link to="/sections" className="hover:text-cyber-primary transition-colors shrink-0">Sectors</Link>
