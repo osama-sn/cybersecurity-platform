@@ -125,7 +125,7 @@ const CodeBlock = ({ content, language = 'bash' }) => {
     );
 };
 
-const ChallengeBlock = ({ block }) => {
+const ChallengeBlock = ({ block, onSuccess }) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [flagInput, setFlagInput] = useState('');
     const [showResult, setShowResult] = useState(false);
@@ -144,6 +144,9 @@ const ChallengeBlock = ({ block }) => {
 
     const handleSubmit = () => {
         setShowResult(true);
+        if (isCorrect && onSuccess) {
+            onSuccess(block.id);
+        }
     };
 
     const isCorrect = challengeType === 'multiple_choice'
@@ -151,27 +154,28 @@ const ChallengeBlock = ({ block }) => {
         : flagInput.trim().toLowerCase() === correctFlag.trim().toLowerCase();
 
     return (
-        <div className="card my-8 border-s-4 border-s-cyber-primary p-0 bg-cyber-900/40 backdrop-blur-md overflow-hidden shadow-[0_0_30px_rgba(0,243,255,0.05)] select-text">
+        <div className="card my-8 border border-cyber-700 p-0 bg-cyber-900/30 rounded-xl overflow-hidden select-text">
             {/* Header */}
-            <div className="bg-cyber-800/50 px-6 py-4 border-b border-cyber-700 flex items-center justify-between">
+            <div className="bg-cyber-800/30 px-5 py-3 border-b border-cyber-700/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-cyber-primary/10 flex items-center justify-center border border-cyber-primary/20">
-                        {challengeType === 'multiple_choice' ? <AlertCircle size={20} className="text-cyber-primary" /> : <Key size={20} className="text-cyber-primary" />}
+                    <div className="text-cyber-400">
+                        {challengeType === 'multiple_choice' ? <AlertCircle size={18} /> : <Key size={18} />}
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-white uppercase tracking-widest">{challengeType === 'multiple_choice' ? 'Multiple Choice Challenge' : 'Flag Submission Challenge'}</h4>
-                        <p className="text-[10px] text-cyber-500 uppercase tracking-widest leading-none mt-1">Status: {showResult ? (isCorrect ? 'DECRYPTED' : 'ACCESS DENIED') : 'LOCKED'}</p>
+                        <h4 className="text-sm font-semibold text-white tracking-wide">
+                            {challengeType === 'multiple_choice' ? 'Question' : 'Flag Challenge'}
+                        </h4>
                     </div>
                 </div>
                 {hint && (
                     <button
                         onClick={() => setShowHint(!showHint)}
-                        className={`p-2 rounded-lg transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest
-                            ${showHint ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : 'bg-cyber-900 text-cyber-500 border border-cyber-700 hover:border-amber-500/50 hover:text-amber-500'}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5
+                            ${showHint ? 'bg-amber-500/10 text-amber-500' : 'text-cyber-500 hover:text-amber-500 hover:bg-cyber-800'}
                         `}
                     >
                         <Lightbulb size={14} />
-                        {showHint ? 'Hide Hint' : 'Show Hint'}
+                        {showHint ? 'Hide Hint' : 'Hint'}
                     </button>
                 )}
             </div>
@@ -195,85 +199,55 @@ const ChallengeBlock = ({ block }) => {
                 {/* Challenge Body */}
                 <div className="space-y-4">
                     {challengeType === 'multiple_choice' ? (
-                        <div className="grid grid-cols-1 gap-3">
+                        <div className="grid grid-cols-1 gap-2.5">
                             {options.map((option, index) => (
                                 <button
                                     key={index}
                                     disabled={showResult}
                                     onClick={() => setSelectedOption(index)}
                                     className={`
-                                        p-4 rounded-xl border text-start transition-all flex items-center justify-between group relative overflow-hidden
+                                        px-4 py-3 rounded-lg border text-start transition-all flex items-center justify-between group
                                         ${showResult
                                             ? index === correctOption
-                                                ? 'bg-cyber-primary/20 border-cyber-primary text-white'
+                                                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-100'
                                                 : index === selectedOption
-                                                    ? 'bg-cyber-danger/20 border-cyber-danger text-white'
-                                                    : 'bg-cyber-900/50 border-cyber-700 text-cyber-500 opacity-60'
+                                                    ? 'bg-red-500/10 border-red-500/50 text-red-100'
+                                                    : 'bg-cyber-900/30 border-cyber-800 text-cyber-500 opacity-50'
                                             : selectedOption === index
-                                                ? 'bg-cyber-800 border-cyber-primary text-white shadow-[0_0_15px_rgba(0,243,255,0.1)]'
-                                                : 'bg-cyber-900/50 border-cyber-700 text-cyber-300 hover:bg-cyber-800 hover:border-cyber-600'
+                                                ? 'bg-cyber-800 border-cyber-primary text-white'
+                                                : 'bg-cyber-900/30 border-cyber-800 text-cyber-300 hover:bg-cyber-800 hover:border-cyber-600'
                                         }
                                     `}
                                 >
-                                    <div className="flex items-center gap-4 z-10">
-                                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-all
-                                            ${selectedOption === index ? 'bg-cyber-primary border-cyber-primary text-black' : 'border-cyber-700 text-cyber-500 group-hover:border-cyber-primary/50'}
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded flex items-center justify-center text-xs font-medium transition-colors
+                                            ${selectedOption === index ? 'bg-cyber-primary text-black' : 'bg-cyber-800 text-cyber-400'}
                                         `}>
                                             {String.fromCharCode(65 + index)}
                                         </div>
-                                        <span dir="auto" className="font-semibold">{option}</span>
+                                        <span dir="auto" className="text-base">{option}</span>
                                     </div>
-                                    {showResult && index === correctOption && <Check size={20} className="text-cyber-primary z-10" />}
+                                    {showResult && index === correctOption && <Check size={18} className="text-emerald-400" />}
                                 </button>
                             ))}
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between px-1">
-                                <label className="text-[10px] font-bold text-cyber-500 uppercase tracking-[0.2em]">System Identifier: <span className="text-cyber-primary">{flagPattern}</span></label>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex gap-1.5 flex-wrap">
-                                        {(correctFlag || "FLAG{EXAMPLE}").split('').map((char, i) => (
-                                            <div
-                                                key={i}
-                                                className={`
-                                                transition-all duration-500 rounded-full
-                                                ${char === ' ' ? 'w-4 h-1 mt-1.5 opacity-0' : 'w-2 h-2'}
-                                                ${flagInput.length > i ? 'bg-cyber-primary shadow-[0_0_8px_rgba(0,243,255,0.6)]' : 'bg-cyber-800'}
-                                            `}
-                                            />
-                                        ))}
-                                    </div>
-                                    <span className="text-[10px] font-mono text-cyber-500">{flagInput.length} / {correctFlag.length || '??'}</span>
-                                </div>
-                            </div>
-
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                                    <Terminal size={18} className={`transition-colors duration-300 ${flagInput ? 'text-cyber-primary' : 'text-cyber-700'}`} />
-                                </div>
+                        <div className="space-y-4">
+                            <div className="relative">
                                 <input
                                     type="text"
-                                    autoFocus
                                     disabled={showResult}
-                                    maxLength={correctFlag.length || 100}
                                     value={flagInput}
                                     onChange={(e) => setFlagInput(e.target.value)}
-                                    placeholder="Waiting for flag input..."
-                                    className={`w-full bg-black/60 border-2 rounded-2xl py-6 pl-14 pr-6 font-mono text-xl tracking-[0.2em] focus:outline-none transition-all duration-300
+                                    placeholder={flagPattern || "FLAG{...}"}
+                                    className={`w-full bg-cyber-900/50 border rounded-lg py-3 px-4 font-mono text-lg focus:outline-none transition-colors
                                         ${showResult
-                                            ? isCorrect ? 'border-cyber-primary text-cyber-primary bg-cyber-primary/5 shadow-[0_0_30px_rgba(0,243,255,0.1)]' : 'border-cyber-danger text-cyber-danger bg-cyber-danger/5'
-                                            : 'border-cyber-800 focus:border-cyber-primary text-white shadow-inner focus:shadow-[0_0_20px_rgba(0,243,255,0.05)]'
+                                            ? isCorrect ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'
+                                            : 'border-cyber-700 focus:border-cyber-primary text-white'
                                         }
                                     `}
                                 />
-                                {/* Underline decoration */}
-                                <div className={`absolute bottom-0 left-0 h-1 bg-cyber-primary transition-all duration-500 rounded-b-2xl ${showResult ? 'w-full' : 'w-0 group-focus-within:w-full opacity-50'}`} />
                             </div>
-
-                            <p className="text-[10px] font-bold text-cyber-700 uppercase tracking-widest text-center animate-pulse">
-                                Input terminal active • UTF-8 Encoding • Secure validation enabled
-                            </p>
                         </div>
                     )}
                 </div>
@@ -283,29 +257,27 @@ const ChallengeBlock = ({ block }) => {
                     <button
                         onClick={handleSubmit}
                         disabled={challengeType === 'multiple_choice' ? selectedOption === null : !flagInput.trim()}
-                        className="btn btn-primary w-full py-5 rounded-xl font-bold uppercase tracking-[0.3em] shadow-xl shadow-cyber-primary/10 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                        className="btn btn-primary w-full py-3 rounded-lg font-medium transition-all"
                     >
-                        <ArrowRight size={18} />
-                        Submit Payload
+                        Check Answer
                     </button>
                 ) : (
-                    <div className={`p-6 rounded-xl border-2 animate-in zoom-in-95 duration-300 ${isCorrect
-                        ? 'bg-cyber-primary/10 border-cyber-primary/30 text-cyber-primary shadow-[0_0_30px_rgba(0,243,255,0.1)]'
-                        : 'bg-cyber-danger/10 border-cyber-danger/30 text-cyber-danger'}`}>
-                        <div className="flex items-center gap-4 mb-3">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${isCorrect ? 'bg-cyber-primary border-cyber-primary text-black' : 'bg-cyber-danger border-cyber-danger text-white'}`}>
-                                {isCorrect ? <Check size={24} strokeWidth={3} /> : <AlertTriangle size={24} strokeWidth={3} />}
+                    <div className={`p-4 rounded-lg border animate-in zoom-in-95 duration-300 ${isCorrect
+                        ? 'bg-emerald-500/10 border-emerald-500/30'
+                        : 'bg-red-500/10 border-red-500/30'}`}>
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5">
+                                {isCorrect ? <Check size={20} className="text-emerald-400" /> : <AlertTriangle size={20} className="text-red-400" />}
                             </div>
                             <div>
-                                <p className="font-black text-xl uppercase tracking-[0.1em] italic">{isCorrect ? 'PROTOCOL SUCCESS' : 'SYSTEM REJECTION'}</p>
-                                <p className="text-[10px] uppercase tracking-widest opacity-70">{isCorrect ? 'Target neutralized / Key accepted' : 'Validation failed / Check credentials'}</p>
+                                <p className={`font-semibold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {isCorrect ? 'Correct!' : 'Incorrect'}
+                                </p>
+                                {explanation && (
+                                    <p dir="auto" className="text-sm mt-2 text-cyber-300">{explanation}</p>
+                                )}
                             </div>
                         </div>
-                        {explanation && (
-                            <div className="mt-4 pt-4 border-t border-current/10">
-                                <p dir="auto" className="text-sm font-medium leading-relaxed opacity-90">{explanation}</p>
-                            </div>
-                        )}
                         {!isCorrect && (
                             <button
                                 onClick={() => {
@@ -313,9 +285,9 @@ const ChallengeBlock = ({ block }) => {
                                     setFlagInput('');
                                     setSelectedOption(null);
                                 }}
-                                className="mt-4 text-[10px] font-bold uppercase tracking-[0.2em] text-cyber-500 hover:text-white transition-colors flex items-center gap-2"
+                                className="mt-4 text-sm font-medium text-cyber-400 hover:text-white transition-colors flex items-center gap-1.5"
                             >
-                                <Play size={10} className="rotate-180" /> Try Re-Submission
+                                <Play size={14} className="rotate-180" /> Try Again
                             </button>
                         )}
                     </div>
@@ -421,7 +393,7 @@ const TableBlock = ({ content }) => {
     );
 };
 
-const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
+const BlockRenderer = ({ block, index, onToggle, isEditor = false, onChallengeSuccess }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
@@ -464,7 +436,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false }) => {
             return <TableBlock content={block.content} />;
 
         case 'quiz':
-            return <ChallengeBlock block={block} />;
+            return <ChallengeBlock block={block} onSuccess={onChallengeSuccess} />;
         case 'heading':
         case 'h1':
         case 'h2':

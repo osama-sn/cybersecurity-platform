@@ -1,26 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
-import { Box, ChevronRight, Lock, ShieldX } from 'lucide-react';
+import { useProgress } from '../hooks/useProgress';
+import { Box, ChevronRight, Lock, ShieldX, CheckCircle, Play } from 'lucide-react';
 
 // Helper Component
-const TopicCard = ({ topic }) => (
+const TopicCard = ({ topic, isCompleted }) => (
   <Link
     to={`/topics/${topic.id}`}
-    className="bg-cyber-900/50 border border-cyber-700/50 rounded-lg p-4 flex items-center justify-between hover:bg-cyber-800 hover:border-cyber-primary/50 transition-all group"
+    className={`border rounded-lg p-4 flex items-center justify-between transition-all group
+      ${isCompleted 
+        ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40' 
+        : 'bg-cyber-900/50 border-cyber-700/50 hover:bg-cyber-800 hover:border-cyber-primary/50'}
+    `}
   >
     <div className="flex items-center gap-4">
-      <div className="p-2 bg-cyber-800 rounded border border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10 transition-colors">
-        <Box size={20} />
+      <div className={`p-2 rounded border transition-colors
+        ${isCompleted 
+          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' 
+          : 'bg-cyber-800 border-cyber-700 text-cyber-primary group-hover:bg-cyber-primary/10'}
+      `}>
+        {isCompleted ? <CheckCircle size={20} /> : <Box size={20} />}
       </div>
-      <span className="text-lg font-medium text-cyber-200 group-hover:text-white transition-colors">
+      <span className={`text-lg font-medium transition-colors
+        ${isCompleted ? 'text-emerald-100/70 line-through decoration-emerald-500/30' : 'text-cyber-200 group-hover:text-white'}
+      `}>
         {topic.title}
       </span>
     </div>
     <div className="flex items-center gap-3">
-      <ChevronRight size={20} className="text-cyber-600 group-hover:text-cyber-primary group-hover:translate-x-1 transition-all" />
+      {isCompleted && <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest px-2">Passed</span>}
+      <ChevronRight size={20} className={`${isCompleted ? 'text-emerald-500/50' : 'text-cyber-600 group-hover:text-cyber-primary p-0'} transition-all`} />
     </div>
   </Link>
 );
@@ -28,8 +40,11 @@ const TopicCard = ({ topic }) => (
 const SectionPage = () => {
   const { sectionId } = useParams();
   const { user, userData, isAdmin, isSuperAdmin } = useAuth();
+  const { getUserProgress } = useProgress();
+  
   const [section, setSection] = useState(null);
   const [modules, setModules] = useState([]);
+  const [progressData, setProgressData] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -129,6 +144,18 @@ const SectionPage = () => {
       });
       unsubscribers.push(unsubJunction);
 
+      // 3. Fetch user progress
+      const fetchProgress = async () => {
+        const progress = await getUserProgress();
+        if (progress && progress.completedTopics) {
+          setProgressData(progress.completedTopics);
+        }
+      };
+      
+      if (user) {
+        fetchProgress();
+      }
+
     } catch (err) {
       console.error('Error setting up listeners:', err);
       setLoading(false);
@@ -137,7 +164,7 @@ const SectionPage = () => {
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
-  }, [sectionId]);
+  }, [sectionId, user, getUserProgress]);
 
   if (loading) return <div>Loading...</div>;
   if (!section) return <div>Section not found</div>;
@@ -167,12 +194,90 @@ const SectionPage = () => {
     );
   }
 
+  // Calculate Progress Stats
+  const { totalTopics, completedTopics, progressPercentage, firstUncompletedTopicId } = useMemo(() => {
+    let total = 0;
+    let completed = 0;
+    let firstUncompletedId = null;
+
+    modules.forEach(mod => {
+      // Check Groups
+      mod.groups?.forEach(group => {
+        group.topics.forEach(topic => {
+          total++;
+          if (progressData[topic.id]) {
+            completed++;
+          } else if (!firstUncompletedId) {
+            firstUncompletedId = topic.id;
+          }
+        });
+      });
+      
+      // Check Ungrouped
+      mod.ungroupedTopics?.forEach(topic => {
+        total++;
+        if (progressData[topic.id]) {
+          completed++;
+        } else if (!firstUncompletedId) {
+          firstUncompletedId = topic.id;
+        }
+      });
+    });
+
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    return {
+      totalTopics: total,
+      completedTopics: completed,
+      progressPercentage: percent,
+      firstUncompletedTopicId: firstUncompletedId
+    };
+  }, [modules, progressData]);
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-20">
       <div>
-        <Link to="/sections" className="text-cyber-500 hover:text-cyber-300 mb-2 inline-block">&larr; Back to Sections</Link>
-        <h1 className="text-3xl font-bold text-white">{section.title}</h1>
-        <p className="text-cyber-400 mt-2">{section.description}</p>
+        <Link to="/sections" className="text-cyber-500 hover:text-cyber-300 mb-4 inline-block font-mono text-sm tracking-wide">&larr; Back to Sections</Link>
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="flex-1">
+            <h1 className="text-4xl font-black text-white tracking-tight leading-tight">{section.title}</h1>
+            <p className="text-cyber-400/80 mt-3 text-lg max-w-3xl leading-relaxed">{section.description}</p>
+          </div>
+          
+          {/* Progress Overview Card */}
+          {totalTopics > 0 && (
+            <div className="shrink-0 w-full md:w-72 bg-cyber-900/50 border border-cyber-700/50 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-cyber-300 uppercase tracking-widest">Progress</span>
+                <span className="text-2xl font-black text-cyber-primary">{progressPercentage}%</span>
+              </div>
+              <div className="w-full h-2 bg-cyber-800 rounded-full overflow-hidden mb-4">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyber-primary to-emerald-400 transition-all duration-1000 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs font-mono text-cyber-500 mb-5">
+                <span>{completedTopics} / {totalTopics} Topics Passed</span>
+              </div>
+              
+              <Link 
+                to={firstUncompletedTopicId ? `/topics/${firstUncompletedTopicId}` : "#"}
+                className={`w-full py-3 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all
+                  ${progressPercentage === 100 
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default' 
+                    : 'bg-cyber-primary text-black hover:bg-white active:scale-95 shadow-[0_0_15px_rgba(0,243,255,0.3)]'}
+                `}
+              >
+                {progressPercentage === 100 ? (
+                  <><CheckCircle size={16} /> Section Completed</>
+                ) : (
+                  <><Play size={16} className="fill-black" /> {completedTopics === 0 ? 'Start Section' : 'Resume Learning'}</>
+                )}
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-8">
@@ -194,7 +299,11 @@ const SectionPage = () => {
                     </h3>
                     <div className="grid gap-3">
                       {group.topics.map(topic => (
-                        <TopicCard key={topic.id} topic={topic} />
+                        <TopicCard 
+                          key={topic.id} 
+                          topic={topic} 
+                          isCompleted={!!progressData[topic.id]} 
+                        />
                       ))}
                     </div>
                   </div>

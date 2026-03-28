@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useData } from '../context/DataContext'; // We might need more specific fetching here
+import { useData } from '../context/DataContext';
 import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
-import BlockRenderer from '../components/BlockRenderer'; // Ensure imports are correct
-import { ChevronRight, ChevronLeft, CheckCircle, User } from 'lucide-react';
+import { useProgress } from '../hooks/useProgress';
+import BlockRenderer from '../components/BlockRenderer';
+import { ChevronRight, ChevronLeft, CheckCircle, User, Award } from 'lucide-react';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -13,12 +14,20 @@ const TopicPage = () => {
   const navigate = useNavigate();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
+  const { markTopicComplete, updateLastAccessed, getUserProgress } = useProgress();
   const contentRef = useRef(null);
 
   const [topic, setTopic] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nextTopicId, setNextTopicId] = useState(null);
+  
+  // Progress state
+  const [passedChallenges, setPassedChallenges] = useState(new Set());
+  const [isCompleted, setIsCompleted] = useState(false);
+  const quizBlocks = blocks.filter(b => b.type === 'quiz');
+  const totalChallenges = quizBlocks.length;
+  const allPassed = totalChallenges > 0 && passedChallenges.size === totalChallenges;
 
   useEffect(() => {
     if (!topicId) return;
@@ -95,13 +104,54 @@ const TopicPage = () => {
     };
   }, [topicId]);
 
-  const handleComplete = () => {
-    // Mark completed in Firestore (UserProgress)
-    // Navigate to next
+  // Check if topic is already completed
+  useEffect(() => {
+    const checkProgress = async () => {
+      const progress = await getUserProgress();
+      if (progress?.completedTopics?.[topicId]) {
+        setIsCompleted(true);
+      }
+    };
+    checkProgress();
+  }, [topicId, getUserProgress]);
+
+  // Update last accessed
+  useEffect(() => {
+    if (topic && topic.sectionId) {
+      updateLastAccessed(topic.sectionId, topicId);
+    }
+  }, [topic, topicId, updateLastAccessed]);
+
+  // Handle challenge success
+  const handleChallengeSuccess = useCallback(async (blockId) => {
+    setPassedChallenges(prev => {
+      const newSet = new Set(prev);
+      newSet.add(blockId);
+      return newSet;
+    });
+  }, []);
+
+  // Auto-complete if all challenges passed
+  useEffect(() => {
+    const completeTopic = async () => {
+      if (allPassed && !isCompleted && topic?.sectionId) {
+        const success = await markTopicComplete(topic.sectionId, topicId);
+        if (success) {
+          setIsCompleted(true);
+        }
+      }
+    };
+    completeTopic();
+  }, [allPassed, isCompleted, topic, topicId, markTopicComplete]);
+
+  const handleManualComplete = async () => {
+    if (topic?.sectionId && !isCompleted) {
+      await markTopicComplete(topic.sectionId, topicId);
+    }
+    
     if (nextTopicId) {
       navigate(`/topics/${nextTopicId}`);
     } else {
-      // Go back to module or section
       navigate(-1);
     }
   };
@@ -140,7 +190,15 @@ const TopicPage = () => {
       </div>
 
       <div className="mb-10 border-b border-cyber-700 pb-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{topic.title}</h1>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-white">{topic.title}</h1>
+          {isCompleted && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full shrink-0">
+              <CheckCircle size={16} />
+              <span className="text-xs font-bold tracking-wider uppercase">Passed</span>
+            </div>
+          )}
+        </div>
 
         {topic.createdBy && (
           <div className="flex items-center gap-2 text-sm text-cyber-500 mb-4 font-mono">
@@ -177,6 +235,7 @@ const TopicPage = () => {
                 block={block}
                 index={block.type === 'numbered' ? listIndex : undefined}
                 onToggle={handleUpdate}
+                onChallengeSuccess={handleChallengeSuccess}
               />
             );
           });
@@ -189,22 +248,37 @@ const TopicPage = () => {
         )}
       </div>
 
+      {/* Success Banner if All Challenges Passed */}
+      {allPassed && !isCompleted && (
+        <div className="mt-8 p-6 bg-emerald-500/10 border-2 border-emerald-500/50 rounded-xl flex items-center justify-between animate-in slide-in-from-bottom-5">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400">
+              <Award size={24} />
+            </div>
+            <div>
+              <h3 className="text-emerald-400 font-bold text-lg">Topic Passed!</h3>
+              <p className="text-emerald-500/80 text-sm">You have successfully completed all challenges in this topic.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation Footer */}
-      <div className="mt-20 flex items-center justify-between border-t border-cyber-700 pt-8">
+      <div className="mt-12 flex items-center justify-between border-t border-cyber-700 pt-8">
         <button
           onClick={() => navigate(-1)}
-          className="btn btn-outline flex items-center gap-2"
+          className="btn btn-outline flex items-center gap-2 px-6"
         >
           {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {t('topic.prev')}
+          Back
         </button>
 
         {isLearningMode && (
           <button
-            onClick={handleComplete}
-            className="btn btn-primary flex items-center gap-2 px-6"
+            onClick={handleManualComplete}
+            className={`btn flex items-center gap-2 px-8 ${isCompleted || allPassed ? 'btn-primary' : 'btn-outline border-cyber-700 text-cyber-400'}`}
           >
-            {t('topic.next')}
+            {isCompleted || allPassed ? 'Next Topic' : 'Mark as Complete'}
             {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         )}
