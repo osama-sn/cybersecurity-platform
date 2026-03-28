@@ -123,13 +123,22 @@ const TopicPage = () => {
   }, [topic, topicId, updateLastAccessed]);
 
   // Handle challenge success
-  const handleChallengeSuccess = useCallback(async (blockId) => {
+  const handleChallengeSuccess = useCallback((blockId, points = 0) => {
     setPassedChallenges(prev => {
+      if (prev.has(blockId)) return prev; // Already handled
+
       const newSet = new Set(prev);
       newSet.add(blockId);
+
+      // Award points in the background
+      if (points > 0 && topic?.sectionId) {
+        // Fire and forget, useProgress handles double-point prevention via Firestore
+        awardPoints(topic.sectionId, blockId, points).catch(console.error);
+      }
+
       return newSet;
     });
-  }, []);
+  }, [awardPoints, topic?.sectionId]);
 
   // Auto-complete if all challenges passed
   useEffect(() => {

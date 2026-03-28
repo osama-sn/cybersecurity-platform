@@ -171,13 +171,24 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                     onChange={e => onChange({ ...block, metadata: { ...block.metadata, hint: e.target.value } })}
                     dir={getDirection(block.metadata?.hint)}
                 />
-                <input
-                    className="input text-sm py-2"
-                    placeholder="Explanation (shown after answer)"
-                    value={block.metadata?.explanation || ''}
-                    onChange={e => onChange({ ...block, metadata: { ...block.metadata, explanation: e.target.value } })}
-                    dir={getDirection(block.metadata?.explanation)}
-                />
+                <div className="grid grid-cols-2 gap-2">
+                    <input
+                        className="input text-sm py-2"
+                        placeholder="Explanation (shown after answer)"
+                        value={block.metadata?.explanation || ''}
+                        onChange={e => onChange({ ...block, metadata: { ...block.metadata, explanation: e.target.value } })}
+                        dir={getDirection(block.metadata?.explanation)}
+                    />
+                    <input
+                        type="number"
+                        min="0"
+                        className="input text-sm py-2 font-mono text-emerald-400"
+                        placeholder="Points Awarded (e.g. 50)"
+                        value={block.metadata?.points || ''}
+                        onChange={e => onChange({ ...block, metadata: { ...block.metadata, points: Number(e.target.value) } })}
+                        dir="ltr"
+                    />
+                </div>
             </div>
         );
     }

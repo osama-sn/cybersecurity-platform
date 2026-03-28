@@ -102,6 +102,78 @@ export const useProgress = () => {
   }, [user]);
 
   /**
+   * Awards points to a user for a specific challenge block.
+   * Ensures points are only awarded once per block.
+   * Updates the `leaderboards` collection for the corresponding section.
+   */
+  const awardPoints = useCallback(async (sectionId, blockId, points) => {
+    if (!user || !points || points <= 0) return false;
+
+    // We don't set loading here to avoid UI flickering during background point updates
+    try {
+      const progressRef = doc(db, 'userProgress', user.uid);
+      const progressSnap = await getDoc(progressRef);
+      
+      let isAlreadyScored = false;
+      if (progressSnap.exists()) {
+        const data = progressSnap.data();
+        if (data.scoredBlocks?.[blockId]) {
+          isAlreadyScored = true;
+        }
+      }
+
+      if (!isAlreadyScored) {
+        // 1. Mark as scored to prevent farming
+        if (!progressSnap.exists()) {
+          await setDoc(progressRef, {
+            scoredBlocks: { [blockId]: true },
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } else {
+          await updateDoc(progressRef, {
+            [`scoredBlocks.${blockId}`]: true,
+            updatedAt: serverTimestamp()
+          });
+        }
+
+        // 2. Update Leaderboard Entry for this Section
+        const leaderboardRef = doc(db, 'leaderboards', `${sectionId}_${user.uid}`);
+        const lbSnap = await getDoc(leaderboardRef);
+
+        const profileData = {
+          displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+          photoURL: user.photoURL || '',
+          email: user.email || ''
+        };
+
+        if (!lbSnap.exists()) {
+          await setDoc(leaderboardRef, {
+            userId: user.uid,
+            sectionId: sectionId,
+            score: points,
+            ...profileData,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          await updateDoc(leaderboardRef, {
+            score: increment(points),
+            ...profileData, // update their display info just in case
+            updatedAt: serverTimestamp()
+          });
+        }
+        
+        return { success: true, pointsAwarded: points };
+      }
+      
+      return { success: false, reason: 'already_scored' };
+    } catch (err) {
+      console.error('Error awarding points:', err);
+      return { success: false, reason: 'error', error: err };
+    }
+  }, [user]);
+
+  /**
    * Fetches the user's progress.
    */
   const getUserProgress = useCallback(async () => {
@@ -124,6 +196,7 @@ export const useProgress = () => {
   return {
     markTopicComplete,
     updateLastAccessed,
+    awardPoints,
     getUserProgress,
     loading,
     error

@@ -4,7 +4,8 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } f
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../hooks/useProgress';
-import { Box, ChevronRight, Lock, ShieldX, CheckCircle, Play } from 'lucide-react';
+import { Box, ChevronRight, Lock, ShieldX, CheckCircle, Play, Trophy } from 'lucide-react';
+import LeaderboardView from '../components/LeaderboardView';
 
 // Helper Component
 const TopicCard = ({ topic, isCompleted }) => (
@@ -46,6 +47,7 @@ const SectionPage = () => {
   const [modules, setModules] = useState([]);
   const [progressData, setProgressData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('content');
 
   useEffect(() => {
     if (!sectionId) return;
@@ -280,16 +282,57 @@ const SectionPage = () => {
         </div>
       </div>
 
-      <div className="space-y-8">
-        {modules.map((module) => (
-          <div key={module.id} className="animate-fade-in-up">
-            <h2 className="text-2xl font-bold text-white mb-4 mt-8 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-cyber-primary rounded-full inline-block"></span>
-              {module.title}
-            </h2>
+      {/* Tabs */}
+      <div className="flex items-center gap-8 border-b border-cyber-800/80 mb-8 pt-4">
+        <button
+          onClick={() => setActiveTab('content')}
+          className={`pb-4 border-b-2 font-bold tracking-wider uppercase text-sm transition-all
+            ${activeTab === 'content' ? 'border-cyber-primary text-cyber-primary' : 'border-transparent text-cyber-500 hover:text-cyber-300'}
+          `}
+        >
+          Curriculum
+        </button>
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          className={`pb-4 border-b-2 font-bold tracking-wider uppercase text-sm transition-all flex items-center gap-2
+            ${activeTab === 'leaderboard' ? 'border-yellow-400 text-yellow-500 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'border-transparent text-cyber-500 hover:text-cyber-300'}
+          `}
+        >
+          <Trophy size={18} className={activeTab === 'leaderboard' ? 'text-yellow-400' : ''} />
+          Leaderboard
+        </button>
+      </div>
 
-            <div className="space-y-6">
-              {/* Groups */}
+      {activeTab === 'content' ? (
+        <div className="space-y-8 animate-fade-in">
+          {modules.map((module) => {
+            const isLockedToStudent = module.isLocked && !isAdmin && !isSuperAdmin;
+            
+            return (
+            <div key={module.id} className={`animate-fade-in-up ${module.isLocked ? 'opacity-80' : ''}`}>
+              <h2 className="text-2xl font-bold text-white mb-4 mt-8 flex items-center gap-2">
+                <span className={`w-1.5 h-6 rounded-full inline-block ${module.isLocked ? 'bg-red-500' : 'bg-cyber-primary'}`}></span>
+                {module.title}
+                {module.isLocked && (
+                  <span className="flex items-center gap-1 text-xs px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full ml-2">
+                    <Lock size={12} /> {isAdmin || isSuperAdmin ? 'Hidden from Students' : 'Locked'}
+                  </span>
+                )}
+              </h2>
+
+              {isLockedToStudent ? (
+                <div className="bg-cyber-900/30 border border-cyber-800 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-cyber-800 border border-cyber-700 flex items-center justify-center mb-4">
+                    <Lock size={24} className="text-cyber-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-cyber-300">Module Locked</h3>
+                  <p className="text-sm text-cyber-500 max-w-sm mt-2">
+                    This module is currently locked. Complete previous assignments or wait for the instructor to unlock it.
+                  </p>
+                </div>
+              ) : (
+              <div className="space-y-6">
+                {/* Groups */}
               {module.groups && module.groups.map(group => (
                 group.topics.length > 0 && (
                   <div key={group.id} className="ml-4 border-l-2 border-cyber-800 pl-4 space-y-3">
@@ -320,10 +363,17 @@ const SectionPage = () => {
               {(!module.groups?.length && !module.ungroupedTopics?.length) && (
                 <p className="text-sm text-cyber-600 italic px-1">No topics yet.</p>
               )}
-            </div>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+          );
+        })}
+        </div>
+      ) : (
+        <div className="animate-fade-in-up mt-8">
+          <LeaderboardView sectionId={sectionId} />
+        </div>
+      )}
     </div>
   );
 };

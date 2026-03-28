@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, deleteDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight, Pencil, Save, XCircle, User } from 'lucide-react';
+import { Plus, Trash2, FileText, ArrowLeft, GripVertical, Import, X, Search, Unlink, Folder, ChevronDown, ChevronRight, Pencil, Save, XCircle, User, Lock, Unlock } from 'lucide-react';
 
 // Helper Component for Topic Item to reduce code duplication
 const TopicItem = ({ topic, onDragStart, onUnlink, onDelete, currentUser, isAdmin }) => {
@@ -217,6 +217,18 @@ const AdminModule = () => {
         }
     };
 
+    const handleToggleLock = async () => {
+        if (!isAdmin) return;
+        try {
+            const moduleRef = doc(db, 'modules', moduleId);
+            await updateDoc(moduleRef, { isLocked: !moduleData.isLocked });
+            setModuleData(prev => ({ ...prev, isLocked: !prev.isLocked }));
+        } catch (error) {
+            console.error("Error toggling lock:", error);
+            alert("Failed to update module status.");
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, [moduleId]);
@@ -396,9 +408,20 @@ const AdminModule = () => {
                 <ArrowLeft size={16} /> Back
             </button>
 
-            <h1 className="text-3xl font-bold bg-cyber-800 p-4 rounded-lg border border-cyber-700">
-                Module: {moduleData.title}
-            </h1>
+            <div className="flex items-center justify-between bg-cyber-800 p-4 rounded-lg border border-cyber-700">
+                <h1 className="text-3xl font-bold flex items-center gap-3">
+                    Module: {moduleData.title}
+                    {moduleData.isLocked && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded-full border border-red-500/30 uppercase tracking-widest font-bold">Locked</span>}
+                </h1>
+                {isAdmin && (
+                    <button
+                        onClick={handleToggleLock}
+                        className={`btn flex items-center gap-2 ${moduleData.isLocked ? 'btn-outline text-red-500 border-red-500/50 hover:bg-red-500/10' : 'btn-outline text-emerald-500 border-emerald-500/50 hover:bg-emerald-500/10'}`}
+                    >
+                        {moduleData.isLocked ? <><Unlock size={18} /> Unlock Module</> : <><Lock size={18} /> Lock Module</>}
+                    </button>
+                )}
+            </div>
 
             <div className="card">
                 <div className="flex items-center justify-between mb-4">

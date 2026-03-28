@@ -145,7 +145,7 @@ const ChallengeBlock = ({ block, onSuccess }) => {
     const handleSubmit = () => {
         setShowResult(true);
         if (isCorrect && onSuccess) {
-            onSuccess(block.id);
+            onSuccess(block.id, metadata.points || 0);
         }
     };
 
@@ -162,8 +162,13 @@ const ChallengeBlock = ({ block, onSuccess }) => {
                         {challengeType === 'multiple_choice' ? <AlertCircle size={18} /> : <Key size={18} />}
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold text-white tracking-wide">
+                        <h4 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
                             {challengeType === 'multiple_choice' ? 'Question' : 'Flag Challenge'}
+                            {metadata.points > 0 && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    {metadata.points} PTS
+                                </span>
+                            )}
                         </h4>
                     </div>
                 </div>
