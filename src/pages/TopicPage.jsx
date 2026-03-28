@@ -10,7 +10,7 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } f
 import { db } from '../firebase/config';
 
 const TopicPage = () => {
-  const { topicId } = useParams();
+  const { sectionId, topicId } = useParams();
   const navigate = useNavigate();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
@@ -134,37 +134,37 @@ const TopicPage = () => {
       newSet.add(blockId);
 
       // Award points in the background
-      if (points > 0 && topic?.sectionId) {
+      if (points > 0 && sectionId) {
         // Fire and forget, useProgress handles double-point prevention via Firestore
-        awardPoints(topic.sectionId, blockId, points).catch(console.error);
+        awardPoints(sectionId, blockId, points).catch(console.error);
       }
 
       return newSet;
     });
-  }, [awardPoints, topic?.sectionId]);
+  }, [awardPoints, sectionId]);
 
   // Auto-complete if all challenges passed
   useEffect(() => {
     const completeTopic = async () => {
-      if (allPassed && !isCompleted && topic?.sectionId) {
-        const success = await markTopicComplete(topic.sectionId, topicId);
+      if (allPassed && !isCompleted && sectionId) {
+        const success = await markTopicComplete(sectionId, topicId);
         if (success) {
           setIsCompleted(true);
         }
       }
     };
     completeTopic();
-  }, [allPassed, isCompleted, topic, topicId, markTopicComplete]);
+  }, [allPassed, isCompleted, sectionId, topicId, markTopicComplete]);
 
   const handleManualComplete = async () => {
-    if (topic?.sectionId && !isCompleted) {
-      await markTopicComplete(topic.sectionId, topicId);
+    if (sectionId && !isCompleted) {
+      await markTopicComplete(sectionId, topicId);
     }
     
     if (nextTopicId) {
-      navigate(`/topics/${nextTopicId}`);
+      navigate(`/sections/${sectionId}/topics/${nextTopicId}`);
     } else {
-      navigate(-1);
+      navigate(`/sections/${sectionId}`);
     }
   };
 
@@ -187,18 +187,33 @@ const TopicPage = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (loading) return <div className="p-10 text-center animate-pulse">{t('topic.loading')}</div>;
-  if (!topic) return <div className="p-10 text-center text-red-500">{t('topic.notFound')}</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-40 animate-pulse">
+      <div className="w-16 h-16 bg-cyber-800 rounded-full border border-cyber-700 mb-4 flex items-center justify-center">
+        <Box size={24} className="text-cyber-primary rotate-12" />
+      </div>
+      <p className="text-cyber-500 font-mono text-xs tracking-[0.3em] uppercase">Initialising_Sector...</p>
+    </div>
+  );
+  if (!topic) return (
+    <div className="flex flex-col items-center justify-center py-40">
+      <div className="w-16 h-16 bg-red-500/10 rounded-full border border-red-500/30 mb-4 flex items-center justify-center">
+        <ShieldAlert size={24} className="text-red-500" />
+      </div>
+      <p className="text-red-500 font-mono text-xs tracking-[0.3em] uppercase">Sector_Not_Found</p>
+      <Link to={`/sections/${sectionId}`} className="btn btn-outline border-red-500/30 text-red-500 mt-6 text-xs uppercase tracking-widest font-black">Re-Route to Sector</Link>
+    </div>
+  );
 
   return (
     <div ref={contentRef} className="max-w-3xl mx-auto pb-20 animate-fade-in select-text">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-cyber-500 mb-6 font-mono">
-        <Link to="/sections" className="hover:text-cyber-primary">{t('topic.breadcrumb.sections')}</Link>
-        {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-        <span>{t('topic.breadcrumb.module')}</span>
-        {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-        <span className="text-cyber-primary">{topic.title}</span>
+      {/* Premium Breadcrumb Link */}
+      <div className="flex items-center gap-3 text-cyber-500 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] font-black">
+        <Link to="/sections" className="hover:text-cyber-primary transition-colors">Sectors</Link>
+        <div className="w-1 h-1 rounded-full bg-cyber-800"></div>
+        <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors">Sector_{sectionId.substring(0,6)}</Link>
+        <div className="w-1 h-1 rounded-full bg-cyber-primary animate-pulse"></div>
+        <span className="text-cyber-primary">Current_Node</span>
       </div>
 
       <div className="mb-10 border-b border-cyber-700 pb-6">

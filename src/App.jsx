@@ -35,7 +35,7 @@ function App() {
                 <Route path="about" element={<About />} />
                 <Route path="sections" element={<SectionsList />} />
                 <Route path="sections/:sectionId" element={<SectionPage />} />
-                <Route path="topics/:topicId" element={<TopicPage />} />
+                <Route path="sections/:sectionId/topics/:topicId" element={<TopicPage />} />
                 <Route path="profile" element={
                   <ProtectedRoute>
                     <Settings />

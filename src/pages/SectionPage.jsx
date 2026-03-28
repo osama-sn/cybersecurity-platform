@@ -9,9 +9,9 @@ import LeaderboardView from '../components/LeaderboardView';
 
 // Helper Component
 // Helper Component: TopicCard with premium styling
-const TopicCard = ({ topic, isCompleted }) => (
+const TopicCard = ({ topic, isCompleted, sectionId }) => (
   <Link
-    to={`/topics/${topic.id}`}
+    to={`/sections/${sectionId}/topics/${topic.id}`}
     className={`relative group overflow-hidden border rounded-2xl p-5 flex items-center justify-between transition-all duration-300
       ${isCompleted 
         ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
@@ -428,6 +428,7 @@ const SectionPage = () => {
                                   key={topic.id} 
                                   topic={topic} 
                                   isCompleted={!!progressData[topic.id]} 
+                                  sectionId={sectionId}
                                 />
                               ))}
                             </div>
@@ -446,7 +447,7 @@ const SectionPage = () => {
                             </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {module.ungroupedTopics.map(topic => (
-                              <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} />
+                              <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} />
                             ))}
                           </div>
                         </div>
