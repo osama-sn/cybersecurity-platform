@@ -97,9 +97,16 @@ const Sidebar = ({ isOpen, onClose }) => {
           </div>
 
           {sections.filter(s => hasAccess(s.id)).map(section => (
-            <div key={section.id} className="mb-2">
-              <div className="text-cyber-200 font-bold px-2 py-1">{section.title}</div>
-            </div>
+            <NavLink
+              key={section.id}
+              to={`/sections/${section.id}`}
+              className={({ isActive }) => `block mb-2 px-3 py-2 rounded-lg transition-all ${isActive ? 'bg-cyber-900/80 border border-cyber-primary/20 text-cyber-primary' : 'text-cyber-200 hover:bg-cyber-800/50 hover:text-white hover:border-cyber-700/50 border border-transparent'}`}
+            >
+              <div className="font-bold flex items-center gap-2">
+                <BookOpen size={16} className="opacity-70" />
+                {section.title}
+              </div>
+            </NavLink>
           ))}
 
           {sections.filter(s => hasAccess(s.id)).length === 0 && (
@@ -114,28 +121,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <span>{t('sidebar.about')}</span>
           </NavLink>
 
-          {/* Managed Sections (For Delegated Users) */}
-          {userData?.allowedSections?.length > 0 && !isAdmin && (
-            <div className="mt-6 pt-6 border-t border-cyber-700">
-              <div className="text-xs font-semibold text-cyber-500 uppercase tracking-wider mb-2">
-                Managed Sections
-              </div>
-              {sections
-                .filter(s => userData.allowedSections.includes(s.id))
-                .map(section => (
-                  <NavLink
-                    key={section.id}
-                    to={`/admin/section/${section.id}`}
-                    className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20' : 'text-cyber-400 hover:text-cyber-primary'}`}
-                  >
-                    <BookOpen size={16} />
-                    <span className="truncate">{section.title}</span>
-                  </NavLink>
-                ))}
-            </div>
-          )}
-
-          {/* Admin Link */}
+          {/* Admin Navigation */}
           {isAdmin && (
             <div className="mt-6 pt-6 border-t border-cyber-700">
               <div className="text-xs font-semibold text-cyber-500 uppercase tracking-wider mb-2">
