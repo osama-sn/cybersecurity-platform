@@ -4,7 +4,7 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } f
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../hooks/useProgress';
-import { Box, ChevronRight, Lock, ShieldX, CheckCircle, Play, Trophy, Shield, Award } from 'lucide-react';
+import { Box, ChevronRight, ChevronDown, Lock, ShieldX, CheckCircle, Play, Trophy, Shield, Award, Layers } from 'lucide-react';
 import LeaderboardView from '../components/LeaderboardView';
 
 // Helper Component
@@ -12,61 +12,48 @@ import LeaderboardView from '../components/LeaderboardView';
 const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
   const content = (
     <div
-      className={`relative group overflow-hidden border rounded-2xl p-5 flex items-center justify-between transition-all duration-300
+      className={`relative group overflow-hidden border rounded-xl px-4 py-3 flex items-center justify-between transition-all duration-200
         ${isDisabled
-          ? 'bg-cyber-900/20 border-cyber-800/50 cursor-not-allowed opacity-60'
+          ? 'bg-cyber-900/10 border-cyber-800/30 cursor-not-allowed opacity-50'
           : isCompleted 
-            ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
-            : 'bg-cyber-900/40 border-cyber-700/50 hover:bg-cyber-800/60 hover:border-cyber-primary/50 hover:shadow-[0_0_20px_rgba(0,243,255,0.05)]'}
+            ? 'bg-emerald-500/5 border-emerald-500/10 hover:bg-emerald-500/10 hover:border-emerald-500/30' 
+            : 'bg-cyber-900/30 border-cyber-800/50 hover:bg-cyber-800/50 hover:border-cyber-primary/40'}
       `}
     >
-      {/* Hover Glow Effect */}
-      {!isDisabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyber-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>}
-
-      <div className="flex items-center gap-5 relative z-10">
-        <div className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-500 shadow-inner
+      <div className="flex items-center gap-3 relative z-10 min-w-0">
+        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 transition-all duration-300
           ${isDisabled
             ? 'bg-cyber-950 border-cyber-800 text-cyber-700'
             : isCompleted 
-              ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400 group-hover:scale-110' 
-              : 'bg-cyber-800/80 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary group-hover:shadow-[0_0_10px_rgba(0,243,255,0.2)]'}
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+              : 'bg-cyber-800/50 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary/50'}
         `}>
-          {isDisabled ? <Lock size={20} /> : isCompleted ? <CheckCircle size={22} strokeWidth={2.5} /> : <Box size={22} />}
+          {isDisabled ? <Lock size={14} /> : isCompleted ? <CheckCircle size={16} strokeWidth={2.5} /> : <Play size={14} className="ml-0.5 fill-current" />}
         </div>
-        <div className="flex flex-col">
-          <span className={`text-[17px] font-bold tracking-tight transition-colors
-            ${isDisabled ? 'text-cyber-600' : isCompleted ? 'text-emerald-100/60' : 'text-white group-hover:text-cyber-primary'}
+        <div className="flex flex-col min-w-0">
+          <span className={`text-sm font-bold truncate transition-colors
+            ${isDisabled ? 'text-cyber-600' : isCompleted ? 'text-emerald-100/70' : 'text-white group-hover:text-cyber-primary'}
           `}>
             {topic.title}
           </span>
-          {isDisabled ? (
-             <span className="text-[10px] font-black text-red-500/50 uppercase tracking-[0.2em] mt-1">Status: Encrypted</span>
-          ) : isCompleted ? (
-            <span className="text-[10px] font-black text-emerald-500/70 uppercase tracking-[0.2em] mt-1">Status: Completed</span>
-          ) : (
-            <span className="text-[10px] font-bold text-cyber-500 uppercase tracking-[0.2em] mt-1">Status: Available</span>
-          )}
-          {topic.description && (
-            <p className={`text-[11px] mt-2 line-clamp-1 h-4 transition-colors
-              ${isDisabled ? 'text-cyber-700' : 'text-cyber-400 group-hover:text-cyber-300'}
+          <div className="flex items-center gap-2">
+            <span className={`text-[9px] font-black uppercase tracking-widest
+              ${isDisabled ? 'text-red-500/40' : isCompleted ? 'text-emerald-500/60' : 'text-cyber-500'}
             `}>
-              {topic.description}
-            </p>
-          )}
+              {isDisabled ? 'Locked' : isCompleted ? 'Cleared' : 'Active'}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 relative z-10">
+      <div className="flex items-center gap-2 relative z-10 shrink-0">
         {isCompleted && !isDisabled && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <Award size={12} className="text-emerald-400" />
-            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Passed</span>
+          <div className="flex items-center px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <Award size={10} className="text-emerald-400" />
           </div>
         )}
-        <div className={`p-2 rounded-lg transition-all duration-300
-          ${isDisabled ? 'text-cyber-800' : isCompleted ? 'text-emerald-500/40' : 'text-cyber-700 group-hover:text-cyber-primary group-hover:bg-cyber-primary/10'}
-        `}>
-          <ChevronRight size={20} />
+        <div className={`transition-all duration-300 ${isDisabled ? 'text-cyber-800' : 'text-cyber-600 group-hover:text-cyber-primary'}`}>
+          <ChevronRight size={14} />
         </div>
       </div>
     </div>
@@ -75,7 +62,7 @@ const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
   if (isDisabled) return content;
 
   return (
-    <Link to={`/sections/${sectionId}/topics/${topic.id}`}>
+    <Link to={`/sections/${sectionId}/topics/${topic.id}`} className="block">
       {content}
     </Link>
   );
@@ -152,12 +139,27 @@ const SectionSkeleton = () => (
   const [modules, setModules] = useState([]);
   const [progressData, setProgressData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [modulesLoading, setModulesLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('content');
+  const [openModules, setOpenModules] = useState(new Set());
+
+  const toggleModule = (moduleId) => {
+    setOpenModules(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleId)) {
+        newSet.delete(moduleId);
+      } else {
+        newSet.add(moduleId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     if (!sectionId) return;
 
     setLoading(true);
+    setModulesLoading(true);
     const unsubscribers = [];
 
     try {
@@ -246,8 +248,16 @@ const SectionSkeleton = () => (
 
         modulesData.sort((a, b) => a.order - b.order);
         setModules(modulesData);
+        
+        // Auto-open the first module if none are open
+        if (modulesData.length > 0 && openModules.size === 0) {
+          setOpenModules(new Set([modulesData[0].id]));
+        }
+        
+        setModulesLoading(false);
       }, (error) => {
         console.error('Error listening to sectionModules:', error);
+        setModulesLoading(false);
       });
       unsubscribers.push(unsubJunction);
 
@@ -317,7 +327,7 @@ const SectionSkeleton = () => (
     };
   }, [modules, progressData]);
 
-  if (loading) return <SectionSkeleton />;
+  if (loading || (modulesLoading && activeTab === 'content')) return <SectionSkeleton />;
   if (!section) return <div>Section not found</div>;
 
   // Access check
@@ -463,113 +473,126 @@ const SectionSkeleton = () => (
           <div className="space-y-12 pb-20">
             {modules.map((module, mIdx) => {
               const isLockedToStudent = module.isLocked && !isAdmin && !isSuperAdmin;
+              const isOpen = openModules.has(module.id);
               
               return (
-              <div key={module.id} className="animate-fade-in-up" style={{ animationDelay: `${mIdx * 100}ms` }}>
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-5">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border shadow-xl transition-all duration-500
-                      ${module.isLocked ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-cyber-900/80 border-cyber-800 text-cyber-primary group-hover:scale-110'}
-                    `}>
-                      <span className="font-black text-xl italic">{mIdx + 1}</span>
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-black text-white tracking-tight flex items-center gap-3 uppercase">
-                        {module.title}
-                      </h2>
-                      {module.isLocked && (
-                        <div className="flex items-center gap-1.5 text-[9px] font-black px-2.5 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full tracking-widest mt-1">
-                          <Lock size={10} /> {isAdmin || isSuperAdmin ? 'HIDDEN_FROM_STUDENTS' : 'LOCKED_BY_ADMIN'}
+                <div key={module.id} className="animate-fade-in-up bg-cyber-900/10 border border-cyber-800/30 rounded-3xl overflow-hidden transition-all duration-500" style={{ animationDelay: `${mIdx * 100}ms` }}>
+                  {/* Module Header - Clickable for Toggle */}
+                  <div 
+                    onClick={() => toggleModule(module.id)}
+                    className={`flex items-center justify-between p-6 cursor-pointer hover:bg-cyber-800/20 transition-colors
+                      ${isOpen ? 'border-b border-cyber-800/50' : ''}
+                    `}
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500
+                        ${module.isLocked ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-cyber-900 border-cyber-800 text-cyber-primary'}
+                      `}>
+                        <span className="font-black text-lg italic">{mIdx + 1}</span>
+                      </div>
+                      <div>
+                        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-3 uppercase">
+                          {module.title}
+                        </h2>
+                        <div className="flex items-center gap-3 mt-1">
+                          {module.isLocked && (
+                            <div className="flex items-center gap-1.5 text-[8px] font-black px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full tracking-widest">
+                              <Lock size={8} /> LOCKED
+                            </div>
+                          )}
+                          <span className="text-[10px] font-black text-cyber-500 uppercase tracking-widest flex items-center gap-1.5">
+                            <Layers size={10} /> {(module.groups?.reduce((acc, g) => acc + g.topics.length, 0) || 0) + (module.ungroupedTopics?.length || 0)} Topics
+                          </span>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                    
+                    <div className={`w-10 h-10 rounded-full border border-cyber-800 flex items-center justify-center text-cyber-500 transition-all duration-300 ${isOpen ? 'rotate-180 text-cyber-primary border-cyber-primary/30' : ''}`}>
+                      <ChevronDown size={20} />
+                    </div>
+                  </div>
+
+                  {/* Module Content - Conditionally Rendered */}
+                  <div className={`transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+                    <div className="p-6 space-y-8">
                       {module.description && (
-                        <p className="text-sm text-cyber-500 font-medium mt-3 max-w-2xl leading-relaxed whitespace-pre-wrap border-l border-cyber-800 pl-4">
+                        <p className="text-sm text-cyber-400 font-medium leading-relaxed italic border-l-2 border-cyber-800 pl-4 py-1">
                           {module.description}
                         </p>
                       )}
-                    </div>
-                  </div>
-                </div>
 
-                {isLockedToStudent ? (
-                  <div className="bg-cyber-900/20 border border-cyber-800/50 rounded-[2rem] p-16 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-red-500/2 blur-3xl group-hover:bg-red-500/5 transition-all duration-700"></div>
-                    <div className="w-24 h-24 rounded-3xl bg-cyber-950/80 border border-cyber-800 flex items-center justify-center mb-6 shadow-2xl relative z-10">
-                      <Lock size={40} className="text-red-500/50" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white relative z-10 uppercase tracking-widest">Access Restricted</h3>
-                    <p className="text-cyber-500 max-w-sm mt-3 relative z-10 leading-relaxed font-medium">
-                      This path is currently encrypted. Reach out to your instructor or complete prerequisite modules to unlock this sector.
-                    </p>
-                  </div>
-                ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-1 gap-10">
-                  {/* Module Cards Wrapper */}
-                  <div className="bg-cyber-900/20 border border-cyber-800/40 rounded-[2.5rem] p-8 md:p-10 shadow-inner">
-                    <div className="space-y-12">
-                      {/* Groups */}
-                      {module.groups && module.groups.map(group => (
-                        group.topics.length > 0 && (
-                          <div key={group.id} className="space-y-6">
-                            <div className="flex items-center gap-3 px-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-primary shadow-[0_0_10px_rgba(0,243,255,1)]"></div>
-                              <h3 className="text-[13px] font-black text-cyber-500 uppercase tracking-[0.3em]">
-                                {group.title}
-                              </h3>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {group.topics.map(topic => (
-                                <TopicCard 
-                                  key={topic.id} 
-                                  topic={topic} 
-                                  isCompleted={!!progressData[topic.id]} 
-                                  sectionId={sectionId}
-                                  isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
-                                />
-                              ))}
-                            </div>
+                      {isLockedToStudent ? (
+                        <div className="bg-cyber-950/50 border border-cyber-800/50 rounded-2xl p-10 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                          <div className="w-16 h-16 rounded-2xl bg-cyber-900/80 border border-cyber-800 flex items-center justify-center mb-4 shadow-xl">
+                            <Lock size={24} className="text-red-500/50" />
                           </div>
-                        )
-                      ))}
-
-                      {/* Ungrouped Topics */}
-                      {module.ungroupedTopics && module.ungroupedTopics.length > 0 && (
-                        <div className="space-y-6">
-                           <div className="flex items-center gap-3 px-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-500"></div>
-                              <h3 className="text-[13px] font-black text-cyber-500 uppercase tracking-[0.3em]">
-                                General Intel
-                              </h3>
-                            </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {module.ungroupedTopics.map(topic => (
-                              <TopicCard 
-                                key={topic.id} 
-                                topic={topic} 
-                                isCompleted={!!progressData[topic.id]} 
-                                sectionId={sectionId} 
-                                isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
-                              />
-                            ))}
-                          </div>
+                          <h3 className="text-lg font-bold text-white uppercase tracking-widest">Access Restricted</h3>
+                          <p className="text-cyber-500 text-sm max-w-sm mt-2 leading-relaxed font-medium">
+                            Reach out to your instructor to unlock this sector.
+                          </p>
                         </div>
-                      )}
+                      ) : (
+                        <div className="space-y-8">
+                          {/* Groups */}
+                          {module.groups && module.groups.map(group => (
+                            group.topics.length > 0 && (
+                              <div key={group.id} className="space-y-3">
+                                <div className="flex items-center gap-2 px-1">
+                                  <div className="w-1 h-1 rounded-full bg-cyber-primary shadow-[0_0_8px_rgba(0,243,255,1)]"></div>
+                                  <h3 className="text-[10px] font-black text-cyber-500 uppercase tracking-[0.2em]">
+                                    {group.title}
+                                  </h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                  {group.topics.map(topic => (
+                                    <TopicCard 
+                                      key={topic.id} 
+                                      topic={topic} 
+                                      isCompleted={!!progressData[topic.id]} 
+                                      sectionId={sectionId}
+                                      isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )
+                          ))}
 
-                      {(!module.groups?.length && !module.ungroupedTopics?.length) && (
-                        <div className="py-20 text-center flex flex-col items-center">
-                          <div className="w-12 h-12 rounded-full border border-cyber-800 flex items-center justify-center text-cyber-700 mb-4 opacity-30">
-                            <Box size={24} />
-                          </div>
-                          <p className="text-sm text-cyber-700 font-bold uppercase tracking-widest italic">Sector is empty.</p>
+                          {/* Ungrouped Topics */}
+                          {module.ungroupedTopics && module.ungroupedTopics.length > 0 && (
+                            <div className="space-y-3">
+                               <div className="flex items-center gap-2 px-1">
+                                  <div className="w-1 h-1 rounded-full bg-cyber-500"></div>
+                                  <h3 className="text-[10px] font-black text-cyber-500 uppercase tracking-[0.2em]">
+                                    General Intel
+                                  </h3>
+                                </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {module.ungroupedTopics.map(topic => (
+                                  <TopicCard 
+                                    key={topic.id} 
+                                    topic={topic} 
+                                    isCompleted={!!progressData[topic.id]} 
+                                    sectionId={sectionId} 
+                                    isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {(!module.groups?.length && !module.ungroupedTopics?.length) && (
+                            <div className="py-12 text-center flex flex-col items-center">
+                              <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic">Sector is empty.</p>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-            );
-          })}
+              );
+            })}
           </div>
         ) : (
           <div className="animate-fade-in-up mt-8">

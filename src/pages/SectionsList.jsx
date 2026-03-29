@@ -2,7 +2,38 @@ import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Folder, ArrowRight, Lock } from 'lucide-react';
+import { Folder, ArrowRight, Lock, Layout } from 'lucide-react';
+
+const SectionsSkeleton = () => (
+    <div className="space-y-8 animate-fade-in">
+        <div className="flex items-center justify-between border-b border-cyber-700 pb-4">
+            <div className="w-48 h-8 bg-cyber-800 rounded-lg animate-pulse" />
+            <div className="w-32 h-4 bg-cyber-800/50 rounded animate-pulse" />
+        </div>
+
+        <div className="grid gap-6">
+            {[1, 2, 3].map(i => (
+                <div key={i} className="card relative overflow-hidden bg-cyber-900/40 border border-cyber-800/50 p-6 rounded-2xl animate-pulse">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-cyber-800" />
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-cyber-800 rounded-lg border border-cyber-700/30 w-12 h-12" />
+                            <div className="space-y-3">
+                                <div className="w-64 h-6 bg-cyber-800 rounded" />
+                                <div className="w-96 h-4 bg-cyber-800/60 rounded" />
+                            </div>
+                        </div>
+                        <div className="w-5 h-5 bg-cyber-800 rounded" />
+                    </div>
+                    <div className="mt-6 flex items-center gap-4">
+                        <div className="w-24 h-6 bg-cyber-800/40 rounded" />
+                        <div className="w-32 h-4 bg-cyber-800/30 rounded" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
 
 const SectionsList = () => {
     const { sections, loading } = useData();
@@ -17,7 +48,7 @@ const SectionsList = () => {
     };
 
     if (loading) {
-        return <div className="text-center py-20 text-cyber-400 animate-pulse">{t('sections.loading')}</div>;
+        return <SectionsSkeleton />;
     }
 
     return (

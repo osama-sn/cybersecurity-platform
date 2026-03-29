@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useProgress } from '../hooks/useProgress';
@@ -48,6 +49,7 @@ const TopicSkeleton = () => (
 const TopicPage = () => {
   const { sectionId, topicId } = useParams();
   const navigate = useNavigate();
+  const { isAdmin, isSuperAdmin } = useAuth();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
   const { markTopicComplete, updateLastAccessed, getUserProgress, awardPoints } = useProgress();
