@@ -428,10 +428,11 @@ const BlockNote = ({ note, onSave }) => {
         return (
             <button
                 onClick={() => setIsEditing(true)}
-                className="absolute right-0 -top-3 md:top-1/2 md:-translate-y-1/2 md:-right-10 opacity-40 md:opacity-20 hover:opacity-100 transition-all p-2 text-cyber-400 hover:text-fuchsia-400 bg-cyber-900/90 rounded-lg border border-cyber-700 hover:border-fuchsia-500/50 z-10 shadow-lg"
+                className="absolute rtl:left-0 ltr:right-0 -top-4 opacity-70 group-hover/block:opacity-100 transition-all px-2 py-1 text-cyber-400 hover:text-fuchsia-400 bg-cyber-900/95 rounded border border-cyber-700 hover:border-fuchsia-500/50 z-10 shadow-lg flex items-center gap-1.5"
                 title="Add a private note here"
             >
-                <MessageSquare size={14} />
+                <MessageSquare size={12} />
+                <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline-block">Add Note</span>
             </button>
         );
     }
