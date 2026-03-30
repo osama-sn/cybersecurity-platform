@@ -473,129 +473,257 @@ const SectionSkeleton = () => (
 
       <div className="px-4 md:px-0">
         {activeTab === 'content' ? (
-          <div className="space-y-12 pb-20">
-            {modules.map((module, mIdx) => {
-              const isLockedToStudent = module.isLocked && !isAdmin && !isSuperAdmin;
-              const isOpen = openModules.has(module.id);
-              
-              return (
-                <div key={module.id} className="animate-fade-in-up bg-cyber-900/10 border border-cyber-800/30 rounded-3xl overflow-hidden transition-all duration-500" style={{ animationDelay: `${mIdx * 100}ms` }}>
-                  {/* Module Header - Clickable for Toggle */}
-                  <div 
-                    onClick={() => toggleModule(module.id)}
-                    className={`flex items-center justify-between p-6 cursor-pointer hover:bg-cyber-800/20 transition-colors
-                      ${isOpen ? 'border-b border-cyber-800/50' : ''}
-                    `}
-                  >
-                    <div className="flex items-center gap-5">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500
-                        ${module.isLocked ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-cyber-900 border-cyber-800 text-cyber-primary'}
-                      `}>
-                        <span className="font-black text-lg italic">{mIdx + 1}</span>
+          <div className="space-y-6 pb-20">
+            {(() => {
+              // Compute per-module stats
+              const enrichedModules = modules.map(mod => {
+                const allTopics = [
+                  ...(mod.groups?.flatMap(g => g.topics) || []),
+                  ...(mod.ungroupedTopics || [])
+                ];
+                const total = allTopics.length;
+                const completed = allTopics.filter(t => progressData[t.id]).length;
+                const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                const isFullyCompleted = total > 0 && completed === total;
+                const isInProgress = completed > 0 && !isFullyCompleted;
+                return { ...mod, _total: total, _completed: completed, _pct: pct, _isFullyCompleted: isFullyCompleted, _isInProgress: isInProgress };
+              });
+
+              // The "active" module: first in-progress, or fallback to first uncompleted
+              const activeModule = enrichedModules.find(m => m._isInProgress)
+                ?? enrichedModules.find(m => !m._isFullyCompleted && m._total > 0);
+
+              // Remaining modules (all of them in order, excluding the active one if we show it separately)
+              const remainingModules = enrichedModules.filter(m => m.id !== activeModule?.id);
+
+              const ModuleTopicsExpanded = ({ module }) => {
+                const isLockedToStudent = module.isLocked && !isAdmin && !isSuperAdmin;
+                return (
+                  <div className="mt-4 border-t border-cyber-800/50 pt-4 space-y-6">
+                    {module.description && (
+                      <p className="text-sm text-cyber-400 font-medium leading-relaxed italic border-l-2 border-cyber-primary/40 pl-4 py-1">
+                        {module.description}
+                      </p>
+                    )}
+                    {isLockedToStudent ? (
+                      <div className="bg-cyber-950/50 border border-cyber-800/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+                        <Lock size={24} className="text-red-500/50 mb-3" />
+                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">{t('sections.restricted')}</h3>
+                        <p className="text-cyber-500 text-xs max-w-sm mt-1 leading-relaxed">{t('sections.restrictedDesc')}</p>
                       </div>
-                      <div>
-                        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-3 uppercase">
-                          {module.title}
-                        </h2>
-                        <div className="flex items-center gap-3 mt-1">
-                          {module.isLocked && (
-                            <div className="flex items-center gap-1.5 text-[8px] font-black px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full tracking-widest">
-                              <Lock size={8} /> {t('sections.locked').toUpperCase()}
+                    ) : (
+                      <div className="space-y-6">
+                        {module.groups?.map(group => group.topics.length > 0 && (
+                          <div key={group.id} className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-primary shadow-[0_0_6px_rgba(0,243,255,0.8)]"></div>
+                              <h3 className="text-[10px] font-black text-cyber-400 uppercase tracking-[0.2em]">{group.title}</h3>
                             </div>
-                          )}
-                          <span className="text-[10px] font-black text-cyber-500 uppercase tracking-widest flex items-center gap-1.5">
-                            <Layers size={10} /> {(module.groups?.reduce((acc, g) => acc + g.topics.length, 0) || 0) + (module.ungroupedTopics?.length || 0)} {t('sections.topicsCountLabel')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className={`w-10 h-10 rounded-full border border-cyber-800 flex items-center justify-center text-cyber-500 transition-all duration-300 ${isOpen ? 'rotate-180 text-cyber-primary border-cyber-primary/30' : ''}`}>
-                      <ChevronDown size={20} />
-                    </div>
-                  </div>
-
-                  {/* Module Content - Conditionally Rendered */}
-                  <div className={`transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-                    <div className="p-6 space-y-8">
-                      {module.description && (
-                        <p className="text-sm text-cyber-400 font-medium leading-relaxed italic border-l-2 border-cyber-800 pl-4 py-1">
-                          {module.description}
-                        </p>
-                      )}
-
-                      {isLockedToStudent ? (
-                        <div className="bg-cyber-950/50 border border-cyber-800/50 rounded-2xl p-10 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                          <div className="w-16 h-16 rounded-2xl bg-cyber-900/80 border border-cyber-800 flex items-center justify-center mb-4 shadow-xl">
-                            <Lock size={24} className="text-red-500/50" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {group.topics.map(topic => (
+                                <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin} />
+                              ))}
+                            </div>
                           </div>
-                          <h3 className="text-lg font-bold text-white uppercase tracking-widest">{t('sections.restricted')}</h3>
-                          <p className="text-cyber-500 text-sm max-w-sm mt-2 leading-relaxed font-medium">
-                            {t('sections.restrictedDesc')}
-                          </p>
+                        ))}
+                        {module.ungroupedTopics?.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-500"></div>
+                              <h3 className="text-[10px] font-black text-cyber-400 uppercase tracking-[0.2em]">{t('sections.generalIntel')}</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {module.ungroupedTopics.map(topic => (
+                                <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {(!module.groups?.length && !module.ungroupedTopics?.length) && (
+                          <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic text-center py-8">{t('sections.emptySector')}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
+              return (
+                <>
+                  {/* ── ACTIVE / IN-PROGRESS MODULE HERO ── */}
+                  {activeModule && (
+                    <div className="space-y-3">
+                      <h2 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse inline-block"></span>
+                        {t('sections.inProgressModules')}
+                      </h2>
+                      <div
+                        onClick={() => toggleModule(activeModule.id)}
+                        className="cursor-pointer group relative overflow-hidden bg-[#0d1117] border border-cyber-700/60 hover:border-cyber-primary/50 rounded-2xl p-5 transition-all duration-300"
+                      >
+                        {/* Ambient glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyber-primary/5 via-transparent to-transparent pointer-events-none" />
+                        <div className="flex items-center gap-5">
+                          {/* Icon Box */}
+                          <div className="relative shrink-0">
+                            <div className="w-16 h-16 rounded-xl bg-cyber-900 border border-cyber-700 flex items-center justify-center text-cyber-primary shadow-[0_0_20px_rgba(0,243,255,0.15)] group-hover:shadow-[0_0_30px_rgba(0,243,255,0.25)] transition-all duration-500">
+                              <Box size={28} />
+                            </div>
+                          </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-cyber-primary text-black uppercase tracking-widest">
+                                {t('sections.inProgressBadge')}
+                              </span>
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                <Layers size={8} /> {t('sections.regularBadge')}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-black text-white tracking-tight truncate">{activeModule.title}</h3>
+                            <div className="flex items-center gap-3 mt-1 text-[11px] font-bold text-cyber-400">
+                              <span className="flex items-center gap-1">
+                                <CheckCircle size={11} className="text-cyber-500" />
+                                {activeModule._completed}/{activeModule._total} {t('sections.topicsCountLabel')}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Progress & action */}
+                          <div className="shrink-0 text-right flex flex-col items-end gap-2">
+                            <span className="text-cyber-primary font-black text-sm">
+                              {activeModule._pct}%
+                            </span>
+                            <div className="w-28 h-1.5 bg-cyber-900 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-cyber-primary to-emerald-400 rounded-full transition-all duration-700"
+                                style={{ width: `${activeModule._pct}%` }}
+                              />
+                            </div>
+                            <ChevronDown
+                              size={14}
+                              className={`text-cyber-500 transition-transform duration-300 ${openModules.has(activeModule.id) ? 'rotate-180' : ''}`}
+                            />
+                          </div>
                         </div>
-                      ) : (
-                        <div className="space-y-8">
-                          {/* Groups */}
-                          {module.groups && module.groups.map(group => (
-                            group.topics.length > 0 && (
-                              <div key={group.id} className="space-y-3">
-                                <div className="flex items-center gap-2 px-1">
-                                  <div className="w-1 h-1 rounded-full bg-cyber-primary shadow-[0_0_8px_rgba(0,243,255,1)]"></div>
-                                  <h3 className="text-[10px] font-black text-cyber-500 uppercase tracking-[0.2em]">
-                                    {group.title}
-                                  </h3>
+                        {/* Expanded topics */}
+                        {openModules.has(activeModule.id) && <ModuleTopicsExpanded module={activeModule} />}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── ALL MODULES LIST ── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-black text-white uppercase tracking-widest">{t('sections.allModules')}</h2>
+                      <span className="text-[10px] text-cyber-500 font-bold">
+                        {enrichedModules.length} · {enrichedModules.filter(m => m._isFullyCompleted).length} {t('sections.passed')}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {remainingModules.map((module, mIdx) => {
+                        const isLockedToStudent = module.isLocked && !isAdmin && !isSuperAdmin;
+                        const isOpen = openModules.has(module.id);
+
+                        return (
+                          <div
+                            key={module.id}
+                            className="animate-fade-in-up"
+                            style={{ animationDelay: `${mIdx * 60}ms` }}
+                          >
+                            {/* Card header row */}
+                            <div
+                              onClick={() => toggleModule(module.id)}
+                              className={`cursor-pointer group flex items-center gap-4 p-4 bg-[#0d1117] border rounded-2xl transition-all duration-300
+                                ${
+                                  module._isFullyCompleted
+                                    ? 'border-emerald-500/20 hover:border-emerald-500/40'
+                                    : isLockedToStudent
+                                    ? 'border-red-900/30 opacity-60'
+                                    : 'border-cyber-800/40 hover:border-cyber-primary/30'
+                                }
+                                ${isOpen ? 'rounded-b-none' : ''}
+                              `}
+                            >
+                              {/* Icon */}
+                              <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border ${
+                                module._isFullyCompleted
+                                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                  : isLockedToStudent
+                                  ? 'bg-red-500/10 border-red-500/20 text-red-500'
+                                  : 'bg-cyber-900/60 border-cyber-800 text-cyber-primary'
+                              }`}>
+                                {module._isFullyCompleted
+                                  ? <CheckCircle size={20} strokeWidth={2.5} />
+                                  : isLockedToStudent
+                                  ? <Lock size={18} />
+                                  : <Box size={20} />
+                                }
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                  {module.isLocked && (
+                                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full border border-red-500/30 text-red-400 uppercase tracking-widest">
+                                      {t('sections.locked')}
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                  {group.topics.map(topic => (
-                                    <TopicCard 
-                                      key={topic.id} 
-                                      topic={topic} 
-                                      isCompleted={!!progressData[topic.id]} 
-                                      sectionId={sectionId}
-                                      isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
-                                    />
-                                  ))}
+                                <h3 className={`text-sm font-black tracking-tight ${
+                                  module._isFullyCompleted ? 'text-emerald-100/70' : 'text-white'
+                                }`}>
+                                  {module.title}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-0.5 text-[10px] font-bold text-cyber-500">
+                                  <Layers size={9} />
+                                  <span>{module._total} {t('sections.topicsCountLabel')}</span>
                                 </div>
                               </div>
-                            )
-                          ))}
 
-                          {/* Ungrouped Topics */}
-                          {module.ungroupedTopics && module.ungroupedTopics.length > 0 && (
-                            <div className="space-y-3">
-                               <div className="flex items-center gap-2 px-1">
-                                  <div className="w-1 h-1 rounded-full bg-cyber-500"></div>
-                                  <h3 className="text-[10px] font-black text-cyber-500 uppercase tracking-[0.2em]">
-                                    {t('sections.generalIntel')}
-                                  </h3>
-                                </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {module.ungroupedTopics.map(topic => (
-                                  <TopicCard 
-                                    key={topic.id} 
-                                    topic={topic} 
-                                    isCompleted={!!progressData[topic.id]} 
-                                    sectionId={sectionId} 
-                                    isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin}
-                                  />
-                                ))}
+                              {/* Right: status or progress */}
+                              <div className="shrink-0 flex items-center gap-3">
+                                {module._isFullyCompleted ? (
+                                  <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-black">
+                                    <CheckCircle size={14} strokeWidth={2.5} />
+                                    {t('sections.cleared')}
+                                  </span>
+                                ) : module._pct > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-20 h-1.5 bg-cyber-900 rounded-full overflow-hidden">
+                                      <div
+                                        className="h-full bg-gradient-to-r from-cyber-primary to-emerald-400 rounded-full"
+                                        style={{ width: `${module._pct}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-[11px] font-black text-cyber-300">{module._pct}%</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] font-black text-cyber-600 uppercase tracking-widest">
+                                    {module._total === 0 ? '—' : t('sections.active')}
+                                  </span>
+                                )}
+                                <ChevronDown
+                                  size={14}
+                                  className={`text-cyber-600 group-hover:text-cyber-400 transition-all duration-300 ${isOpen ? 'rotate-180 text-cyber-primary' : ''}`}
+                                />
                               </div>
                             </div>
-                          )}
 
-                          {(!module.groups?.length && !module.ungroupedTopics?.length) && (
-                            <div className="py-12 text-center flex flex-col items-center">
-                              <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic">{t('sections.emptySector')}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            {/* Expanded content */}
+                            {isOpen && (
+                              <div className="bg-[#0d1117] border border-t-0 border-cyber-800/40 rounded-b-2xl px-5 pb-5">
+                                <ModuleTopicsExpanded module={module} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
+                </>
               );
-            })}
+            })()}
           </div>
         ) : (
           <div className="animate-fade-in-up mt-8">

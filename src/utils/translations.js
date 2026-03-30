@@ -230,7 +230,13 @@ export const translations = {
             restricted: "وصول مقيّد",
             restrictedDesc: "تواصل مع مدربك لفك قفل هذا القطاع.",
             generalIntel: "معلومات عامة",
-            emptySector: "القطاع فارغ حاليًا."
+            emptySector: "القطاع فارغ حاليًا.",
+            inProgressModules: "وحدات قيد التقدم",
+            allModules: "جميع الوحدات",
+            inProgressBadge: "قيد التقدم",
+            regularBadge: "أساسي",
+            coreBadge: "نظري",
+            seeModule: "عرض الوحدة"
         },
         topic: {
             loading: "جاري فك تشفير المحتوى...",
@@ -518,7 +524,13 @@ export const translations = {
             restricted: "Access Restricted",
             restrictedDesc: "Reach out to your instructor to unlock this sector.",
             generalIntel: "General Intel",
-            emptySector: "Sector is empty."
+            emptySector: "Sector is empty.",
+            inProgressModules: "In Progress Modules",
+            allModules: "Modules",
+            inProgressBadge: "In Progress",
+            regularBadge: "REGULAR",
+            coreBadge: "GENERAL",
+            seeModule: "See Module"
         },
         topic: {
             loading: "Decrypting content...",
