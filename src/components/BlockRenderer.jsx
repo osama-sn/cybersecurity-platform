@@ -428,7 +428,7 @@ const BlockNote = ({ note, onSave, t }) => {
         return (
             <button
                 onClick={() => setIsEditing(true)}
-                className="absolute rtl:left-0 ltr:right-0 -top-4 opacity-0 group-hover/block:opacity-100 transition-all p-1.5 text-cyber-500 hover:text-fuchsia-400 bg-cyber-950/80 rounded border border-cyber-800 shadow-sm"
+                className="absolute rtl:-right-2 ltr:-left-2 -top-4 opacity-0 group-hover/block:opacity-100 transition-all p-1.5 text-cyber-500 hover:text-fuchsia-400 bg-cyber-950/80 rounded border border-cyber-800 shadow-sm"
                 title={t('topic.noteTooltip')}
             >
                 <MessageSquare size={14} />
