@@ -76,7 +76,7 @@ const SectionsList = () => {
                                     <div>
                                         <h2 className="text-xl font-bold text-white mb-1 group-hover:text-cyber-primary transition-colors flex items-center gap-2">
                                             {section.title}
-                                            {isLocked && <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-widest font-black">Locked</span>}
+                                            {isLocked && <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-widest font-black">{t('sections.locked')}</span>}
                                         </h2>
                                         <p className="text-cyber-400 text-sm line-clamp-2">
                                             {section.description || t('sections.fallbackDesc')}

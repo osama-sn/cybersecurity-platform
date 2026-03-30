@@ -325,13 +325,13 @@ const TopicPage = () => {
           <Lock size={40} className="text-amber-500" />
         </div>
         <div className="text-center space-y-4 max-w-md">
-          <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Sector Encrypted</h1>
+          <h1 className="text-3xl font-black text-white uppercase tracking-tighter">{t('topic.encryptedTitle')}</h1>
           <p className="text-cyber-400 leading-relaxed">
-            This sector's data stream is currently offline or hasn't been authorised for your clearance level yet.
+            {t('topic.encryptedDesc')}
           </p>
           <div className="pt-4">
             <Link to={`/sections/${sectionId}`} className="btn btn-outline border-amber-500/30 text-amber-500 hover:bg-amber-500/10 px-8 py-3 text-xs uppercase tracking-[0.2em] font-black">
-              Return to Sector Base
+              {t('topic.returnToSector')}
             </Link>
           </div>
         </div>
@@ -343,8 +343,8 @@ const TopicPage = () => {
       <div className="w-16 h-16 bg-red-500/10 rounded-full border border-red-500/30 mb-4 flex items-center justify-center">
         <ShieldAlert size={24} className="text-red-500" />
       </div>
-      <p className="text-red-500 font-mono text-xs tracking-[0.3em] uppercase">Sector_Not_Found</p>
-      <Link to={`/sections/${sectionId}`} className="btn btn-outline border-red-500/30 text-red-500 mt-6 text-xs uppercase tracking-widest font-black">Re-Route to Sector</Link>
+      <p className="text-red-500 font-mono text-xs tracking-[0.3em] uppercase">{t('topic.notFoundLabel')}</p>
+      <Link to={`/sections/${sectionId}`} className="btn btn-outline border-red-500/30 text-red-500 mt-6 text-xs uppercase tracking-widest font-black">{t('topic.rerouteToSector')}</Link>
     </div>
   );
 
@@ -352,11 +352,11 @@ const TopicPage = () => {
     <div ref={contentRef} className="max-w-4xl mx-auto px-2 sm:px-6 md:px-0 pb-20 animate-fade-in select-text overflow-x-hidden">
       {/* Premium Breadcrumb Link */}
       <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-cyber-500 mb-8 font-mono text-[10px] uppercase tracking-[0.2em] font-black">
-        <Link to="/sections" className="hover:text-cyber-primary transition-colors shrink-0">Sectors</Link>
+        <Link to="/sections" className="hover:text-cyber-primary transition-colors shrink-0">{t('topic.sectorsBreadcrumb')}</Link>
         <div className="w-1 h-1 rounded-full bg-cyber-800 shrink-0"></div>
-        <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors shrink-0">Sector_{sectionId.substring(0,6)}</Link>
+        <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors shrink-0">{t('topic.sectorPrefix')}{sectionId.substring(0,6)}</Link>
         <div className="w-1 h-1 rounded-full bg-cyber-primary animate-pulse shrink-0"></div>
-        <span className="text-cyber-primary truncate">Current_Node</span>
+        <span className="text-cyber-primary truncate">{t('topic.currentNode')}</span>
       </div>
 
       <div className="mb-12 border-b border-cyber-800/50 pb-10">
@@ -366,7 +366,7 @@ const TopicPage = () => {
             {topic.createdBy && (
               <div className="flex items-center gap-2 text-[10px] text-cyber-500 font-black uppercase tracking-widest">
                 <User size={12} />
-                <span>Authorised_by:</span>
+                <span>{t('topic.authorisedBy')}</span>
                 <span className="text-cyber-300">{topic.createdBy.displayName || topic.createdBy.email}</span>
               </div>
             )}
@@ -374,7 +374,7 @@ const TopicPage = () => {
           {isCompleted && (
             <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
               <CheckCircle size={18} strokeWidth={2.5} />
-              <span className="text-xs font-black tracking-[0.1em] uppercase">Mission_Accomplished</span>
+              <span className="text-xs font-black tracking-[0.1em] uppercase">{t('topic.missionAccomplished')}</span>
             </div>
           )}
         </div>
@@ -437,8 +437,8 @@ const TopicPage = () => {
               <Award size={24} />
             </div>
             <div>
-              <h3 className="text-emerald-400 font-bold text-lg">Topic Passed!</h3>
-              <p className="text-emerald-500/80 text-sm">You have successfully completed all challenges in this topic.</p>
+              <h3 className="text-emerald-400 font-bold text-lg">{t('topic.passedTitle')}</h3>
+              <p className="text-emerald-500/80 text-sm">{t('topic.passedDesc')}</p>
             </div>
           </div>
         </div>
@@ -449,22 +449,22 @@ const TopicPage = () => {
         <div className="mt-12 p-6 bg-cyber-900/30 border border-cyber-800 rounded-2xl animate-fade-in">
           <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
             <MessageSquare size={18} className="text-cyber-primary" />
-            Anonymous Content Review
+            {t('topic.feedbackTitle')}
           </h3>
           <p className="text-sm text-cyber-400 mb-4">
-            Help us improve our material! Leave anonymous feedback on this topic (only admins can see this).
+            {t('topic.feedbackDesc')}
           </p>
           
           {feedbackSubmitted ? (
             <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
               <CheckCircle size={18} />
-              <p className="text-sm font-bold">Thank you for your feedback!</p>
+              <p className="text-sm font-bold">{t('topic.feedbackThanks')}</p>
             </div>
           ) : (
             <div className="space-y-3">
               <textarea
                 className="w-full bg-black/40 border border-cyber-700 focus:border-cyber-primary rounded-xl p-4 text-sm text-cyber-300 min-h-[100px] resize-none outline-none transition-colors"
-                placeholder="Was anything confusing? Or was it great? Let us know..."
+                placeholder={t('topic.feedbackPlaceholder')}
                 value={feedback}
                 onChange={e => setFeedback(e.target.value)}
                 dir="auto"
@@ -476,9 +476,9 @@ const TopicPage = () => {
                   className="btn btn-primary px-6 py-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2"
                 >
                   {isFeedbackSubmitting ? (
-                    <><Loader2 size={14} className="animate-spin" /> Submitting...</>
+                    <><Loader2 size={14} className="animate-spin" /> {t('topic.submitting')}</>
                   ) : (
-                    'Submit Review'
+                    t('topic.submitReview')
                   )}
                 </button>
               </div>
@@ -494,7 +494,7 @@ const TopicPage = () => {
           className="btn btn-outline flex items-center justify-center gap-2 px-6 w-full sm:w-auto order-2 sm:order-1"
         >
           {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          Back
+          {t('topic.back')}
         </button>
 
         {isLearningMode && (
@@ -502,7 +502,7 @@ const TopicPage = () => {
             onClick={handleManualComplete}
             className={`btn flex items-center justify-center gap-2 px-8 w-full sm:w-auto order-1 sm:order-2 ${isCompleted || allPassed ? 'btn-primary' : 'btn-outline border-cyber-700 text-cyber-400'}`}
           >
-            {isCompleted || allPassed ? 'Next Topic' : 'Mark as Complete'}
+            {isCompleted || allPassed ? t('topic.nextTopic') : t('topic.markComplete')}
             {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         )}
