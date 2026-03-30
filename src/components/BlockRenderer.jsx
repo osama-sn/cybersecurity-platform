@@ -416,7 +416,7 @@ const ImageBlockRenderer = ({ block }) => {
     );
 };
 
-const BlockNote = ({ note, onSave }) => {
+const BlockNote = ({ note, onSave, t }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [text, setText] = useState(note || '');
 
@@ -428,28 +428,27 @@ const BlockNote = ({ note, onSave }) => {
         return (
             <button
                 onClick={() => setIsEditing(true)}
-                className="absolute rtl:left-0 ltr:right-0 -top-4 opacity-70 group-hover/block:opacity-100 transition-all px-2 py-1 text-cyber-400 hover:text-fuchsia-400 bg-cyber-900/95 rounded border border-cyber-700 hover:border-fuchsia-500/50 z-10 shadow-lg flex items-center gap-1.5"
-                title="Add a private note here"
+                className="absolute rtl:left-0 ltr:right-0 -top-4 opacity-0 group-hover/block:opacity-100 transition-all p-1.5 text-cyber-500 hover:text-fuchsia-400 bg-cyber-950/80 rounded border border-cyber-800 shadow-sm"
+                title={t('topic.noteTooltip')}
             >
-                <MessageSquare size={12} />
-                <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline-block">Add Note</span>
+                <MessageSquare size={14} />
             </button>
         );
     }
 
     if (!isEditing && note) {
         return (
-            <div className="mt-3 bg-fuchsia-500/10 border-l-2 border-fuchsia-500 p-3 rounded-r-lg group/note relative text-sm w-full">
+            <div className="mt-3 bg-fuchsia-500/10 border-s-2 border-fuchsia-500 p-3 rounded-e-lg group/note relative text-sm w-full">
                 <div className="flex items-center gap-2 mb-1.5">
                     <MessageSquare size={12} className="text-fuchsia-400" /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest text-fuchsia-400">Your Private Note</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-fuchsia-400">{t('topic.yourNote')}</span>
                 </div>
                 <div className="text-fuchsia-200/90 whitespace-pre-wrap leading-relaxed" dir="auto">{note}</div>
                 <button
                     onClick={() => setIsEditing(true)}
-                    className="absolute top-2 right-2 opacity-0 group-hover/note:opacity-100 p-1.5 text-fuchsia-400 hover:text-white bg-black/40 rounded hover:bg-fuchsia-500/50 transition-colors"
+                    className="absolute top-2 rtl:left-2 ltr:right-2 opacity-0 group-hover/note:opacity-100 p-1.5 text-fuchsia-400 hover:text-white bg-black/40 rounded hover:bg-fuchsia-500/50 transition-colors"
                 >
-                    Edit
+                    {t('topic.editNote')}
                 </button>
             </div>
         );
@@ -460,13 +459,13 @@ const BlockNote = ({ note, onSave }) => {
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <MessageSquare size={14} className="text-fuchsia-400" /> 
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Write Private Note</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{t('topic.writeNote')}</span>
                 </div>
             </div>
             <textarea
                 autoFocus
                 className="w-full bg-black/40 text-sm text-fuchsia-100 outline-none resize-none min-h-[80px] rounded p-3 border border-cyber-800 focus:border-fuchsia-500/50 transition-colors"
-                placeholder="What are your thoughts on this section? (visible only to you)"
+                placeholder={t('topic.notePlaceholder')}
                 value={text}
                 onChange={e => setText(e.target.value)}
                 dir="auto"
@@ -476,13 +475,13 @@ const BlockNote = ({ note, onSave }) => {
                     onClick={() => { setIsEditing(false); setText(note || ''); }}
                     className="text-[10px] font-bold uppercase tracking-wider text-cyber-500 hover:text-white px-3 py-1.5 transition-colors"
                 >
-                    Cancel
+                    {t('common.cancel')}
                 </button>
                 <button
                     onClick={() => { onSave(text.trim()); setIsEditing(false); }}
                     className="text-[10px] font-black uppercase tracking-widest bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50 hover:bg-fuchsia-500 hover:text-white px-4 py-1.5 rounded transition-all shadow-[0_0_15px_rgba(217,70,239,0.1)] hover:shadow-[0_0_20px_rgba(217,70,239,0.4)]"
                 >
-                    Save Note
+                    {t('topic.saveNote')}
                 </button>
             </div>
         </div>
@@ -736,9 +735,11 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
     return (
         <div className="relative group/block w-full">
-            {content}
+            <div className="w-full relative">
+                {content}
+            </div>
             {canHaveNote && (
-                <BlockNote note={userNote} onSave={(text) => onSaveNote?.(block.id, text)} />
+                <BlockNote note={userNote} onSave={(text) => onSaveNote?.(block.id, text)} t={t} />
             )}
         </div>
     );

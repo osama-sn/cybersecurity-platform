@@ -260,15 +260,21 @@ export const translations = {
             missionAccomplished: "اكتملت_المهمة",
             passedTitle: "تم اجتياز الموضوع!",
             passedDesc: "لقد أتممت بنجاح جميع التحديات الموجودة في هذا الموضوع.",
-            feedbackTitle: "مراجعة سرية للمحتوى",
+            feedbackTitle: "شرفنا برفيو بشكل حر من غير مايكون اسمك واضح  علشان نحسن من تجربتنا",
             feedbackDesc: "ساعدنا في تحسين المحتوى! اترك تقييمك السري حول هذا الموضوع (المشرف فقط يمكنه رؤيته).",
             feedbackThanks: "شكراً على تقييمك!",
             feedbackPlaceholder: "هل كان هناك جزء غير واضح؟ أو رائع جداً؟ أخبرنا...",
             submitReview: "إرسال التقييم",
             submitting: "جاري الإرسال...",
             back: "رجوع",
+            markComplete: "اكتمال",
             nextTopic: "الموضوع التالي",
-            markComplete: "تحديد كمكتمل"
+            noteTooltip: "أضف ملاحظة خاصة",
+            yourNote: "ملاحظتك الخاصة",
+            editNote: "تعديل",
+            writeNote: "اكتب ملاحظة خاصة",
+            notePlaceholder: "ما رأيك في هذا الجزء؟ (أنت فقط من يراها)",
+            saveNote: "حفظ الملاحظة"
         },
         renderer: {
             copy: "نسخ الكود",
@@ -562,7 +568,13 @@ export const translations = {
             submitting: "Submitting...",
             back: "Back",
             nextTopic: "Next Topic",
-            markComplete: "Mark as Complete"
+            markComplete: "Mark as Complete",
+            noteTooltip: "Add a private note here",
+            yourNote: "Your Private Note",
+            editNote: "Edit",
+            writeNote: "Write Private Note",
+            notePlaceholder: "What are your thoughts on this section? (visible only to you)",
+            saveNote: "Save Note"
         },
         renderer: {
             copy: "Copy code",
