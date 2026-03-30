@@ -4,12 +4,14 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } f
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../hooks/useProgress';
+import { useLanguage } from '../context/LanguageContext';
 import { Box, ChevronRight, ChevronDown, Lock, ShieldX, CheckCircle, Play, Trophy, Shield, Award, Layers } from 'lucide-react';
 import LeaderboardView from '../components/LeaderboardView';
 
 // Helper Component
 // Helper Component: TopicCard with premium styling
 const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
+  const { t } = useLanguage();
   const content = (
     <div
       className={`relative group overflow-hidden border rounded-xl px-4 py-3 flex items-center justify-between transition-all duration-200
@@ -38,10 +40,10 @@ const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
           </span>
           <div className="flex items-center gap-2">
             <span className={`text-[9px] font-black uppercase tracking-widest
-              ${isDisabled ? 'text-red-500/40' : isCompleted ? 'text-emerald-500/60' : 'text-cyber-500'}
-            `}>
-              {isDisabled ? 'Locked' : isCompleted ? 'Cleared' : 'Active'}
-            </span>
+                ${isDisabled ? 'text-red-500/40' : isCompleted ? 'text-emerald-500/60' : 'text-cyber-500'}
+              `}>
+                {isDisabled ? t('sections.locked') : isCompleted ? t('sections.cleared') : t('sections.active')}
+              </span>
           </div>
         </div>
       </div>
@@ -134,6 +136,7 @@ const SectionSkeleton = () => (
   const { sectionId } = useParams();
   const { user, userData, isAdmin, isSuperAdmin } = useAuth();
   const { getUserProgress } = useProgress();
+  const { t } = useLanguage();
   
   const [section, setSection] = useState(null);
   const [modules, setModules] = useState([]);
@@ -347,15 +350,15 @@ const SectionSkeleton = () => (
           {isSectionLocked ? <Lock size={48} className="text-amber-400" /> : <ShieldX size={48} className="text-red-400" />}
         </div>
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-white">{isSectionLocked ? 'Section Encrypted' : 'Access Denied'}</h1>
+          <h1 className="text-2xl font-bold text-white">{isSectionLocked ? t('sections.encryptedTitle') : t('sections.accessDeniedTitle')}</h1>
           <p className="text-cyber-400 max-w-md">
             {isSectionLocked 
-              ? 'This sector is currently under maintenance or hasn\'t been unlocked by the command center yet.' 
-              : 'You do not have permission to view this section. Contact the administrator to request access.'}
+              ? t('sections.encryptedDesc') 
+              : t('sections.accessDeniedDesc')}
           </p>
         </div>
         <Link to="/sections" className="btn btn-outline flex items-center gap-2">
-          &larr; Back to Sections
+          &larr; {t('sections.backToSections')}
         </Link>
       </div>
     );
@@ -369,7 +372,7 @@ const SectionSkeleton = () => (
           <div className="w-5 h-5 rounded-full border border-cyber-800 flex items-center justify-center group-hover/back:border-cyber-primary transition-colors">
             <span className="mb-0.5">←</span>
           </div>
-          Dashboard / Sections
+          {t('sections.breadcrumb')}
         </Link>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-cyber-900/40 border border-cyber-800/50 p-8 md:p-12 rounded-[2rem] backdrop-blur-3xl relative overflow-hidden shadow-2xl">
@@ -379,7 +382,7 @@ const SectionSkeleton = () => (
 
           <div className="flex-1 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-primary/10 border border-cyber-primary/20 text-cyber-primary text-[10px] font-black tracking-widest uppercase mb-6">
-              <Shield size={12} /> SECURED_PATH // {section.id.substring(0, 8)}
+              <Shield size={12} /> {t('sections.securedPath')} // {section.id.substring(0, 8)}
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-tight drop-shadow-sm">
               {section.title}
@@ -396,7 +399,7 @@ const SectionSkeleton = () => (
               <div className="bg-cyber-800/40 border border-cyber-700/50 rounded-3xl p-8 backdrop-blur-xl relative shadow-xl">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-cyber-500 uppercase tracking-widest">Section Pulse</span>
+                    <span className="text-[10px] font-black text-cyber-500 uppercase tracking-widest">{t('sections.pulse')}</span>
                     <span className="text-3xl font-black text-white flex items-center gap-1">
                       {progressPercentage}%
                       <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse"></div>
@@ -416,9 +419,9 @@ const SectionSkeleton = () => (
                   </div>
                   
                   <div className="flex items-center justify-between font-mono text-[11px] text-cyber-500 font-bold px-1">
-                    <span>{completedTopics} PASSED</span>
+                    <span>{completedTopics} {t('sections.passed')}</span>
                     <span className="opacity-50">/</span>
-                    <span>{totalTopics} TOTAL</span>
+                    <span>{totalTopics} {t('sections.total')}</span>
                   </div>
                 </div>
 
@@ -433,9 +436,9 @@ const SectionSkeleton = () => (
                   >
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                     {progressPercentage === 100 ? (
-                      <><CheckCircle size={18} /> MISSION_ACCOMPLISHED</>
+                      <><CheckCircle size={18} /> {t('sections.missionAccomplished')}</>
                     ) : (
-                      <><Play size={18} className="fill-current" /> {completedTopics === 0 ? 'COMMENCE_MISSION' : 'RESUME_MISSION'}</>
+                      <><Play size={18} className="fill-current" /> {completedTopics === 0 ? t('sections.commenceMission') : t('sections.resumeMission')}</>
                     )}
                   </Link>
                 </div>
@@ -454,7 +457,7 @@ const SectionSkeleton = () => (
           `}
         >
           {activeTab === 'content' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-cyber-primary rounded-full blur-[2px]"></div>}
-          Curriculum
+          {t('sections.curriculum')}
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
@@ -464,7 +467,7 @@ const SectionSkeleton = () => (
         >
           <Trophy size={16} />
           {activeTab === 'leaderboard' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-amber-400 rounded-full blur-[2px]"></div>}
-          Leaderboard
+          {t('sections.leaderboard')}
         </button>
       </div>
 
@@ -497,11 +500,11 @@ const SectionSkeleton = () => (
                         <div className="flex items-center gap-3 mt-1">
                           {module.isLocked && (
                             <div className="flex items-center gap-1.5 text-[8px] font-black px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full tracking-widest">
-                              <Lock size={8} /> LOCKED
+                              <Lock size={8} /> {t('sections.locked').toUpperCase()}
                             </div>
                           )}
                           <span className="text-[10px] font-black text-cyber-500 uppercase tracking-widest flex items-center gap-1.5">
-                            <Layers size={10} /> {(module.groups?.reduce((acc, g) => acc + g.topics.length, 0) || 0) + (module.ungroupedTopics?.length || 0)} Topics
+                            <Layers size={10} /> {(module.groups?.reduce((acc, g) => acc + g.topics.length, 0) || 0) + (module.ungroupedTopics?.length || 0)} {t('sections.topicsCountLabel')}
                           </span>
                         </div>
                       </div>
@@ -526,9 +529,9 @@ const SectionSkeleton = () => (
                           <div className="w-16 h-16 rounded-2xl bg-cyber-900/80 border border-cyber-800 flex items-center justify-center mb-4 shadow-xl">
                             <Lock size={24} className="text-red-500/50" />
                           </div>
-                          <h3 className="text-lg font-bold text-white uppercase tracking-widest">Access Restricted</h3>
+                          <h3 className="text-lg font-bold text-white uppercase tracking-widest">{t('sections.restricted')}</h3>
                           <p className="text-cyber-500 text-sm max-w-sm mt-2 leading-relaxed font-medium">
-                            Reach out to your instructor to unlock this sector.
+                            {t('sections.restrictedDesc')}
                           </p>
                         </div>
                       ) : (
@@ -564,7 +567,7 @@ const SectionSkeleton = () => (
                                <div className="flex items-center gap-2 px-1">
                                   <div className="w-1 h-1 rounded-full bg-cyber-500"></div>
                                   <h3 className="text-[10px] font-black text-cyber-500 uppercase tracking-[0.2em]">
-                                    General Intel
+                                    {t('sections.generalIntel')}
                                   </h3>
                                 </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -583,7 +586,7 @@ const SectionSkeleton = () => (
 
                           {(!module.groups?.length && !module.ungroupedTopics?.length) && (
                             <div className="py-12 text-center flex flex-col items-center">
-                              <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic">Sector is empty.</p>
+                              <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic">{t('sections.emptySector')}</p>
                             </div>
                           )}
                         </div>
