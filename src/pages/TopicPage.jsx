@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useProgress } from '../hooks/useProgress';
 import BlockRenderer from '../components/BlockRenderer';
 import { ChevronRight, ChevronLeft, CheckCircle, User, Award, Box, ShieldAlert } from 'lucide-react';
-import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const TopicSkeleton = () => (
@@ -49,7 +49,7 @@ const TopicSkeleton = () => (
 const TopicPage = () => {
   const { sectionId, topicId } = useParams();
   const navigate = useNavigate();
-  const { isAdmin, isSuperAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin, user } = useAuth();
   const { isLearningMode } = useMode();
   const { t, isRTL } = useLanguage();
   const { markTopicComplete, updateLastAccessed, getUserProgress, awardPoints } = useProgress();
@@ -62,9 +62,11 @@ const TopicPage = () => {
   const [sectionLoading, setSectionLoading] = useState(true);
   const [nextTopicId, setNextTopicId] = useState(null);
   
-  // Progress state
+  // Progress & Notes state
   const [passedChallenges, setPassedChallenges] = useState(new Set());
   const [isCompleted, setIsCompleted] = useState(false);
+  const [userNotes, setUserNotes] = useState({});
+
   const quizBlocks = blocks.filter(b => b.type === 'quiz');
   const totalChallenges = quizBlocks.length;
   const allPassed = totalChallenges > 0 && quizBlocks.every(block => passedChallenges.has(block.id));
@@ -163,6 +165,48 @@ const TopicPage = () => {
       unsubscribers.forEach(unsub => unsub());
     };
   }, [topicId, sectionId]);
+
+  // Fetch User Notes
+  useEffect(() => {
+    if (!user || !topicId) return;
+    const fetchNotes = async () => {
+      try {
+        const docRef = doc(db, 'userNotes', `${user.uid}_${topicId}`);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          setUserNotes(snap.data().notes || {});
+        }
+      } catch (err) {
+        console.error("Error fetching user notes:", err);
+      }
+    };
+    fetchNotes();
+  }, [user, topicId]);
+
+  const handleSaveNote = async (blockId, noteText) => {
+    if (!user || !topicId) return;
+    
+    // Optimistic update
+    const newNotes = { ...userNotes };
+    if (!noteText) {
+        delete newNotes[blockId];
+    } else {
+        newNotes[blockId] = noteText;
+    }
+    setUserNotes(newNotes);
+
+    try {
+        const docRef = doc(db, 'userNotes', `${user.uid}_${topicId}`);
+        await setDoc(docRef, {
+            userId: user.uid,
+            topicId,
+            notes: newNotes,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+    } catch (err) {
+        console.error("Error saving note:", err);
+    }
+  };
 
   // Check if topic is already completed
   useEffect(() => {
@@ -349,6 +393,8 @@ const TopicPage = () => {
                 onToggle={handleUpdate}
                 onSuccess={handleChallengeSuccess}
                 isPassed={passedChallenges.has(block.id)}
+                userNote={userNotes[block.id]}
+                onSaveNote={handleSaveNote}
               />
             );
           });

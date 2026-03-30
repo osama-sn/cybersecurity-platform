@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
-import { GripVertical, X, Plus, ChevronRight } from 'lucide-react';
+import { GripVertical, X, Plus, ChevronRight, Loader2, UploadCloud } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import BlockRenderer from '../BlockRenderer';
+import { uploadToTelegram, getTelegramFileUrl } from '../../utils/telegram';
 
 // Renders the block content in "edit mode" - a simple textarea or input
 const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
@@ -66,24 +67,76 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
     }
 
     if (block.type === 'image') {
+        const [isUploading, setIsUploading] = useState(false);
+        const [previewUrl, setPreviewUrl] = useState('');
+
+        useEffect(() => {
+            let isMounted = true;
+            if (block.content?.startsWith('tg://')) {
+                const fileId = block.content.replace('tg://', '');
+                getTelegramFileUrl(fileId)
+                    .then(url => { if (isMounted) setPreviewUrl(url); })
+                    .catch(err => console.error("Preview load failed", err));
+            } else {
+                setPreviewUrl(block.content || '');
+            }
+            return () => { isMounted = false; };
+        }, [block.content]);
+
+        const handleFileUpload = async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setIsUploading(true);
+            try {
+                const fileId = await uploadToTelegram(file);
+                onChange({ ...block, content: `tg://${fileId}` });
+            } catch (err) {
+                console.error("Upload error:", err);
+                alert("Failed to upload image. Please try again.");
+            } finally {
+                setIsUploading(false);
+            }
+        };
+
         return (
-            <div className="space-y-2">
-                <input
-                    ref={inputRef}
-                    className={`${baseClass} text-cyber-300`}
-                    value={block.content}
-                    onChange={e => onChange({ ...block, content: e.target.value })}
-                    onKeyDown={onKeyDown}
-                    placeholder="Paste Image URL..."
-                    dir="ltr"
-                />
-                {block.content && (
-                    <img
-                        src={block.content}
-                        alt="Preview"
-                        className="max-w-full h-auto rounded-lg border border-cyber-700 mt-2 max-h-96 object-contain bg-black/20"
-                        onError={(e) => e.target.style.display = 'none'}
+            <div className="space-y-2 w-full my-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-pink-400 font-mono uppercase tracking-widest flex items-center gap-2">
+                        <UploadCloud size={14} /> Image Block
+                    </span>
+                </div>
+                <div className="flex gap-2">
+                    <input
+                        ref={inputRef}
+                        className={`${baseClass} flex-1 text-cyber-300 bg-cyber-900/30 border border-cyber-700 rounded-lg px-4 py-2 text-sm`}
+                        value={block.content}
+                        onChange={e => onChange({ ...block, content: e.target.value })}
+                        onKeyDown={onKeyDown}
+                        placeholder="Paste Image URL or browse file..."
+                        dir="ltr"
                     />
+                    <label className={`btn px-4 py-2 cursor-pointer flex items-center justify-center shrink-0 min-w-[120px] ${isUploading ? 'btn-outline border-cyber-600 text-cyber-500 cursor-not-allowed' : 'btn-primary'}`}>
+                        {isUploading ? (
+                            <><Loader2 size={16} className="animate-spin mr-2" /> Uploading...</>
+                        ) : (
+                            'Browse File'
+                        )}
+                        <input type="file" className="hidden" accept="image/*,video/*" onChange={handleFileUpload} disabled={isUploading} />
+                    </label>
+                </div>
+                {previewUrl && (
+                    <div className="bg-black/20 p-2 rounded-xl border border-cyber-700 mt-2">
+                        {previewUrl.includes('.mp4') || previewUrl.match(/\.(webm|ogg)(\?|$)/) ? (
+                            <video src={previewUrl} controls className="max-w-full h-auto rounded-lg mx-auto max-h-[400px]" />
+                        ) : (
+                            <img
+                                src={previewUrl}
+                                alt="Preview"
+                                className="max-w-full h-auto rounded-lg mx-auto max-h-[400px] object-contain"
+                                onError={(e) => e.target.style.display = 'none'}
+                            />
+                        )}
+                    </div>
                 )}
             </div>
         );

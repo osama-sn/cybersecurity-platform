@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight } from 'lucide-react';
+import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight, MessageSquare, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { getTelegramFileUrl } from '../utils/telegram';
 
 const CopyButton = ({ text }) => {
     const [copied, setCopied] = useState(false);
@@ -367,7 +368,128 @@ const ToggleBlock = ({ block, children }) => {
     );
 };
 
+const ImageBlockRenderer = ({ block }) => {
+    const [previewUrl, setPreviewUrl] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        if (block.content?.startsWith('tg://')) {
+            setLoading(true);
+            const fileId = block.content.replace('tg://', '');
+            getTelegramFileUrl(fileId)
+                .then(url => { if (isMounted) { setPreviewUrl(url); setLoading(false); } })
+                .catch(err => { console.error("Image load failed", err); if (isMounted) setLoading(false); });
+        } else {
+            setPreviewUrl(block.content || '');
+        }
+        return () => { isMounted = false; };
+    }, [block.content]);
+
+    if (loading) {
+        return (
+            <div className="my-6 w-full h-48 bg-cyber-900/50 rounded-xl border border-cyber-700 flex items-center justify-center text-cyber-500 animate-pulse">
+                <Loader2 size={24} className="animate-spin" />
+            </div>
+        );
+    }
+
+    if (!previewUrl) return null;
+
+    if (previewUrl.includes('.mp4') || previewUrl.match(/\.(webm|ogg)(\?|$)/)) {
+        return (
+            <div className="my-6">
+                <video src={previewUrl} controls className="w-full h-auto rounded-xl shadow-lg border border-cyber-700 bg-black/50" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="my-6">
+            <img
+                src={previewUrl}
+                alt="Content"
+                className="w-full h-auto rounded-xl shadow-lg border border-cyber-700 bg-black/50"
+                loading="lazy"
+            />
+        </div>
+    );
+};
+
+const BlockNote = ({ note, onSave }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [text, setText] = useState(note || '');
+
+    useEffect(() => {
+        setText(note || '');
+    }, [note]);
+
+    if (!isEditing && !note) {
+        return (
+            <button
+                onClick={() => setIsEditing(true)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[120%] lg:translate-x-full ml-2 opacity-0 group-hover/block:opacity-100 transition-opacity p-2 text-cyber-600 hover:text-fuchsia-400 bg-cyber-900/80 backdrop-blur rounded-lg border border-transparent hover:border-fuchsia-500/30 z-10"
+                title="Add a private note here"
+            >
+                <MessageSquare size={16} />
+            </button>
+        );
+    }
+
+    if (!isEditing && note) {
+        return (
+            <div className="mt-3 bg-fuchsia-500/10 border-l-2 border-fuchsia-500 p-3 rounded-r-lg group/note relative text-sm w-full">
+                <div className="flex items-center gap-2 mb-1.5">
+                    <MessageSquare size={12} className="text-fuchsia-400" /> 
+                    <span className="text-[9px] font-black uppercase tracking-widest text-fuchsia-400">Your Private Note</span>
+                </div>
+                <div className="text-fuchsia-200/90 whitespace-pre-wrap leading-relaxed" dir="auto">{note}</div>
+                <button
+                    onClick={() => setIsEditing(true)}
+                    className="absolute top-2 right-2 opacity-0 group-hover/note:opacity-100 p-1.5 text-fuchsia-400 hover:text-white bg-black/40 rounded hover:bg-fuchsia-500/50 transition-colors"
+                >
+                    Edit
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-3 bg-cyber-900 border border-cyber-700 hover:border-fuchsia-500/50 rounded-lg p-3 transition-colors shadow-2xl relative z-20 w-full animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <MessageSquare size={14} className="text-fuchsia-400" /> 
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Write Private Note</span>
+                </div>
+            </div>
+            <textarea
+                autoFocus
+                className="w-full bg-black/40 text-sm text-fuchsia-100 outline-none resize-none min-h-[80px] rounded p-3 border border-cyber-800 focus:border-fuchsia-500/50 transition-colors"
+                placeholder="What are your thoughts on this section? (visible only to you)"
+                value={text}
+                onChange={e => setText(e.target.value)}
+                dir="auto"
+            />
+            <div className="flex justify-end gap-2 mt-3">
+                <button
+                    onClick={() => { setIsEditing(false); setText(note || ''); }}
+                    className="text-[10px] font-bold uppercase tracking-wider text-cyber-500 hover:text-white px-3 py-1.5 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={() => { onSave(text.trim()); setIsEditing(false); }}
+                    className="text-[10px] font-black uppercase tracking-widest bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50 hover:bg-fuchsia-500 hover:text-white px-4 py-1.5 rounded transition-all shadow-[0_0_15px_rgba(217,70,239,0.1)] hover:shadow-[0_0_20px_rgba(217,70,239,0.4)]"
+                >
+                    Save Note
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const TableBlock = ({ content }) => {
+
     // Basic Markdown Table Parser
     const lines = content.trim().split('\n');
     const headers = lines[0]?.split('|').slice(1, -1).map(h => h.trim()) || [];
@@ -409,7 +531,7 @@ const TableBlock = ({ content }) => {
     );
 };
 
-const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, isPassed }) => {
+const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, isPassed, userNote, onSaveNote }) => {
     const { t } = useLanguage();
 
     // Utility for style commonalities
@@ -434,18 +556,27 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
     const parseMarkdown = (text) => {
         if (!text) return '';
-        // Simple parser for basic markdown
         let html = text
+            // Markdown Links [text](url)
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4 break-all">$1</a>')
             // Bold **text**
             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
             // Italic *text*
             .replace(/\*(.*?)\*/g, '<em class="text-cyber-400 italic">$1</em>')
             // Inline Code `text`
-            .replace(/`([^`]+)`/g, '<code class="bg-cyber-800 text-cyber-300 px-1.5 py-0.5 rounded font-mono text-sm border border-cyber-700">$1</code>')
-            // Wrapper Link [text](url)
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4">$1</a>');
+            .replace(/`([^`]+)`/g, '<code class="bg-cyber-800 text-cyber-300 px-1.5 py-0.5 rounded font-mono text-sm border border-cyber-700">$1</code>');
+            
+        // Auto-link raw URLs that are not part of an <a> tag
+        html = html.replace(/(<a [^>]+>.*?<\/a>)|(https?:\/\/[^\s<]+)/g, (match, aTag, url) => {
+            if (aTag) return aTag;
+            // It's a raw URL, wrap it
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-cyber-primary hover:underline underline-offset-4 break-all">${url}</a>`;
+        });
+        
         return html;
     };
+
+    const renderContent = () => {
 
     switch (block.type) {
         case 'table':
@@ -560,16 +691,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             return <YouTubeBlock url={block.content} />;
 
         case 'image':
-            return (
-                <div className="my-6">
-                    <img
-                        src={block.content}
-                        alt="Content"
-                        className="w-full h-auto rounded-xl shadow-lg border border-cyber-700"
-                        loading="lazy"
-                    />
-                </div>
-            );
+            return <ImageBlockRenderer block={block} />;
 
 
 
@@ -604,6 +726,21 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
         default:
             return <div className="text-red-500 p-4 border border-dashed border-red-500 rounded my-4">Unsupported block type: {block.type}</div>;
     }
+    };
+    
+    const content = renderContent();
+    if (isEditor) return content;
+    
+    const canHaveNote = block.type !== 'divider' && block.type !== 'quiz';
+
+    return (
+        <div className="relative group/block w-full">
+            {content}
+            {canHaveNote && (
+                <BlockNote note={userNote} onSave={(text) => onSaveNote?.(block.id, text)} />
+            )}
+        </div>
+    );
 };
 
 export default BlockRenderer;
