@@ -296,6 +296,7 @@ export const translations = {
         common: {
             loading: "جاري التحميل...",
             back: "رجوع",
+            cancel: "إلغاء",
             adminArea: "منطقة المشرف"
         }
     },
@@ -596,6 +597,7 @@ export const translations = {
         common: {
             loading: "Loading...",
             back: "Back",
+            cancel: "Cancel",
             adminArea: "Admin Area"
         }
     }
