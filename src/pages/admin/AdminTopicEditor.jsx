@@ -5,7 +5,7 @@ import {
     addDoc, deleteDoc, serverTimestamp, updateDoc, writeBatch
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { ArrowLeft, CheckCircle, Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2, Plus, MessageSquare } from 'lucide-react';
 import EditorBlock from '../../components/NotionEditor/EditorBlock';
 import SlashMenu from '../../components/NotionEditor/SlashMenu';
 
@@ -40,6 +40,7 @@ const AdminTopicEditor = () => {
     const [activeBlockId, setActiveBlockId] = useState(null);
     const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
     const [selectedBlockIds, setSelectedBlockIds] = useState(new Set());
+    const [feedbacks, setFeedbacks] = useState([]);
 
     // Topic details editing
     const [isEditingTopic, setIsEditingTopic] = useState(false);
@@ -93,6 +94,30 @@ const AdminTopicEditor = () => {
             setBlocks(loaded.length > 0 ? loaded : [newBlock('text')]);
         };
         fetchBlocks();
+
+        const fetchFeedbacks = async () => {
+            const q = query(
+                collection(db, 'topicFeedback'),
+                where('topicId', '==', topicId),
+                orderBy('createdAt', 'desc')
+            );
+            try {
+                const snap = await getDocs(q);
+                setFeedbacks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            } catch (err) {
+                console.warn("Failed to fetch feedbacks or missing index. Trying without order...", err);
+                const fallbackQ = query(collection(db, 'topicFeedback'), where('topicId', '==', topicId));
+                try {
+                    const fallbackSnap = await getDocs(fallbackQ);
+                    const fbList = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    fbList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                    setFeedbacks(fbList);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        };
+        fetchFeedbacks();
     }, [topicId]);
 
     // ── Auto-save (debounced) ──────────────────────────────────────────────────
@@ -691,6 +716,28 @@ const AdminTopicEditor = () => {
                     )}
                 </div>
             </div>
+
+            {/* ── Student Reviews ── */}
+            {feedbacks.length > 0 && (
+                <div className="mb-8 p-6 bg-cyber-900/30 border border-cyber-800/60 rounded-2xl relative overflow-hidden group/feedback">
+                    <h3 className="text-sm font-black text-cyber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <MessageSquare size={14} className="text-cyber-primary" /> Anonymous Student Feedback ({feedbacks.length})
+                    </h3>
+                    <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                        {feedbacks.map(fb => (
+                            <div key={fb.id} className="min-w-[280px] w-[280px] bg-cyber-950 border border-cyber-700/50 p-4 rounded-xl shrink-0 shadow-lg relative">
+                                <div className="absolute top-0 right-0 p-3 opacity-10">
+                                    <MessageSquare size={40} />
+                                </div>
+                                <p className="text-cyber-300 text-sm whitespace-pre-wrap italic relative z-10" dir="auto">"{fb.content}"</p>
+                                <p className="text-[10px] text-cyber-600 font-mono mt-4 text-right">
+                                    {fb.createdAt?.toDate ? fb.createdAt.toDate().toLocaleDateString() : 'Just now'}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* ── Editor Canvas ── */}
             <div

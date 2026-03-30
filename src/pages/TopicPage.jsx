@@ -6,8 +6,8 @@ import { useMode } from '../context/ModeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useProgress } from '../hooks/useProgress';
 import BlockRenderer from '../components/BlockRenderer';
-import { ChevronRight, ChevronLeft, CheckCircle, User, Award, Box, ShieldAlert } from 'lucide-react';
-import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import { ChevronRight, ChevronLeft, CheckCircle, User, Award, Box, ShieldAlert, MessageSquare, Loader2 } from 'lucide-react';
+import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const TopicSkeleton = () => (
@@ -62,10 +62,13 @@ const TopicPage = () => {
   const [sectionLoading, setSectionLoading] = useState(true);
   const [nextTopicId, setNextTopicId] = useState(null);
   
-  // Progress & Notes state
+  // Progress & Notes & Feedback state
   const [passedChallenges, setPassedChallenges] = useState(new Set());
   const [isCompleted, setIsCompleted] = useState(false);
   const [userNotes, setUserNotes] = useState({});
+  const [feedback, setFeedback] = useState('');
+  const [isFeedbackSubmitting, setIsFeedbackSubmitting] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const quizBlocks = blocks.filter(b => b.type === 'quiz');
   const totalChallenges = quizBlocks.length;
@@ -205,6 +208,25 @@ const TopicPage = () => {
         }, { merge: true });
     } catch (err) {
         console.error("Error saving note:", err);
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (!feedback.trim()) return;
+    setIsFeedbackSubmitting(true);
+    try {
+      await addDoc(collection(db, 'topicFeedback'), {
+        topicId,
+        sectionId,
+        content: feedback.trim(),
+        createdAt: serverTimestamp()
+      });
+      setFeedbackSubmitted(true);
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      alert("Failed to submit feedback.");
+    } finally {
+      setIsFeedbackSubmitting(false);
     }
   };
 
@@ -419,6 +441,49 @@ const TopicPage = () => {
               <p className="text-emerald-500/80 text-sm">You have successfully completed all challenges in this topic.</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Anonymous Feedback Section (Visible after completion) */}
+      {(isCompleted || allPassed) && !isAdmin && !isSuperAdmin && (
+        <div className="mt-12 p-6 bg-cyber-900/30 border border-cyber-800 rounded-2xl animate-fade-in">
+          <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+            <MessageSquare size={18} className="text-cyber-primary" />
+            Anonymous Content Review
+          </h3>
+          <p className="text-sm text-cyber-400 mb-4">
+            Help us improve our material! Leave anonymous feedback on this topic (only admins can see this).
+          </p>
+          
+          {feedbackSubmitted ? (
+            <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+              <CheckCircle size={18} />
+              <p className="text-sm font-bold">Thank you for your feedback!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <textarea
+                className="w-full bg-black/40 border border-cyber-700 focus:border-cyber-primary rounded-xl p-4 text-sm text-cyber-300 min-h-[100px] resize-none outline-none transition-colors"
+                placeholder="Was anything confusing? Or was it great? Let us know..."
+                value={feedback}
+                onChange={e => setFeedback(e.target.value)}
+                dir="auto"
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handleFeedbackSubmit}
+                  disabled={!feedback.trim() || isFeedbackSubmitting}
+                  className="btn btn-primary px-6 py-2 text-xs font-bold uppercase tracking-widest flex items-center gap-2"
+                >
+                  {isFeedbackSubmitting ? (
+                    <><Loader2 size={14} className="animate-spin" /> Submitting...</>
+                  ) : (
+                    'Submit Review'
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
