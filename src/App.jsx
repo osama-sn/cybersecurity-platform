@@ -8,6 +8,7 @@ import About from './pages/About';
 import SectionsList from './pages/SectionsList';
 import SectionPage from './pages/SectionPage';
 import TopicPage from './pages/TopicPage';
+import Diploma from './pages/Diploma';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminSection from './pages/admin/AdminSection';
@@ -36,6 +37,7 @@ function App() {
                 <Route path="sections" element={<SectionsList />} />
                 <Route path="sections/:sectionId" element={<SectionPage />} />
                 <Route path="sections/:sectionId/topics/:topicId" element={<TopicPage />} />
+                <Route path="diploma" element={<Diploma />} />
                 <Route path="profile" element={
                   <ProtectedRoute>
                     <Settings />

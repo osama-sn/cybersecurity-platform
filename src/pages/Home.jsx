@@ -135,6 +135,42 @@ const Home = () => {
         </div>
       </section>
 
+      {/* 1.5 Promo Banner for Diploma */}
+      <ScrollReveal direction="up">
+        <section className="relative group overflow-hidden rounded-[2rem] border border-cyber-primary/30 p-8 md:p-12 mt-4 mx-2 md:mx-0 bg-cyber-900/60 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyber-900 via-cyber-800 to-cyber-900 opacity-80 z-0"></div>
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyber-primary to-transparent z-10 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-cyber-primary/20 rounded-full blur-[80px] z-0 pointer-events-none group-hover:bg-cyber-primary/30 transition-colors"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 font-arabic">
+            <div className="space-y-4 text-center md:text-start flex-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyber-primary/10 border border-cyber-primary/30 rounded-full text-cyber-primary font-bold text-sm">
+                <Target size={16} /> مميز جداً
+              </div>
+              <h3 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Penetration Testing Diploma
+              </h3>
+              <p className="text-cyber-300 text-lg md:text-xl font-bold">
+                From Zero → Certification Ready <span className="text-cyber-500 font-normal">| 6 Months</span>
+              </p>
+              <p className="text-cyber-400 max-w-2xl leading-relaxed mt-2">
+                لو انت مستعد تتعب، تفهم، وتكمل للآخر فانت داخل على طريق هيغيّر مستقبلك.
+                مختبرات حقيقية، شهادة معتمدة، وفرص عمل لأفضل المتدربين.
+              </p>
+            </div>
+            
+            <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
+              <Link 
+                to="/diploma" 
+                className="btn btn-primary px-8 py-4 text-lg rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2 group-hover:scale-105"
+              >
+                <BookOpen size={20} /> عرض تفاصيل الكورس
+              </Link>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
       {/* 2. Quick About */}
       <ScrollReveal direction="up">
         <section className="card bg-cyber-900/40 border-l-4 border-l-cyber-primary hover:border-l-emerald-400 transition-colors">

@@ -117,6 +117,9 @@ const Sidebar = ({ isOpen, onClose }) => {
           <NavLink to="/" className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-800 text-white' : 'text-cyber-400 hover:text-cyber-200'}`}>
             <span>{t('sidebar.home')}</span>
           </NavLink>
+          <NavLink to="/diploma" className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-800 text-primary' : 'text-cyber-400 hover:text-cyber-primary font-bold'}`}>
+            <span>كورس تدريب الاختراق</span>
+          </NavLink>
           <NavLink to="/about" className={({ isActive }) => `flex items-center gap-2 p-2 rounded-md transition-colors ${isActive ? 'bg-cyber-800 text-white' : 'text-cyber-400 hover:text-cyber-200'}`}>
             <span>{t('sidebar.about')}</span>
           </NavLink>
