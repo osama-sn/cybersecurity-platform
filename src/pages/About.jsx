@@ -81,7 +81,7 @@ const About = () => {
                 Osama Essam
               </h1>
               <p className="text-xl md:text-2xl text-cyber-primary font-bold font-mono">
-                Senior Penetration Tester | Offensive Security Researcher
+                Penetration Tester | Offensive Security Researcher
               </p>
             </motion.div>
 
@@ -104,10 +104,10 @@ const About = () => {
             {/* Summary */}
             <motion.div variants={itemVariants} className="space-y-3 max-w-3xl">
               <p className="text-lg text-cyber-100 leading-relaxed font-medium">
-                Elite Penetration Tester and Offensive Security Researcher with a proven track record of discovering critical vulnerabilities in enterprise environments, including high-impact Remote Code Execution and Remote Access flaws.
+                Penetration Tester and Offensive Security Researcher with a proven track record of discovering critical vulnerabilities in enterprise environments, including high-impact Remote Code Execution and Remote Access flaws.
               </p>
               <p className="text-base text-cyber-400 leading-relaxed">
-                Master of offensive security tactics, advanced web exploitation, and intricate network penetration testing methodologies. Actively shaping the cybersecurity landscape by engineering elite educational resources and elevating industry standards through cutting-edge threat research.
+                Master of offensive security tactics, advanced web exploitation, and intricate network penetration testing methodologies. Actively shaping the cybersecurity landscape by engineering  educational resources and elevating industry standards through cutting-edge threat research.
               </p>
             </motion.div>
 
@@ -217,7 +217,7 @@ const About = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-white">
-                  Senior Security Researcher & Bug Bounty Hunter
+                  Security Researcher & Bug Bounty Hunter
                 </h3>
                 <p className="text-cyber-primary font-mono text-sm mt-1">Independent Operations</p>
               </div>
@@ -282,7 +282,7 @@ const About = () => {
                     <BookOpen size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Elite Infosec Knowledge Base</h3>
+                    <h3 className="text-xl font-bold text-white"> Infosec Knowledge Base</h3>
                     <p className="text-sm text-cyber-400 mt-1">High-Tier Writeups & Strategic Attack Roadmaps</p>
                   </div>
                 </div>
@@ -348,7 +348,7 @@ const About = () => {
               Ready to Secure Your Perimeter?
             </h2>
             <p className="text-cyber-300 text-lg leading-relaxed">
-              Open to elite penetration testing engagements and collaborative security research opportunities capable of shaping the future of enterprise defense.
+              Open to  penetration testing engagements and collaborative security research opportunities capable of shaping the future of enterprise defense.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
               <a href="mailto:osamaessamkhalifa@gmail.com" className="btn btn-primary text-xl px-12 py-4 rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.25)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105 font-bold uppercase tracking-wider">
