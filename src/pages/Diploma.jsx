@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Rocket, Shield, Trophy, Target, BookOpen, Users, CreditCard, 
   FileText, CheckCircle2, Award, Briefcase, Zap, Brain, Terminal, 
-  Heart, LineChart, ChevronDown, MonitorPlay, Code, Database 
+  Heart, LineChart, ChevronDown, MonitorPlay, Code, Database, Bug
 } from 'lucide-react';
 import ScrollReveal from '../components/animations/ScrollReveal';
 import { useLanguage } from '../context/LanguageContext';

@@ -1,0 +1,232 @@
+
+> cybersecurity-platform@0.0.0 lint
+> eslint .
+
+
+D:\cyper security\my_website\cybersecurity-platform\src\components\BlockRenderer.jsx
+  134:13  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+  148:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  146 |     useEffect(() => {
+  147 |         if (isPassed) {
+> 148 |             setShowResult(true);
+      |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  149 |             if (challengeType === 'multiple_choice') {
+  150 |                 setSelectedOption(correctOption);
+  151 |             } else {                                                                                                  react-hooks/set-state-in-effect
+  346:31  error  'children' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+  378:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  376 |         let isMounted = true;
+  377 |         if (block.content?.startsWith('tg://')) {
+> 378 |             setLoading(true);
+      |             ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  379 |             const fileId = block.content.replace('tg://', '');
+  380 |             getTelegramFileUrl(fileId)
+  381 |                 .then(url => { if (isMounted) { setPreviewUrl(url); setLoading(false); } })  react-hooks/set-state-in-effect
+  424:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  422 |
+  423 |     useEffect(() => {
+> 424 |         setText(note || '');
+      |         ^^^^^^^ Avoid calling setState() directly within an effect
+  425 |     }, [note]);
+  426 |
+  427 |     if (!isEditing && !note) {                                                                                                                                                                                                                       react-hooks/set-state-in-effect
+  591:13  error  Unexpected lexical declaration in case block                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-case-declarations
+  592:13  error  Unexpected lexical declaration in case block                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-case-declarations
+
+D:\cyper security\my_website\cybersecurity-platform\src\components\LeaderboardView.jsx
+  10:11  error  'isRTL' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  10:18  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  15:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  13 |     if (!sectionId) return;
+  14 |
+> 15 |     setLoading(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |     const leaderboardsRef = collection(db, 'leaderboards');
+  17 |     const q = query(
+  18 |       leaderboardsRef,  react-hooks/set-state-in-effect
+
+D:\cyper security\my_website\cybersecurity-platform\src\components\NotionEditor\EditorBlock.jsx
+   91:8   warning  React Hook useEffect has a missing dependency: 'inputRef'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  335:12  error    'isHovered' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+  339:11  error    'getDirection' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                 no-unused-vars
+  353:73  error    Empty block statement                                                                                        no-empty
+
+D:\cyper security\my_website\cybersecurity-platform\src\components\NotionEditor\SlashMenu.jsx
+   35:24  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  33 |         try {
+  34 |             const saved = localStorage.getItem('recentBlocks');
+> 35 |             if (saved) setRecents(JSON.parse(saved));
+     |                        ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  36 |         } catch (e) { console.error('Failed to load recent blocks', e); }
+  37 |     }, []);
+  38 |  react-hooks/set-state-in-effect
+   73:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  71 |
+  72 |     useEffect(() => {
+> 73 |         setActiveIndex(0);
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  74 |     }, [query]);
+  75 |
+  76 |     useEffect(() => {                                                                                                                                               react-hooks/set-state-in-effect
+  103:8   warning  React Hook useEffect has a missing dependency: 'handleSelect'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+
+D:\cyper security\my_website\cybersecurity-platform\src\components\animations\ScrollReveal.jsx
+  1:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\context\AuthContext.jsx
+  8:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\cyper security\my_website\cybersecurity-platform\src\context\DataContext.jsx
+   3:22  error  'getDocs' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                  no-unused-vars
+   7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  36:11  error  'getModules' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                      no-unused-vars
+  36:31  error  'sectionId' is defined but never used                                                                                           no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\context\LanguageContext.jsx
+  6:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\cyper security\my_website\cybersecurity-platform\src\context\ModeContext.jsx
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\About.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\Diploma.jsx
+    2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  377:27  error  'Bug' is not defined                                                           no-undef
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\Home.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\Login.jsx
+  15:40  error    React Hook "useLanguage" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  40:18  error    'err' is defined but never used                                                                                                 no-unused-vars
+  49:8   warning  React Hook useEffect has a missing dependency: 'clearDisabledFlag'. Either include it or remove the dependency array            react-hooks/exhaustive-deps
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\SectionPage.jsx
+  291:6  warning  React Hook useEffect has a missing dependency: 'openModules.size'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\Settings.jsx
+  9:19  error  'logout' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\Signup.jsx
+  17:40  error  React Hook "useLanguage" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\TopicPage.jsx
+    3:10  error  'useData' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                  no-unused-vars
+   10:49  error  'getDocs' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                  no-unused-vars
+   63:23  error  'setNextTopicId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  395:37  error  'index' is defined but never used                                                               no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\admin\AdminModule.jsx
+   82:12  error    'dragOverIndex' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+   83:12  error    'isDraggingGroup' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+   83:29  error    'setIsDraggingGroup' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  281:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  279 |
+  280 |     useEffect(() => {
+> 281 |         fetchData();
+      |         ^^^^^^^^^ Avoid calling setState() directly within an effect
+  282 |     }, [moduleId]);
+  283 |
+  284 |     // Create a brand new topic + link it to this module  react-hooks/set-state-in-effect
+  282:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+  384:11  error    'handleDragStart' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+  385:11  error    'handleDragOver' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-unused-vars
+  387:11  error    'handleDrop' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               no-unused-vars
+  387:31  error    'targetIndex' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+  387:44  error    'targetGroupId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  426:50  error    'targetOrder' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+  657:75  error    'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+  691:70  error    'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\admin\AdminSection.jsx
+   1:31   error    'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-unused-vars
+   3:114  error    'writeBatch' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+  91:9    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  89 |
+  90 |     useEffect(() => {
+> 91 |         fetchData();
+     |         ^^^^^^^^^ Avoid calling setState() directly within an effect
+  92 |     }, [sectionId, user]); // Re-fetch if user/permissions change (though unlikely to change mid-session)
+  93 |
+  94 |     // Create a brand new module + link it to this section  react-hooks/set-state-in-effect
+  92:8    warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+
+D:\cyper security\my_website\cybersecurity-platform\src\pages\admin\AdminTopicEditor.jsx
+    5:5   error    'addDoc' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                       no-unused-vars
+    5:13  error    'deleteDoc' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                    no-unused-vars
+   54:12  error    'dragOverIndex' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+  128:8   warning  React Hook useCallback has a missing dependency: 'persistBlocks'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  278:23  error    'idsToDelete' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+  580:57  error    Unnecessary escape character: \-                                                                                    no-useless-escape
+  580:59  error    Unnecessary escape character: \*                                                                                    no-useless-escape
+  588:20  error    Unnecessary escape character: \-                                                                                    no-useless-escape
+  588:22  error    Unnecessary escape character: \*                                                                                    no-useless-escape
+  589:78  error    Unnecessary escape character: \-                                                                                    no-useless-escape
+  589:80  error    Unnecessary escape character: \*                                                                                    no-useless-escape
+  595:50  error    Unnecessary escape character: \.                                                                                    no-useless-escape
+  595:52  error    Unnecessary escape character: \)                                                                                    no-useless-escape
+
+D:\cyper security\my_website\cybersecurity-platform\src\utils\migrateData.js
+  2:39  error  'updateDoc' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  2:50  error  'doc' is defined but never used. Allowed unused vars must match /^[A-Z_]/u        no-unused-vars
+
+✖ 71 problems (64 errors, 7 warnings)
+
