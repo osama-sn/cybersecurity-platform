@@ -34,7 +34,7 @@ const Diploma = () => {
 
   const modules = [
     {
-      title: 'الأسبوع 1: Introduction',
+      title: 'Introduction',
       icon: BookOpen,
       desc: 'فهم الـ Pentesting process كاملة والمشي على Methodology صح',
       items: [
@@ -48,7 +48,7 @@ const Diploma = () => {
       outcome: 'تفهم الـ Pentesting process كاملة، تمشي على Methodology صح في أي Target، وتبدأ تفكر بعقلية Pentester'
     },
     {
-      title: 'الأسبوع 2: Recon & Enumeration',
+      title: 'Recon & Enumeration',
       icon: MonitorPlay,
       desc: 'جمع المعلومات والتعداد باستخدام Nmap',
       items: [
@@ -62,7 +62,7 @@ const Diploma = () => {
       outcome: 'تعمل Enumeration كامل لأي Network، تستخدم Nmap باحتراف، تحدد attack surface بدقة، وتتعامل مع Firewalls'
     },
     {
-      title: 'الأسبوع 3-4: Footprinting',
+      title: 'Footprinting',
       icon: Target,
       desc: 'اكتشاف الخدمات ونقاط الضعف',
       items: [
@@ -76,7 +76,7 @@ const Diploma = () => {
       outcome: 'تجمع معلومات عن أي Target، تكتشف Services و Weak Points، وتبني صورة كاملة قبل الهجوم'
     },
     {
-      title: 'الأسبوع 5: Vulnerability Assessment',
+      title: 'Vulnerability Assessment',
       icon: Shield,
       desc: 'تقييم الثغرات واكتشافها',
       items: [
@@ -90,7 +90,7 @@ const Diploma = () => {
       outcome: 'تحدد الثغرات الحقيقية، تحلل النتائج وتبني Attack Plan، وتستخدم Tools بشكل احترافي'
     },
     {
-      title: 'الأسبوع 6-8: Exploitation & Payloads',
+      title: 'Exploitation & Payloads',
       icon: Terminal,
       desc: 'نقل الملفات والهجوم وبناء الـ Shells',
       items: [
@@ -104,7 +104,7 @@ const Diploma = () => {
       outcome: 'تدخل على Systems، تبني Payloads، وتستخدم Shells باحتراف، وتتعامل مع القيود'
     },
     {
-      title: 'الأسبوع 9: Metasploit Framework',
+      title: 'Metasploit Framework',
       icon: Zap,
       desc: 'استخدام إطار العمل الأقوى للاختراق',
       items: [
@@ -118,7 +118,7 @@ const Diploma = () => {
       outcome: 'تستخدم Metasploit بشكل احترافي، تدير Sessions و Meterpreter، وتبني Exploit كامل'
     },
     {
-      title: 'الأسبوع 10-14: Web Security',
+      title: 'Web Security',
       icon: Code,
       desc: 'الفحص والهجوم على تطبيقات الويب',
       items: [
@@ -130,20 +130,6 @@ const Diploma = () => {
         'File Inclusion (LFI, RFI, PHP Wrappers)'
       ],
       outcome: 'تفصص وتهاجم تطبيقات الويب، تكتشف وتستغل XSS والـ Inclusions، وتعمل Fuzzing قوي'
-    },
-    {
-      title: 'Advanced Web: SQLi & SQLMap',
-      icon: Database,
-      desc: 'فهم عميق لقواعد البيانات وثغرات الـ SQL Injection',
-      items: [
-        'Intro to Databases & SQL Statements',
-        'Subverting Query Logic, Union Injections',
-        'Database Enum, Reading/Writing Files',
-        'SQLMap Overview & Tuning',
-        'Advanced DB Enum & Bypassing Defenses',
-        'OS Exploitation & Skills Assessment'
-      ],
-      outcome: 'تستخرج بيانات، تفهم SQL Injection بعمق، وتعمل Automation كامل للهجوم'
     }
   ];
 
@@ -332,6 +318,43 @@ const Diploma = () => {
         </div>
       </section>
 
+      {/* Course Outcomes */}
+      <section className="px-4 max-w-6xl mx-auto mb-16 mt-16 pt-16 border-t border-cyber-800">
+        <ScrollReveal direction="up">
+          <div className="card bg-gradient-to-r from-cyber-900 via-cyber-800 to-cyber-900 border border-cyber-secondary p-8 md:p-12 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyber-secondary/10 rounded-bl-full group-hover:scale-150 transition-transform" />
+            <Target size={40} className="text-cyber-secondary mb-6 relative z-10" />
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 relative z-10">مخرجات الكورس (Course Outcomes)</h3>
+            <div className="grid md:grid-cols-2 gap-6 relative z-10">
+              <div className="space-y-4">
+                <p className="flex items-start gap-3 text-cyber-300 text-lg">
+                  <CheckCircle2 size={24} className="text-cyber-secondary shrink-0 mt-1" />
+                  <span>إن شاء الله هتكون قادر على اجتياز شهادة <strong className="text-white">eJPT</strong> بكل سهولة.</span>
+                </p>
+                <p className="flex items-start gap-3 text-cyber-300 text-lg">
+                  <CheckCircle2 size={24} className="text-cyber-secondary shrink-0 mt-1" />
+                  <span>هتكون لميت من 60% لـ 70% من محتوى شهادات: <strong className="text-white">OSCP, eWPT, CPTS, PNPT</strong>.</span>
+                </p>
+                <p className="flex items-start gap-3 text-cyber-300 text-lg">
+                  <CheckCircle2 size={24} className="text-cyber-secondary shrink-0 mt-1" />
+                  <span>مؤهل تماماً للمستوى التاني واللي هيأهلك لاجتياز كل الشهادات اللي فوق.</span>
+                </p>
+              </div>
+              <div className="space-y-4">
+                <p className="flex items-start gap-3 text-cyber-300 text-lg">
+                  <Brain size={24} className="text-cyber-primary shrink-0 mt-1" />
+                  <span>هتكتسب أهم حاجة في المجال وهي <strong>عقلية الـ Pentester</strong> وإزاي بتفكر بشكل سليم، ودي أهم حاجة للشركات في أي إنترفيو مش مجرد استخدام Tools وخلاص.</span>
+                </p>
+                <p className="flex items-start gap-3 text-cyber-300 text-lg">
+                  <Briefcase size={24} className="text-cyber-primary shrink-0 mt-1" />
+                  <span>هتكتسب <strong>Soft Skills</strong> كتيرة وتفهم سوق العمل شغال إزاي، وإزاي تاخد أول وظيفة وتعدي الإنترفيو مرتاح.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
       {/* 6. How we teach & Requirements */}
       <section className="px-4 max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
         
@@ -341,22 +364,21 @@ const Diploma = () => {
             <h3 className="text-2xl font-bold text-white flex items-center gap-3">
               <Zap className="text-cyber-warning" /> متطلبات الكورس
             </h3>
-            <div className="bg-cyber-900/60 border border-cyber-800 rounded-2xl p-6 md:p-8 space-y-6">
+            <div className="bg-cyber-900/60 border border-cyber-800 rounded-2xl p-6 md:p-8 space-y-6 h-full">
               <div>
-                <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Brain size={18} className="text-cyber-primary"/> أساسيات يفضل معرفتها:</h4>
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Brain size={18} className="text-cyber-primary"/> لمن هذا الكورس؟</h4>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Networking</span>
-                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Linux CLI</span>
-                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Basics of Programming</span>
+                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Networking Basics</span>
+                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Linux Basics</span>
+                  <span className="px-3 py-1 bg-cyber-800 rounded-lg text-sm text-cyber-300">Basic Programming Experience</span>
                 </div>
-                <p className="text-sm text-cyber-500 mt-3 italic">ولو فيه أساسيات واقعة منك؟ متقلقش هنراجعها أثناء الشرح!</p>
+                <p className="text-sm text-cyber-500 mt-3 italic">ولو فيه أساسيات واقعة منك وعدينا عليها إن شاء الله هنشرحها واحنا شغالين مع بعض.</p>
               </div>
               <div className="border-t border-cyber-800 pt-6">
                 <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Terminal size={18} className="text-cyber-secondary"/> أجهزة وأدوات:</h4>
                 <ul className="space-y-2 text-cyber-300 text-sm">
-                  <li className="flex gap-2"><CheckCircle2 size={16} className="text-cyber-primary"/> لاب توب بمواصفات تسمح بالتشغيل المعقول</li>
-                  <li className="flex gap-2"><CheckCircle2 size={16} className="text-cyber-primary"/> إنترنت مستقر</li>
-                  <li className="flex gap-2"><CheckCircle2 size={16} className="text-cyber-primary"/> متصفح (مفيش داعي تسطب أدوات معقدة، كل الشغل من خلال الـ Box على المنصة)</li>
+                  <li className="flex gap-2"><CheckCircle2 size={16} className="text-cyber-primary shrink-0 mt-0.5"/> لاب توب وموبايل واتصال إنترنت مستقر</li>
+                  <li className="flex gap-2"><CheckCircle2 size={16} className="text-cyber-primary shrink-0 mt-0.5"/> مش هنحتاج نحمل Tools كتيرة، لأن كل الشغل العملي هيكون من خلال الـ Box الخاص بمنصة Hack The Box.</li>
                 </ul>
               </div>
             </div>
@@ -369,14 +391,17 @@ const Diploma = () => {
             <h3 className="text-2xl font-bold text-white flex items-center gap-3">
               <LineChart className="text-cyber-primary" /> منهجيتنا في التدريس
             </h3>
-            <div className="bg-cyber-900/60 border border-cyber-800 rounded-2xl p-6 md:p-8">
+            <div className="bg-cyber-900/60 border border-cyber-800 rounded-2xl p-6 md:p-8 h-full">
               <ul className="space-y-5">
                 {[
-                  { icon: BookOpen, text: 'هنشرح النظري خطوة خطوة وهنسألك للتأكد من استيعابك.' },
-                  { icon: MonitorPlay, text: 'تطبيق عملي مباشر على Labs حقيقية.' },
-                  { icon: Bug, text: 'حل اللاب معاك كـ Guidance، لكن مش هنجيب الـ Flag! عشان توصلها بإيدك وتتعلم.' },
-                  { icon: FileText, text: 'كل الـ Sessions والـ Notes متقسمة على المنصة بشكل خرافي.' },
-                  { icon: Brain, text: 'Skill Assessments دورية وهنساعدك فيها لحد ما تثبت المعلومات.' }
+                  { icon: BookOpen, text: 'هنشرح النظري واحدة واحدة وبنسأل في النص عشان نختبر الفهم.' },
+                  { icon: MonitorPlay, text: 'بعد النظري بيكون فيه تطبيق عملي على كل اللي اتعلمناه من خلال الـ Labs.' },
+                  { icon: Bug, text: 'هحل معاكو اللاب، بس مش هجيب الـ Flag عشان أسيبك تجرب إنت بإيدك وتجيبه وتاخد Points.' },
+                  { icon: FileText, text: 'لما نخلص الـ Session هرفعها على المنصة متقسمة وتقدر تدخل تلاقي الشرح مقسم ومُنظم.' },
+                  { icon: Target, text: 'هتراجع اللي اتعلمناه وتجاوب على أسئلة في نص المواضيع عشان تختبر فهمك وتاخد Points كمان.' },
+                  { icon: Zap, text: 'لو فيه حاجة مش فاهمها قوي، إن شاء الله نشرحها تاني خلال الـ Sessions الجاية.' },
+                  { icon: FileText, text: 'هتقدر تكتب ملاحظاتك وأنت بتذاكر على المنصة عشان تعمل لنفسك مرجع محترم ترجعله في أي وقت تحب.' },
+                  { icon: Brain, text: 'بعد كل موديول هيكون فيه Skill Assessment وم خالد إن شاء الله هيساعدكوا في حله وبيراجع على كل اللي اتعلمناه بشكل عملي.' }
                 ].map((item, i) => (
                   <li key={i} className="flex gap-4 group">
                     <div className="mt-1 p-2 bg-cyber-800 rounded-xl text-cyber-400 group-hover:text-cyber-primary group-hover:bg-cyber-900 transition-colors">
@@ -407,14 +432,16 @@ const Diploma = () => {
 
             <div className="grid md:grid-cols-2 gap-x-12 gap-y-6 relative z-10">
               {[
-                'متستعجلش… النجاح محتاج وقت وصبر.',
-                'اللي بيفرق محترف عن مبتدئ: الوقت والمجهود.',
-                'مفيش حاجة سهلة، لو كانت سهلة كان الكل عملها!',
-                'افهم متجريش تحفظ… الـ tools بتتغير بس المفهوم ثابت.',
-                'المجال محتاج ناس تقيلة بجد مش سطحية.',
-                'الدافع والنوايا السليمة بيختصروا عليك طريق طويل.',
-                'لازم صاحب يشجعك ويشاركك نفس الهدف.',
-                'متشتتش نفسك، اختار مسار وكمله للآخر.'
+                'يكون عندك هدف واضح ودافع قوي يكون سبب إنك تكمل في الظروف الصعبة وتصبر على المشاكل.',
+                'تكون نيتك لله زي إنك تنفع الأمة وتكون مصلح في الأرض بعملك.',
+                'علاقتك بالله وبالوالدين أساس التميز في أي حاجة في الدنيا والفرق بين الشخص المتميز عن غيره.',
+                'متقارنش نفسك بحد عشان متحبطش.',
+                'لما تيجي تذاكر متكروتش... افهم واتعب شوية في الأول.',
+                'متستعجلش أبداً! المجال ده محتاج مش أقل من خمس سنين فمتتوقعش توصل في شهرين.',
+                'خلي معاك صديق يشاركك نفس الاهتمام ويشجعك.',
+                'متشتتش نفسك، اختار مسار واحد وكمله للآخر، وبعدين قرر هتعمل إيه.',
+                'الفرق بين الشخص الخبير والمبتدئ هو: حط وقت ومجهود قد إيه عشان يوصل للمستوى دا.',
+                'مفيش حاجة بالساهل! لو كانت سهلة كان زمان الناس كلها بتعملها... المجال ده محتاج وحوش مش ناس ضعيفة.'
               ].map((tip, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="mt-1 w-2 h-2 rounded-full bg-cyber-primary shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
