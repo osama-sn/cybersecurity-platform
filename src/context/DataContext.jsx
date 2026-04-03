@@ -14,22 +14,24 @@ export const DataProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Real-time listener for sections
-        const q = query(collection(db, 'sections'), orderBy('order', 'asc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const sectionsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setSections(sectionsData);
-            setLoading(false);
-        }, (err) => {
-            console.error("Error fetching sections:", err);
-            setError(err);
-            setLoading(false);
-        });
+        const fetchSections = async () => {
+            try {
+                const q = query(collection(db, 'sections'), orderBy('order', 'asc'));
+                const snapshot = await getDocs(q);
+                const sectionsData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setSections(sectionsData);
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching sections:", err);
+                setError(err);
+                setLoading(false);
+            }
+        };
 
-        return () => unsubscribe();
+        fetchSections();
     }, []);
 
     // Helper to fetch modules for a section (could be optimized)

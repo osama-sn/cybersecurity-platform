@@ -78,96 +78,55 @@ const TopicPage = () => {
     if (!topicId) return;
 
     setLoading(true);
+    let isMounted = true;
     const unsubscribers = [];
 
-    try {
-      // 1. Real-time listener for Topic Details
-      const topicRef = doc(db, 'topics', topicId);
-      const unsubTopic = onSnapshot(topicRef, (topicSnap) => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Topic Details
+        const topicRef = doc(db, 'topics', topicId);
+        const topicSnap = await getDoc(topicRef);
+        
+        if (!isMounted) return;
         if (topicSnap.exists()) {
           const topicData = topicSnap.data();
           setTopic({ id: topicSnap.id, ...topicData });
-          console.log('✅ Topic updated in real-time:', topicData.title);
         } else {
           console.error("Topic not found");
           setTopic(null);
         }
-        setLoading(false);
-      }, (error) => {
-        console.error("Error listening to topic:", error);
-        setLoading(false);
-      });
-      unsubscribers.push(unsubTopic);
 
-      // 2. Real-time listener for Content Blocks
-      const blocksRef = collection(db, 'contentBlocks');
-
-      // Try with orderBy first, fallback without it
-      let blocksQuery;
-      try {
-        blocksQuery = query(blocksRef, where('topicId', '==', topicId), orderBy('order', 'asc'));
-      } catch (orderError) {
-        console.warn('OrderBy failed for blocks, using without order:', orderError);
-        blocksQuery = query(blocksRef, where('topicId', '==', topicId));
-      }
-
-      const unsubBlocks = onSnapshot(blocksQuery, (blocksSnap) => {
-        const blocksData = blocksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Sort in memory if orderBy wasn't used
-        blocksData.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        setBlocks(blocksData);
-        console.log(`✅ Content blocks updated in real-time: ${blocksData.length} blocks`);
-      }, (error) => {
-        console.error("Error listening to blocks:", error);
-        // Fallback: try without orderBy
-        const fallbackQuery = query(blocksRef, where('topicId', '==', topicId));
-        const unsubBlocksFallback = onSnapshot(fallbackQuery, (blocksSnap) => {
-          const blocksData = blocksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          blocksData.sort((a, b) => (a.order || 0) - (b.order || 0));
-          setBlocks(blocksData);
-          console.log(`✅ Content blocks updated (fallback): ${blocksData.length} blocks`);
-        });
-        unsubscribers.push(unsubBlocksFallback);
-      });
-      unsubscribers.push(unsubBlocks);
-
-      // 3. Find Next Topic (Simple placeholder logic)
-      // In real app, we would query for the next topic with higher order in same module
-      // or first topic of next module.
-
-    } catch (err) {
-      console.error("Error setting up real-time listeners:", err);
-      setLoading(false);
-    }
-
-    // 4. Fetch Section Details to check for section-level lock
-    const fetchSection = async () => {
-      if (!sectionId) {
-        setSectionLoading(false);
-        return;
-      }
-      try {
-        const sRef = doc(db, 'sections', sectionId);
-        const sSnap = await getDoc(sRef);
-        if (sSnap.exists()) {
-          setSection({ id: sSnap.id, ...sSnap.data() });
+        // 2. Fetch Content Blocks
+        const blocksRef = collection(db, 'contentBlocks');
+        const blocksQuery = query(blocksRef, where('topicId', '==', topicId), orderBy('order', 'asc'));
+        
+        let blocksSnap;
+        try {
+          blocksSnap = await getDocs(blocksQuery);
+        } catch (orderError) {
+          console.warn('OrderBy failed, falling back:', orderError);
+          blocksSnap = await getDocs(query(blocksRef, where('topicId', '==', topicId)));
         }
+
+        if (!isMounted) return;
+        const blocksData = blocksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        blocksData.sort((a, b) => (a.order || 0) - (b.order || 0));
+        setBlocks(blocksData);
+        
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching section for lock check:", err);
-      } finally {
-        setSectionLoading(false);
+        console.error("Error fetching topic data:", err);
+        if (isMounted) setLoading(false);
       }
     };
-    fetchSection();
 
-    // Cleanup function to unsubscribe from all listeners
+    fetchData();
+
     return () => {
-      console.log('🔌 Unsubscribing from real-time listeners');
+      isMounted = false;
       unsubscribers.forEach(unsub => unsub());
     };
-  }, [topicId, sectionId]);
+  }, [topicId]);
 
   // Fetch User Notes
   useEffect(() => {

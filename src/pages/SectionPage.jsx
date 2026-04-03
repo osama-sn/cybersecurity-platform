@@ -163,132 +163,128 @@ const SectionSkeleton = () => (
 
     setLoading(true);
     setModulesLoading(true);
+    let isMounted = true;
     const unsubscribers = [];
 
-    try {
-      // 1. Real-time listener for Section Details
-      const sectionRef = doc(db, 'sections', sectionId);
-      const unsubSection = onSnapshot(sectionRef, (sectionSnap) => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Section Details
+        const sectionRef = doc(db, 'sections', sectionId);
+        const sectionSnap = await getDoc(sectionRef);
+        
+        if (!isMounted) return;
         if (sectionSnap.exists()) {
           setSection({ id: sectionSnap.id, ...sectionSnap.data() });
         } else {
           setSection(null);
         }
         setLoading(false);
-      }, (error) => {
-        console.error('Error listening to section:', error);
-        setLoading(false);
-      });
-      unsubscribers.push(unsubSection);
 
-      // 2. Real-time listener for Modules via sectionModules junction
-      const junctionQuery = query(
-        collection(db, 'sectionModules'),
-        where('sectionId', '==', sectionId)
-      );
-
-      const unsubJunction = onSnapshot(junctionQuery, async (junctionSnap) => {
+        // 2. Fetch Modules via sectionModules junction
+        const junctionQuery = query(
+          collection(db, 'sectionModules'),
+          where('sectionId', '==', sectionId)
+        );
+        const junctionSnap = await getDocs(junctionQuery);
+        
         if (junctionSnap.empty) {
-          setModules([]);
+          if (isMounted) {
+            setModules([]);
+            setModulesLoading(false);
+          }
           return;
         }
 
-        const modulesData = [];
-        for (const jDoc of junctionSnap.docs) {
+        // 3. Fetch all modules and their related data in parallel
+        const modulesData = await Promise.all(junctionSnap.docs.map(async (jDoc) => {
           const jData = jDoc.data();
-          const moduleRef = doc(db, 'modules', jData.moduleId);
-          const moduleSnap = await getDoc(moduleRef);
+          const moduleId = jData.moduleId;
+          
+          // Fetch module details
+          const moduleSnap = await getDoc(doc(db, 'modules', moduleId));
+          if (!moduleSnap.exists()) return null;
 
-          if (moduleSnap.exists()) {
-            const moduleData = { id: moduleSnap.id, ...moduleSnap.data(), order: jData.order || 0 };
+          const moduleData = { id: moduleSnap.id, ...moduleSnap.data(), order: jData.order || 0 };
 
-            // Fetch Groups
-            const groupsQ = query(
-              collection(db, 'groups'),
-              where('moduleId', '==', moduleData.id),
-              orderBy('order', 'asc')
-            );
-            const groupsSnap = await getDocs(groupsQ);
-            const groups = groupsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          // Fetch Groups and Topic Junctions in parallel for this module
+          const [groupsSnap, topicJunctionSnap] = await Promise.all([
+            getDocs(query(collection(db, 'groups'), where('moduleId', '==', moduleId), orderBy('order', 'asc'))),
+            getDocs(query(collection(db, 'moduleTopics'), where('moduleId', '==', moduleId)))
+          ]);
 
-            // Fetch topics via moduleTopics junction
-            const topicJunctionQuery = query(
-              collection(db, 'moduleTopics'),
-              where('moduleId', '==', moduleData.id)
-            );
-            const topicJunctionSnap = await getDocs(topicJunctionQuery);
-
-            const topics = [];
-            for (const tJDoc of topicJunctionSnap.docs) {
-              const tJData = tJDoc.data();
-              const topicRef = doc(db, 'topics', tJData.topicId);
-              const topicSnap = await getDoc(topicRef);
-              if (topicSnap.exists()) {
-                topics.push({
-                  id: topicSnap.id,
-                  ...topicSnap.data(),
-                  order: tJData.order || 0,
-                  groupId: tJData.groupId || 'ungrouped'
-                });
-              }
+          const groups = groupsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          
+          // Fetch all topics for this module's junctions
+          const topics = await Promise.all(topicJunctionSnap.docs.map(async (tJDoc) => {
+            const tJData = tJDoc.data();
+            const topicSnap = await getDoc(doc(db, 'topics', tJData.topicId));
+            if (topicSnap.exists()) {
+              return {
+                id: topicSnap.id,
+                ...topicSnap.data(),
+                order: tJData.order || 0,
+                groupId: tJData.groupId || 'ungrouped'
+              };
             }
+            return null;
+          }));
 
-            topics.sort((a, b) => a.order - b.order);
+          const filteredTopics = topics.filter(Boolean).sort((a, b) => a.order - b.order);
+          const groupIds = new Set(groups.map(g => g.id));
 
-            // Organize topics into groups
-            const groupIds = new Set(groups.map(g => g.id));
+          moduleData.groups = groups.map(group => ({
+            ...group,
+            topics: filteredTopics.filter(t => t.groupId === group.id)
+          }));
 
-            moduleData.groups = groups.map(group => ({
-              ...group,
-              topics: topics.filter(t => t.groupId === group.id)
-            }));
+          moduleData.ungroupedTopics = filteredTopics.filter(t => !t.groupId || t.groupId === 'ungrouped' || !groupIds.has(t.groupId));
 
-            moduleData.ungroupedTopics = topics.filter(t => !t.groupId || t.groupId === 'ungrouped' || !groupIds.has(t.groupId));
+          return moduleData;
+        }));
 
-            modulesData.push(moduleData);
-          }
-        }
+        if (!isMounted) return;
 
-        modulesData.sort((a, b) => a.order - b.order);
-        setModules(modulesData);
+        const finalModules = modulesData.filter(Boolean).sort((a, b) => a.order - b.order);
+        setModules(finalModules);
         
-        // Auto-open the first module if none are open
-        if (modulesData.length > 0 && openModules.size === 0) {
-          setOpenModules(new Set([modulesData[0].id]));
+        if (finalModules.length > 0 && openModules.size === 0) {
+          setOpenModules(new Set([finalModules[0].id]));
         }
         
         setModulesLoading(false);
-      }, (error) => {
-        console.error('Error listening to sectionModules:', error);
-        setModulesLoading(false);
-      });
-      unsubscribers.push(unsubJunction);
-
-      // 3. Real-time listener for user progress
-      if (user) {
-        const progressRef = doc(db, 'userProgress', user.uid);
-        const unsubProgress = onSnapshot(progressRef, (progressSnap) => {
-          if (progressSnap.exists()) {
-            const data = progressSnap.data();
-            if (data.completedTopics) {
-              setProgressData(data.completedTopics);
-            }
-          }
-        }, (error) => {
-          console.error('Error listening to progress:', error);
-        });
-        unsubscribers.push(unsubProgress);
+      } catch (err) {
+        console.error('Error fetching section data:', err);
+        if (isMounted) {
+          setLoading(false);
+          setModulesLoading(false);
+        }
       }
+    };
 
-    } catch (err) {
-      console.error('Error setting up listeners:', err);
-      setLoading(false);
+    fetchData();
+
+    // 4. Real-time listener for user progress (Keeping this as it's targeted and important)
+    if (user) {
+      const progressRef = doc(db, 'userProgress', user.uid);
+      const unsubProgress = onSnapshot(progressRef, (progressSnap) => {
+        if (!isMounted) return;
+        if (progressSnap.exists()) {
+          const data = progressSnap.data();
+          if (data.completedTopics) {
+            setProgressData(data.completedTopics);
+          }
+        }
+      }, (error) => {
+        console.error('Error listening to progress:', error);
+      });
+      unsubscribers.push(unsubProgress);
     }
 
     return () => {
+      isMounted = false;
       unsubscribers.forEach(unsub => unsub());
     };
-  }, [sectionId, user, getUserProgress]);
+  }, [sectionId, user]);
 
   // Calculate Progress Stats (MUST be before any early returns to respect Rules of Hooks)
   const { totalTopics, completedTopics, progressPercentage, firstUncompletedTopicId } = useMemo(() => {

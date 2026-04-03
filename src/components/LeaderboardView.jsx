@@ -12,28 +12,28 @@ const LeaderboardView = ({ sectionId }) => {
   useEffect(() => {
     if (!sectionId) return;
 
-    setLoading(true);
-    const leaderboardsRef = collection(db, 'leaderboards');
-    const q = query(
-      leaderboardsRef,
-      where('sectionId', '==', sectionId),
-      orderBy('score', 'desc'),
-      limit(50)
-    );
+    const fetchLeaders = async () => {
+      try {
+        const q = query(
+          collection(db, 'leaderboards'),
+          where('sectionId', '==', sectionId),
+          orderBy('score', 'desc'),
+          limit(50)
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setLeaders(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setLeaders(data);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching leaderboard:", error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    fetchLeaders();
   }, [sectionId]);
 
   if (loading) {
