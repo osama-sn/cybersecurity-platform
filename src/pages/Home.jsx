@@ -147,14 +147,13 @@ const Home = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyber-primary/10 border border-cyber-primary/30 rounded-full text-cyber-primary font-bold text-sm">
                 <Target size={16} /> مميز جداً
               </div>
-              <h3 className="text-3xl md:text-5xl font-black text-white leading-tight">
-                Penetration Testing Diploma
+              <h3 className="text-3xl md:text-5xl font-black text-white leading-tight font-arabic">
+                كورس احتراف البنتست من الصفر
               </h3>
               <p className="text-cyber-300 text-lg md:text-xl font-bold">
                 From Zero → Certification Ready <span className="text-cyber-500 font-normal">| 6 Months</span>
               </p>
               <p className="text-cyber-400 max-w-2xl leading-relaxed mt-2">
-                لو انت مستعد تتعب، تفهم، وتكمل للآخر فانت داخل على طريق هيغيّر مستقبلك.
                 مختبرات حقيقية، شهادة معتمدة، وفرص عمل لأفضل المتدربين.
               </p>
             </div>

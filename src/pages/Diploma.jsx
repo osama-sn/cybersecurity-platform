@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Rocket, Shield, Trophy, Target, BookOpen, Users, CreditCard, 
-  FileText, CheckCircle2, Award, Briefcase, Zap, Brain, Terminal, 
-  Heart, LineChart, ChevronDown, MonitorPlay, Code, Database, Bug
+  Rocket, Shield, Trophy, Target, BookOpen, 
+  FileText, CheckCircle2, Briefcase, Zap, Brain, Terminal, 
+  LineChart, ChevronDown, MonitorPlay, Code, Database, Bug
 } from 'lucide-react';
 import ScrollReveal from '../components/animations/ScrollReveal';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,20 +17,7 @@ const Diploma = () => {
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
-  const features = [
-    { icon: Trophy, title: 'Leaderboard', desc: 'باسمك ونقطك… كل حاجة بتعملها محسوبة', color: 'text-yellow-400' },
-    { icon: Zap, title: 'إشادة علنية', desc: 'بوست أسبوعي على LinkedIn لأفضل المتدربين', color: 'text-blue-400' },
-    { icon: Terminal, title: 'مختبرات حقيقية', desc: 'اشتراك مجاني على Hack The Box للـ Top of the Month', color: 'text-cyber-primary' },
-    { icon: Award, title: 'تدريب مجاني', desc: 'الأول ياخد تدريب Pentesting كامل مجانًا', color: 'text-purple-400' },
-    { icon: Target, title: 'خصومات قوية', desc: 'للتاني والتالت في الترتيب', color: 'text-cyber-danger' },
-    { icon: Briefcase, title: 'ترشيحات عمل', desc: 'ترشيحات شغل مباشرة للمتميزين', color: 'text-cyber-secondary' },
-    { icon: Users, title: 'Community', desc: 'مجتمع فيه ملخصات وماتريال تقيلة', color: 'text-orange-400' },
-    { icon: CreditCard, title: 'تسهيلات دفع', desc: 'حل لمشكلة الدفع وتقسيط على 3 دفعات', color: 'text-emerald-400' },
-    { icon: Heart, title: 'Referral System', desc: 'خصم يوصل لـ 1500 جنيه', color: 'text-pink-400' },
-    { icon: FileText, title: 'دعم وظيفي', desc: 'تعديل CV + Template جاهز', color: 'text-gray-300' },
-    { icon: Code, title: 'Cheatsheets', desc: 'شيتات بكل Commands الأدوات', color: 'text-cyber-accent' },
-    { icon: Shield, title: 'شهادة معتمدة', desc: 'شهادة إتمام معتمدة من TechPlus', color: 'text-teal-400' },
-  ];
+
 
   const modules = [
     {
@@ -157,44 +144,16 @@ const Diploma = () => {
             <span className="font-bold tracking-wide">LEVEL 1 / eJPT TRACK (3 MONTHS)</span>
           </motion.div>
           
-          <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
-            Penetration Testing Diploma<br />
+          <h1 className="text-4xl md:text-6xl font-black text-white leading-tight font-arabic">
+            كورس احتراف البنتست من الصفر<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-primary to-cyber-secondary">From Zero → Certification Ready</span>
           </h1>
 
-          <div className="card bg-cyber-900/60 border-l-4 border-l-cyber-danger p-6 max-w-3xl mx-auto shadow-2xl backdrop-blur">
-            <p className="text-xl md:text-2xl text-cyber-200 font-bold leading-relaxed">
-              خليني أتكلم معاك بصراحة 👇<br />
-              المجال ده مش سهل… ومش لأي حد!<br />
-              بس لو انت مستعد تتعب، تفهم، وتكمل للآخر… فانت داخل على طريق هيغيّر مستقبلك 💀🔥
-            </p>
-          </div>
+
         </motion.div>
       </section>
 
-      {/* 2. Perks / Features */}
-      <section className="px-4">
-        <ScrollReveal>
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-black text-white mb-4">🎁 المميزات اللي هتاخدها معانا</h2>
-            <div className="h-1 w-20 bg-cyber-primary mx-auto rounded-full" />
-          </div>
-        </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
-          {features.map((feature, i) => (
-            <ScrollReveal key={i} delay={i * 0.05} direction="up">
-              <div className="bg-cyber-900/50 border border-cyber-800 p-6 rounded-2xl hover:border-cyber-primary/50 hover:bg-cyber-800 transition-all group h-full">
-                <div className={`p-4 bg-cyber-950 rounded-xl inline-block mb-4 shadow-lg ${feature.color}`}>
-                  <feature.icon size={28} className="group-hover:scale-110 transition-transform" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-cyber-400 text-sm leading-relaxed">{feature.desc}</p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
 
       {/* 3. Why HTB and Why this track */}
       <section className="px-4 max-w-6xl mx-auto">
