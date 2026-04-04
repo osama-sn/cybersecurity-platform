@@ -310,7 +310,7 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
             value={block.content}
             onChange={e => onChange({ ...block, content: e.target.value })}
             onKeyDown={onKeyDown}
-            placeholder={placeholder || 'Type \'/\' for commands...'}
+            placeholder={placeholder || 'Type any number 0-9 for commands...'}
             rows={1}
             dir={getDirection(block.content)}
         />
