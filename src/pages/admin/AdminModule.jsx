@@ -374,9 +374,15 @@ const AdminModule = () => {
     };
 
     const openImportModal = async () => {
-        const snap = await getDocs(collection(db, 'topics'));
+        const q = query(collection(db, 'topics'), where('parentId', '==', null));
+        const snap = await getDocs(q);
+        // Also fetch where parentId doesn't exist at all (legacy docs)
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setAllTopics(all);
+        
+        // Firestore '==' null might not catch missing fields, so we double filter locally
+        const filtered = all.filter(t => !t.parentId);
+        
+        setAllTopics(filtered);
         setShowImportModal(true);
     };
 

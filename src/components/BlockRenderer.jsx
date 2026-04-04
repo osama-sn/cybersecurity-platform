@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight, MessageSquare, Loader2 } from 'lucide-react';
+import { Copy, Check, Terminal, Play, AlertCircle, AlertTriangle, Key, Lightbulb, ArrowRight, Lock, ChevronRight, MessageSquare, Loader2, FileStack } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { getTelegramFileUrl } from '../utils/telegram';
 
@@ -531,6 +532,41 @@ const TableBlock = ({ content }) => {
     );
 };
 
+const SubpageBlock = ({ block }) => {
+    const { sectionId } = useParams();
+    const subTopicId = block.metadata?.subTopicId;
+    const title = block.content || "Untitled Page";
+
+    if (!subTopicId) return null;
+
+    return (
+        <Link
+            to={`/sections/${sectionId}/topics/${subTopicId}`}
+            className="group/subpage block my-4 p-4 md:p-6 bg-cyber-900/50 border border-cyber-800 hover:border-cyber-primary/50 rounded-2xl transition-all duration-300 hover:bg-cyber-primary/5 shadow-lg hover:shadow-cyber-primary/10 overflow-hidden relative"
+        >
+            <div className="absolute top-0 left-0 w-1 h-full bg-cyber-primary scale-y-0 group-hover/subpage:scale-y-100 transition-transform duration-500 origin-top"></div>
+            
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-cyber-800 rounded-xl flex items-center justify-center text-cyber-primary group-hover/subpage:scale-110 transition-transform duration-300 border border-cyber-700/50 group-hover/subpage:border-cyber-primary/30">
+                        <FileStack size={20} />
+                    </div>
+                    <div>
+                        <div className="text-[10px] md:text-[11px] font-black text-cyber-500 uppercase tracking-[0.2em] mb-1 group-hover/subpage:text-cyber-primary/70 transition-colors">Nested Mission</div>
+                        <h4 className="text-base md:text-xl font-bold text-white group-hover/subpage:text-cyber-primary transition-colors">{title}</h4>
+                    </div>
+                </div>
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-cyber-800 flex items-center justify-center text-cyber-500 group-hover/subpage:text-cyber-primary group-hover/subpage:border-cyber-primary/30 group-hover/subpage:translate-x-1 transition-all duration-300 bg-black/20">
+                    <ArrowRight size={18} />
+                </div>
+            </div>
+            
+            {/* Ambient Pulse Effect */}
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-cyber-primary/5 rounded-full blur-2xl opacity-0 group-hover/subpage:opacity-100 transition-opacity duration-700"></div>
+        </Link>
+    );
+};
+
 const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, isPassed, userNote, onSaveNote }) => {
     const { t } = useLanguage();
 
@@ -696,6 +732,9 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
 
 
+
+        case 'subpage':
+            return <SubpageBlock block={block} />;
 
         case 'divider':
             return <hr className={`${dividerSpacing} border-cyber-700/50`} />;

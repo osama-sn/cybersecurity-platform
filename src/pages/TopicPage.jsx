@@ -59,6 +59,7 @@ const TopicPage = () => {
   const [section, setSection] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [breadcrumbs, setBreadcrumbs] = useState([]); // [{id, title}]
 
   const [nextTopicId, setNextTopicId] = useState(null);
   
@@ -120,7 +121,22 @@ const TopicPage = () => {
       }
     };
 
+    const fetchBreadcrumbs = async (id, path = []) => {
+      const snap = await getDoc(doc(db, 'topics', id));
+      if (snap.exists()) {
+          const data = snap.data();
+          const node = { id: snap.id, title: data.title };
+          const newPath = [node, ...path];
+          
+          if (data.parentId) {
+              return fetchBreadcrumbs(data.parentId, newPath);
+          }
+          if (isMounted) setBreadcrumbs(newPath);
+      }
+    };
+
     fetchData();
+    fetchBreadcrumbs(topicId);
 
     return () => {
       isMounted = false;
@@ -314,8 +330,22 @@ const TopicPage = () => {
         <Link to="/sections" className="hover:text-cyber-primary transition-colors shrink-0">{t('topic.sectorsBreadcrumb')}</Link>
         <div className="w-1 h-1 rounded-full bg-cyber-800 shrink-0"></div>
         <Link to={`/sections/${sectionId}`} className="hover:text-cyber-primary transition-colors shrink-0">{t('topic.sectorPrefix')}{sectionId.substring(0,6)}</Link>
+        
+        {breadcrumbs.length > 1 && (
+          <>
+            {breadcrumbs.slice(0, -1).map((crumb) => (
+              <React.Fragment key={crumb.id}>
+                <div className="w-1 h-1 rounded-full bg-cyber-800 shrink-0"></div>
+                <Link to={`/sections/${sectionId}/topics/${crumb.id}`} className="hover:text-cyber-primary transition-colors shrink-0 max-w-[120px] truncate">
+                  {crumb.title}
+                </Link>
+              </React.Fragment>
+            ))}
+          </>
+        )}
+
         <div className="w-1 h-1 rounded-full bg-cyber-primary animate-pulse shrink-0"></div>
-        <span className="text-cyber-primary truncate">{t('topic.currentNode')}</span>
+        <span className="text-cyber-primary truncate">{topic.title || t('topic.currentNode')}</span>
       </div>
 
       <div className="mb-12 border-b border-cyber-800/50 pb-10">

@@ -41,6 +41,7 @@ const AdminTopicEditor = () => {
     const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
     const [selectedBlockIds, setSelectedBlockIds] = useState(new Set());
     const [feedbacks, setFeedbacks] = useState([]);
+    const [breadcrumbs, setBreadcrumbs] = useState([]); // Array of { id, title }
 
     // Topic details editing
     const [isEditingTopic, setIsEditingTopic] = useState(false);
@@ -71,6 +72,21 @@ const AdminTopicEditor = () => {
             }
         };
         fetchTopic();
+
+        const fetchBreadcrumbs = async (id, path = []) => {
+            const snap = await getDoc(doc(db, 'topics', id));
+            if (snap.exists()) {
+                const data = snap.data();
+                const node = { id: snap.id, title: data.title };
+                const newPath = [node, ...path];
+                
+                if (data.parentId) {
+                    return fetchBreadcrumbs(data.parentId, newPath);
+                }
+                setBreadcrumbs(newPath);
+            }
+        };
+        fetchBreadcrumbs(topicId);
 
         const fetchBlocks = async () => {
             const q = query(
@@ -167,6 +183,36 @@ const AdminTopicEditor = () => {
         } catch (err) {
             console.error('Save error:', err);
             setSaveStatus('idle');
+        }
+    };
+
+    const createSubpage = async (parentBlock) => {
+        try {
+            setSaveStatus('saving');
+            // 1. Create the new topic document
+            const newTopicRef = await addDoc(collection(db, 'topics'), {
+                title: "New Subpage",
+                description: "",
+                parentId: topicId, // Link to current topic
+                sectionId: topic.sectionId || null, // Inherit section if possible
+                createdAt: serverTimestamp(),
+                createdBy: topic.createdBy || null
+            });
+
+            // 2. Update the local block metadata
+            updateBlock({ 
+                ...parentBlock, 
+                type: 'subpage', 
+                content: "New Subpage",
+                metadata: { ...parentBlock.metadata, subTopicId: newTopicRef.id } 
+            });
+
+            // 3. Status update
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+        } catch (err) {
+            console.error("Error creating subpage:", err);
+            alert("Failed to create subpage.");
         }
     };
 
@@ -420,7 +466,11 @@ const AdminTopicEditor = () => {
     const handleSlashSelect = (type) => {
         const block = blocks.find(b => b.id === slashMenu.blockId);
         if (block) {
-            updateBlock({ ...block, type, content: '' });
+            if (type === 'subpage') {
+                createSubpage(block);
+            } else {
+                updateBlock({ ...block, type, content: '' });
+            }
         }
         setSlashMenu({ open: false, blockId: null, query: '', position: { top: 0, left: 0 } });
     };
@@ -636,12 +686,27 @@ const AdminTopicEditor = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-primary/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000"></div>
 
                 <div className="flex-1 space-y-4 relative z-10">
-                    <button
-                        onClick={() => window.history.back()}
-                        className="flex items-center gap-2 text-cyber-500 hover:text-cyber-primary transition-colors text-[10px] font-black uppercase tracking-[0.2em]"
-                    >
-                        <ArrowLeft size={12} /> Return_to_Sector
-                    </button>
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
+                        <button
+                            onClick={() => window.history.back()}
+                            className="flex items-center gap-2 text-cyber-500 hover:text-cyber-primary transition-colors"
+                        >
+                            <ArrowLeft size={12} /> Return
+                        </button>
+                        {breadcrumbs.length > 1 && (
+                            <>
+                                <div className="w-1 h-1 rounded-full bg-cyber-800"></div>
+                                <div className="flex items-center gap-2 text-cyber-600">
+                                    {breadcrumbs.slice(0, -1).map((crumb, i) => (
+                                        <div key={crumb.id} className="flex items-center gap-2">
+                                            <a href={`/admin/topics/${crumb.id}`} className="hover:text-cyber-primary transition-colors max-w-[100px] truncate">{crumb.title}</a>
+                                            {i < breadcrumbs.length - 2 && <span>/</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
 
                     {isEditingTopic ? (
                         <div className="space-y-4 max-w-2xl bg-cyber-900/50 p-6 rounded-2xl border border-cyber-700/50">

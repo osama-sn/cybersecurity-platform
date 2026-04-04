@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
-import { GripVertical, X, Plus, ChevronRight, Loader2, UploadCloud } from 'lucide-react';
+import { GripVertical, X, Plus, ChevronRight, Loader2, UploadCloud, FileStack, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import BlockRenderer from '../BlockRenderer';
 import { uploadToTelegram, getTelegramFileUrl } from '../../utils/telegram';
@@ -286,6 +287,34 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
                     rows={3}
                     dir={getDirection(block.content)}
                 />
+            </div>
+        );
+    }
+
+    if (block.type === 'subpage') {
+        const subTopicId = block.metadata?.subTopicId;
+        return (
+            <div className="flex items-center gap-3 w-full my-1 group/sublink">
+                <div className="w-8 h-8 bg-cyber-900 border border-cyber-700 rounded-lg flex items-center justify-center text-indigo-400 shrink-0">
+                    <FileStack size={16} />
+                </div>
+                <input
+                    ref={inputRef}
+                    className={`${baseClass} flex-1 text-indigo-100 font-bold hover:bg-white/5 px-2 py-1 rounded transition-colors`}
+                    value={block.content}
+                    onChange={e => onChange({ ...block, content: e.target.value })}
+                    onKeyDown={onKeyDown}
+                    placeholder="Subpage Title..."
+                    dir={getDirection(block.content)}
+                />
+                {subTopicId && (
+                    <Link 
+                        to={`/admin/topics/${subTopicId}`}
+                        className="opacity-0 group-hover/sublink:opacity-100 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/30 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-all"
+                    >
+                        Manage Page <ExternalLink size={10} />
+                    </Link>
+                )}
             </div>
         );
     }

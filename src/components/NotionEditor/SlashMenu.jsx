@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Type, Heading1, Heading2, Heading3, Code, Video, Key, Minus, Lightbulb, AlertTriangle, List, ListOrdered, CheckSquare, Quote, Image, ChevronRight, ClipboardPaste } from 'lucide-react';
+import { Type, Heading1, Heading2, Heading3, Code, Video, Key, Minus, Lightbulb, AlertTriangle, List, ListOrdered, CheckSquare, Quote, Image, ChevronRight, ClipboardPaste, FileStack } from 'lucide-react';
 
 const BLOCK_TYPES = [
     { id: 'text', label: 'Text', description: 'Plain paragraph', icon: <Type size={16} />, color: 'text-blue-400' },
@@ -18,6 +18,7 @@ const BLOCK_TYPES = [
     { id: 'toggle', label: 'Toggle List', description: 'Toggles can hide content inside', icon: <ChevronRight size={16} />, color: 'text-cyber-300' },
     { id: 'image', label: 'Image', description: 'Embed from URL', icon: <Image size={16} />, color: 'text-pink-400' },
     { id: 'paste', label: 'Paste', description: 'Paste content with smart parsing', icon: <ClipboardPaste size={16} />, color: 'text-cyan-400' },
+    { id: 'subpage', label: 'Subpage', description: 'Nested page inside this topic', icon: <FileStack size={16} />, color: 'text-indigo-400' },
     { id: 'divider', label: 'Divider', description: 'Horizontal rule', icon: <Minus size={16} />, color: 'text-cyber-500' },
 ];
 
