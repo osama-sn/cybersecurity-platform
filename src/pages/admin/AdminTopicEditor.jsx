@@ -65,16 +65,7 @@ const AdminTopicEditor = () => {
         blocksRef.current = blocks;
     }, [blocks]);
 
-    // Cleanup: save on unmount if pending
-    useEffect(() => {
-        return () => {
-            if (saveTimer.current) {
-                clearTimeout(saveTimer.current);
-                // Use blocksRef.current to get the latest state in the cleanup closure
-                persistBlocks(blocksRef.current);
-            }
-        };
-    }, []);
+    // The cleanup logic is now integrated into the main useEffect below to handle topic transitions correctly
 
     // ── Load data ──────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -151,6 +142,21 @@ const AdminTopicEditor = () => {
             }
         };
         fetchFeedbacks();
+
+        return () => {
+            // ── Cleanup: Flush any pending save for the OLD topicId ──
+            if (saveTimer.current) {
+                clearTimeout(saveTimer.current);
+                // We use persistBlocks from this specific render's closure
+                persistBlocks(blocksRef.current);
+            }
+            // Reset states to avoid data leakage between topics during transition
+            setBlocks([]);
+            setTopic(null);
+            setBreadcrumbs([]);
+            firestoreIds.current = {};
+            setSaveStatus('idle');
+        };
     }, [topicId]);
 
     // ── Auto-save (debounced) ──────────────────────────────────────────────────
@@ -225,11 +231,9 @@ const AdminTopicEditor = () => {
             };
 
             // 3. Update state AND persist immediately
-            setBlocks(prev => {
-                const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
-                persistBlocks(next); // Immediate persist
-                return next;
-            });
+            const nextBlocks = blocks.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+            setBlocks(nextBlocks);
+            await persistBlocks(nextBlocks); // Await immediate persist to ensure data integrity
 
             // 4. Status update
             setSaveStatus('saved');

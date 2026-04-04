@@ -532,16 +532,21 @@ const TableBlock = ({ content }) => {
     );
 };
 
-const SubpageBlock = ({ block }) => {
+const SubpageBlock = ({ block, isEditor }) => {
     const { sectionId } = useParams();
     const subTopicId = block.metadata?.subTopicId;
     const title = block.content || "Untitled Page";
 
     if (!subTopicId) return null;
 
+    // Determine the target URL based on whether we are in editor mode or not
+    const targetUrl = isEditor 
+        ? `/admin/topics/${subTopicId}` 
+        : `/sections/${sectionId}/topics/${subTopicId}`;
+
     return (
         <Link
-            to={`/sections/${sectionId}/topics/${subTopicId}`}
+            to={targetUrl}
             className="group/subpage block my-4 p-4 md:p-6 bg-cyber-900/50 border border-cyber-800 hover:border-cyber-primary/50 rounded-2xl transition-all duration-300 hover:bg-cyber-primary/5 shadow-lg hover:shadow-cyber-primary/10 overflow-hidden relative"
         >
             <div className="absolute top-0 left-0 w-1 h-full bg-cyber-primary scale-y-0 group-hover/subpage:scale-y-100 transition-transform duration-500 origin-top"></div>
@@ -734,7 +739,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
 
         case 'subpage':
-            return <SubpageBlock block={block} />;
+            return <SubpageBlock block={block} isEditor={isEditor} />;
 
         case 'divider':
             return <hr className={`${dividerSpacing} border-cyber-700/50`} />;
