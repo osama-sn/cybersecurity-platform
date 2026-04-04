@@ -59,7 +59,7 @@ const TopicPage = () => {
   const [section, setSection] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sectionLoading, setSectionLoading] = useState(true);
+
   const [nextTopicId, setNextTopicId] = useState(null);
   
   // Progress & Notes & Feedback state
@@ -272,7 +272,7 @@ const TopicPage = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (loading || sectionLoading) return <TopicSkeleton />;
+  if (loading) return <TopicSkeleton />;
 
   const isUserAdmin = isAdmin || isSuperAdmin;
   const isLocked = (topic?.isLocked || section?.isLocked) && !isUserAdmin;
