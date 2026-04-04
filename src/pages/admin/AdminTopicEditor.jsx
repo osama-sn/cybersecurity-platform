@@ -820,7 +820,7 @@ const AdminTopicEditor = () => {
                 {/* Hint */}
                 {blocks.length === 1 && blocks[0].content === '' && (
                     <p className="absolute top-10 left-10 text-cyber-700 text-sm pointer-events-none select-none font-mono italic">
-                        Start typing, or press <kbd className="bg-cyber-800 px-1 rounded text-cyber-500">0-9</kbd> for commands...
+                        Start typing, or press <kbd className="bg-cyber-800 px-1 rounded text-cyber-500">0-9</kbd> for quick commands...
                     </p>
                 )}
 

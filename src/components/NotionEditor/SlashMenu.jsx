@@ -3,23 +3,23 @@ import { Type, Heading1, Heading2, Heading3, Code, Video, Key, Minus, Lightbulb,
 
 const BLOCK_TYPES = [
     { id: 'text', label: 'Text', description: 'Plain paragraph', icon: <Type size={16} />, color: 'text-blue-400' },
-    { id: 'h1', label: 'Heading 1', description: 'Large section heading', icon: <Heading1 size={16} />, color: 'text-purple-400' },
-    { id: 'h2', label: 'Heading 2', description: 'Medium section heading', icon: <Heading2 size={16} />, color: 'text-purple-300' },
+    { id: 'h1', label: 'Heading 1', description: 'Large section heading', icon: <Heading1 size={16} />, color: 'text-purple-400', shortcut: '1' },
+    { id: 'h2', label: 'Heading 2', description: 'Medium section heading', icon: <Heading2 size={16} />, color: 'text-purple-300', shortcut: '2' },
     { id: 'h3', label: 'Heading 3', description: 'Small section heading', icon: <Heading3 size={16} />, color: 'text-purple-200' },
-    { id: 'bullet', label: 'Bullet List', description: 'Unordered list', icon: <List size={16} />, color: 'text-green-400' },
-    { id: 'numbered', label: 'Numbered List', description: 'Ordered list', icon: <ListOrdered size={16} />, color: 'text-green-300' },
-    { id: 'todo', label: 'To-do', description: 'Checkbox list', icon: <CheckSquare size={16} />, color: 'text-teal-400' },
+    { id: 'bullet', label: 'Bullet List', description: 'Unordered list', icon: <List size={16} />, color: 'text-green-400', shortcut: '3' },
+    { id: 'numbered', label: 'Numbered List', description: 'Ordered list', icon: <ListOrdered size={16} />, color: 'text-green-300', shortcut: '4' },
+    { id: 'todo', label: 'To-do', description: 'Checkbox list', icon: <CheckSquare size={16} />, color: 'text-teal-400', shortcut: '5' },
     { id: 'quote', label: 'Quote', description: 'Blockquote', icon: <Quote size={16} />, color: 'text-yellow-400' },
-    { id: 'code', label: 'Code', description: 'Code block with syntax', icon: <Code size={16} />, color: 'text-green-500' },
+    { id: 'code', label: 'Code', description: 'Code block with syntax', icon: <Code size={16} />, color: 'text-green-500', shortcut: '6' },
     { id: 'tip', label: 'Callout', description: 'Info / tip callout', icon: <Lightbulb size={16} />, color: 'text-amber-400' },
     { id: 'warning', label: 'Warning', description: 'Warning callout', icon: <AlertTriangle size={16} />, color: 'text-red-400' },
     { id: 'youtube', label: 'Video', description: 'Embed YouTube video', icon: <Video size={16} />, color: 'text-red-500' },
-    { id: 'quiz', label: 'Challenge', description: 'Quiz or flag challenge', icon: <Key size={16} />, color: 'text-yellow-500' },
+    { id: 'quiz', label: 'Challenge', description: 'Quiz or flag challenge', icon: <Key size={16} />, color: 'text-yellow-500', shortcut: '9' },
     { id: 'toggle', label: 'Toggle List', description: 'Toggles can hide content inside', icon: <ChevronRight size={16} />, color: 'text-cyber-300' },
     { id: 'image', label: 'Image', description: 'Embed from URL', icon: <Image size={16} />, color: 'text-pink-400' },
-    { id: 'paste', label: 'Paste', description: 'Paste content with smart parsing', icon: <ClipboardPaste size={16} />, color: 'text-cyan-400' },
-    { id: 'subpage', label: 'Subpage', description: 'Nested page inside this topic', icon: <FileStack size={16} />, color: 'text-indigo-400' },
-    { id: 'divider', label: 'Divider', description: 'Horizontal rule', icon: <Minus size={16} />, color: 'text-cyber-500' },
+    { id: 'paste', label: 'Paste', description: 'Paste content with smart parsing', icon: <ClipboardPaste size={16} />, color: 'text-cyan-400', shortcut: '8' },
+    { id: 'subpage', label: 'Subpage', description: 'Nested page inside this topic', icon: <FileStack size={16} />, color: 'text-indigo-400', shortcut: '7' },
+    { id: 'divider', label: 'Divider', description: 'Horizontal rule', icon: <Minus size={16} />, color: 'text-cyber-500', shortcut: '0' },
 ];
 
 export { BLOCK_TYPES };
@@ -97,6 +97,13 @@ const SlashMenu = ({ query, onSelect, onClose, position }) => {
                 if (item && !item.header) handleSelect(item.id);
             } else if (e.key === 'Escape') {
                 onClose();
+            } else if (/^[0-9]$/.test(e.key)) {
+                // Numeric shortcut support
+                const match = BLOCK_TYPES.find(t => t.shortcut === e.key);
+                if (match) {
+                    e.preventDefault();
+                    handleSelect(match.id);
+                }
             }
         };
         window.addEventListener('keydown', handleKey);
@@ -141,6 +148,11 @@ const SlashMenu = ({ query, onSelect, onClose, position }) => {
                                 <p className="text-sm font-medium text-white">{item.label}</p>
                                 <p className="text-[10px] text-cyber-500">{item.description}</p>
                             </div>
+                            {item.shortcut && (
+                                <div className="ml-auto flex items-center justify-center w-5 h-5 rounded bg-cyber-900 border border-cyber-700 text-[10px] font-black text-cyber-600 group-hover:text-cyber-primary group-hover:border-cyber-primary/50 transition-all">
+                                    {item.shortcut}
+                                </div>
+                            )}
                         </button>
                     );
                 })}
