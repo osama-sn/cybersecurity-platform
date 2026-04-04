@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
     doc, getDoc, collection, query, where, getDocs, orderBy,
     addDoc, deleteDoc, serverTimestamp, updateDoc, writeBatch
@@ -58,6 +58,23 @@ const AdminTopicEditor = () => {
     const saveTimer = useRef(null);
     // Map of blockId → Firestore docId (for blocks already persisted)
     const firestoreIds = useRef({}); // { localId: firestoreDocId }
+    // Reference for latest blocks for cleanup save
+    const blocksRef = useRef(blocks);
+
+    useEffect(() => {
+        blocksRef.current = blocks;
+    }, [blocks]);
+
+    // Cleanup: save on unmount if pending
+    useEffect(() => {
+        return () => {
+            if (saveTimer.current) {
+                clearTimeout(saveTimer.current);
+                // Use blocksRef.current to get the latest state in the cleanup closure
+                persistBlocks(blocksRef.current);
+            }
+        };
+    }, []);
 
     // ── Load data ──────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -199,15 +216,22 @@ const AdminTopicEditor = () => {
                 createdBy: topic.createdBy || null
             });
 
-            // 2. Update the local block metadata
-            updateBlock({ 
+            // 2. Prepare the updated blocks
+            const updatedBlock = { 
                 ...parentBlock, 
                 type: 'subpage', 
                 content: "New Subpage",
                 metadata: { ...parentBlock.metadata, subTopicId: newTopicRef.id } 
+            };
+
+            // 3. Update state AND persist immediately
+            setBlocks(prev => {
+                const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
+                persistBlocks(next); // Immediate persist
+                return next;
             });
 
-            // 3. Status update
+            // 4. Status update
             setSaveStatus('saved');
             setTimeout(() => setSaveStatus('idle'), 2000);
         } catch (err) {
@@ -699,7 +723,7 @@ const AdminTopicEditor = () => {
                                 <div className="flex items-center gap-2 text-cyber-600">
                                     {breadcrumbs.slice(0, -1).map((crumb, i) => (
                                         <div key={crumb.id} className="flex items-center gap-2">
-                                            <a href={`/admin/topics/${crumb.id}`} className="hover:text-cyber-primary transition-colors max-w-[100px] truncate">{crumb.title}</a>
+                                            <Link to={`/admin/topics/${crumb.id}`} className="hover:text-cyber-primary transition-colors max-w-[100px] truncate">{crumb.title}</Link>
                                             {i < breadcrumbs.length - 2 && <span>/</span>}
                                         </div>
                                     ))}
