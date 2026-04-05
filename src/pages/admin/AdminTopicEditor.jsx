@@ -5,7 +5,7 @@ import {
     addDoc, deleteDoc, serverTimestamp, updateDoc, writeBatch
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { ArrowLeft, CheckCircle, Loader2, Plus, MessageSquare } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2, Plus, MessageSquare, Cloud, Save, ShieldAlert, FileStack } from 'lucide-react';
 import EditorBlock from '../../components/NotionEditor/EditorBlock';
 import SlashMenu from '../../components/NotionEditor/SlashMenu';
 
@@ -239,6 +239,16 @@ const AdminTopicEditor = () => {
                 alert("Cloud Sync failed. Work will be saved locally.");
             }
         }
+    };
+
+    const saveToLocalDraft = () => {
+        localStorage.setItem(`cyber_draft_${topicId}`, JSON.stringify({
+            blocks: blocks,
+            timestamp: Date.now()
+        }));
+        setIsOfflineMode(true);
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
     };
 
     const createSubpage = async (parentBlock) => {
@@ -877,19 +887,30 @@ const AdminTopicEditor = () => {
                     )}
                 </div>
 
-                {/* Floating Save Button */}
+                {/* Floating Save Buttons Container */}
                 {hasUnsavedChanges && (
-                    <div className="fixed bottom-10 right-10 z-[100] animate-in slide-in-from-bottom-10 fade-in duration-500">
+                    <div className="fixed bottom-10 right-10 z-[100] flex flex-col gap-3 items-end animate-in slide-in-from-right-10 fade-in duration-500">
+                        {/* Cloud Save Button */}
                         <button
                             onClick={() => persistBlocks(blocks)}
                             disabled={saveStatus === 'saving'}
-                            className="bg-cyber-primary text-black font-black text-xs uppercase tracking-widest px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50_rgba(0,243,255,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border border-cyber-primary/50 group"
+                            className="bg-cyber-primary text-black font-black text-xs uppercase tracking-widest px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50px_rgba(0,243,255,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border border-cyber-primary/50 group"
                         >
                             {saveStatus === 'saving' ? (
-                                <><Loader2 size={18} className="animate-spin" /> Saving Data...</>
+                                <><Loader2 size={18} className="animate-spin" /> Syncing...</>
                             ) : (
-                                <><CheckCircle size={18} className="group-hover:scale-110 transition-transform" /> Save Mission</>
+                                <><Cloud size={18} className="group-hover:scale-110 transition-transform" /> Save Mission</>
                             )}
+                        </button>
+
+                        {/* Local Backup Button */}
+                        <button
+                            onClick={saveToLocalDraft}
+                            className="bg-cyber-900/80 backdrop-blur-md text-cyber-400 font-bold text-[10px] uppercase tracking-widest px-6 py-3 rounded-xl border border-cyber-700/50 hover:border-cyber-primary/30 hover:text-cyber-primary transition-all flex items-center gap-2 group shadow-xl"
+                            title="Save as local draft (No Quota Cost)"
+                        >
+                            <Save size={14} className="group-hover:scale-110 transition-transform" /> 
+                            Save Offline (Draft)
                         </button>
                     </div>
                 )}
