@@ -94,14 +94,25 @@ const BlockInput = ({ block, onChange, onKeyDown, inputRef, placeholder }) => {
     const baseClass = "w-full bg-transparent outline-none resize-none overflow-hidden leading-relaxed";
 
     // Helper to detect text direction
+    const { language } = useLanguage();
     const getDirection = (text) => {
-        if (!text) return 'ltr';
-        // Check for the first strong directional character (Arabic or English)
-        const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
-        if (match) {
-            return /[\u0600-\u06FF]/.test(match[0]) ? 'rtl' : 'ltr';
+        if (!text) return language === 'ar' ? 'rtl' : 'ltr';
+        
+        const hasArabic = /[\u0600-\u06FF]/.test(text);
+        const isLong = text.trim().length > 50;
+
+        if (language === 'ar') {
+            if (!hasArabic && isLong) return 'ltr';
+            const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
+            if (match && /[a-zA-Z]/.test(match[0]) && isLong) return 'ltr';
+            return 'rtl';
         }
-        return /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr';
+        
+        if (language === 'en') {
+            if (hasArabic && !/[a-zA-Z]/.test(text)) return 'rtl';
+            return 'ltr';
+        }
+        return 'ltr';
     };
 
     if (block.type === 'code') {
@@ -365,13 +376,19 @@ const EditorBlock = ({
     const { isRTL } = useLanguage();
 
     // Helper to detect text direction (scoped to EditorBlock for wrapper logic if needed)
+    const { language: siteLang } = useLanguage();
     const getDirection = (text) => {
-        if (!text) return 'ltr';
-        const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
-        if (match) {
-            return /[\u0600-\u06FF]/.test(match[0]) ? 'rtl' : 'ltr';
+        if (!text) return siteLang === 'ar' ? 'rtl' : 'ltr';
+        const hasArabic = /[\u0600-\u06FF]/.test(text);
+        const isLong = text.trim().length > 50;
+
+        if (siteLang === 'ar') {
+            if (!hasArabic && isLong) return 'ltr';
+            const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
+            if (match && /[a-zA-Z]/.test(match[0]) && isLong) return 'ltr';
+            return 'rtl';
         }
-        return /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr';
+        return 'ltr';
     };
 
     useEffect(() => {

@@ -573,7 +573,7 @@ const SubpageBlock = ({ block, isEditor }) => {
 };
 
 const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, isPassed, userNote, onSaveNote }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     // Utility for style commonalities
     const commonClasses = "text-start leading-relaxed select-text";
@@ -586,13 +586,31 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
     const dividerSpacing = isEditor ? 'my-4' : 'my-12';
 
     const getDirection = (text) => {
-        if (!text) return 'ltr';
-        // Check for the first strong directional character (Arabic or English)
-        const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
-        if (match) {
-            return /[\u0600-\u06FF]/.test(match[0]) ? 'rtl' : 'ltr';
+        if (!text) return language === 'ar' ? 'rtl' : 'ltr';
+        
+        // Check if content is primarily English (no Arabic characters)
+        const hasArabic = /[\u0600-\u06FF]/.test(text);
+        const isLong = text.trim().length > 50; // Threshold for "big sentence"
+
+        if (language === 'ar') {
+            // If it's a long English sentence (no Arabic), use LTR
+            if (!hasArabic && isLong) return 'ltr';
+            
+            // For mixed or short text on Arabic site, default to RTL 
+            // unless it starts with English and is somewhat long
+            const match = text.match(/[\u0600-\u06FFa-zA-Z]/);
+            if (match && /[a-zA-Z]/.test(match[0]) && isLong) return 'ltr';
+            
+            return 'rtl';
         }
-        return /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr';
+        
+        // English site: always LTR unless it's purely Arabic
+        if (language === 'en') {
+            if (hasArabic && !/[a-zA-Z]/.test(text)) return 'rtl';
+            return 'ltr';
+        }
+
+        return 'ltr';
     };
 
     const parseMarkdown = (text) => {
@@ -673,7 +691,7 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
                 return (
                     <ul dir="auto" className={`list-disc list-inside space-y-3 text-cyber-300 ${listSpacing} marker:text-cyber-primary text-base md:text-lg ${commonClasses}`}>
                         {block.items.map((item, i) => (
-                            <li key={i} dir={getDirection(item)} dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
+                            <li key={i} dir={getDirection(item)} className={getDirection(item) === 'rtl' ? 'text-right' : 'text-left'} dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
                         ))}
                     </ul>
                 );
@@ -719,8 +737,12 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             return <ToggleBlock block={block} />;
 
         case 'quote':
+            const dir = getDirection(block.content);
             return (
-                <blockquote dir="auto" className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-lg md:text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg select-text ${commonClasses}`}>
+                <blockquote 
+                    dir={dir} 
+                    className={`border-s-4 border-cyber-primary ps-6 py-2 ${blockSpacing} text-lg md:text-xl italic text-cyber-200 bg-cyber-900/30 rounded-e-lg select-text ${commonClasses} ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+                >
                     "{block.content}"
                 </blockquote>
             );
@@ -745,8 +767,9 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
             return <hr className={`${dividerSpacing} border-cyber-700/50`} />;
 
         case 'warning':
+            const warnDir = getDirection(block.content);
             return (
-                <div dir="auto" className={`bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text`}>
+                <div dir={warnDir} className={`bg-cyber-danger/10 border-s-4 border-cyber-danger p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text ${warnDir === 'rtl' ? 'text-right' : 'text-left'}`}>
                     <strong className="text-cyber-danger flex items-center gap-2 mb-2">
                         <AlertCircle size={18} />
                         {t('renderer.warning')}
@@ -757,8 +780,9 @@ const BlockRenderer = ({ block, index, onToggle, isEditor = false, onSuccess, is
 
         case 'tip':
         case 'info':
+            const tipDir = getDirection(block.content);
             return (
-                <div dir="auto" className={`bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text`}>
+                <div dir={tipDir} className={`bg-cyber-primary/10 border-s-4 border-cyber-primary p-6 ${blockSpacing} rounded-e-xl shadow-lg select-text ${tipDir === 'rtl' ? 'text-right' : 'text-left'}`}>
                     <strong className="text-cyber-primary flex items-center gap-2 mb-2">
                         <Play size={18} className="fill-cyber-primary" />
                         {block.type.toUpperCase()}

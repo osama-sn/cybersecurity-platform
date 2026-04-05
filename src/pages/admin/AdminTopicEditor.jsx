@@ -61,6 +61,9 @@ const AdminTopicEditor = () => {
     // Reference for latest blocks for cleanup save
     const blocksRef = useRef(blocks);
 
+    // Track which blocks have been modified to optimize Firestore writes
+    const dirtyBlocks = useRef(new Set());
+
     useEffect(() => {
         blocksRef.current = blocks;
     }, [blocks]);
@@ -163,7 +166,8 @@ const AdminTopicEditor = () => {
     const scheduleSave = useCallback((updatedBlocks) => {
         if (saveTimer.current) clearTimeout(saveTimer.current);
         setSaveStatus('saving');
-        saveTimer.current = setTimeout(() => persistBlocks(updatedBlocks), 800);
+        // Increased debounce for better quota management
+        saveTimer.current = setTimeout(() => persistBlocks(updatedBlocks), 1500); 
     }, []);
 
     const persistBlocks = async (currentBlocks) => {
@@ -172,6 +176,8 @@ const AdminTopicEditor = () => {
 
             currentBlocks.forEach((block, index) => {
                 const firestoreId = firestoreIds.current[block.id];
+                const isDirty = dirtyBlocks.current.has(block.id);
+                
                 const data = {
                     topicId,
                     type: block.type,
@@ -181,8 +187,10 @@ const AdminTopicEditor = () => {
                 };
 
                 if (firestoreId) {
-                    // Update existing
-                    batch.update(doc(db, 'contentBlocks', firestoreId), data);
+                    // Update only if dirty (content changed) OR if it's a structural save
+                    if (isDirty) {
+                        batch.update(doc(db, 'contentBlocks', firestoreId), data);
+                    }
                 } else {
                     // Create new
                     const newRef = doc(collection(db, 'contentBlocks'));
@@ -201,6 +209,7 @@ const AdminTopicEditor = () => {
             }
 
             await batch.commit();
+            dirtyBlocks.current.clear(); // Important: Clear after successful write
             setSaveStatus('saved');
             setTimeout(() => setSaveStatus('idle'), 2000);
         } catch (err) {
@@ -263,6 +272,7 @@ const AdminTopicEditor = () => {
 
     // ── Block mutations ────────────────────────────────────────────────────────
     const updateBlock = (updatedBlock) => {
+        dirtyBlocks.current.add(updatedBlock.id);
         setBlocks(prev => {
             const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
             scheduleSave(next);
@@ -275,7 +285,12 @@ const AdminTopicEditor = () => {
         setBlocks(prev => {
             const next = [...prev];
             next.splice(index + 1, 0, nb);
-            // Immediate save for structural change
+            // Structural change: mark all as dirty to ensure Order is preserved, 
+            // OR we can just pass a flag to persistBlocks. 
+            // For simplicity, let's just mark the NEW block as dirty (it already is kind of)
+            // But we need to update order of following blocks too.
+            // Let's force all to be dirty for structural changes.
+            prev.forEach(b => dirtyBlocks.current.add(b.id)); 
             persistBlocks(next);
             return next;
         });
@@ -294,7 +309,8 @@ const AdminTopicEditor = () => {
             }
             const idx = prev.findIndex(b => b.id === blockId);
             const next = prev.filter(b => b.id !== blockId);
-            // Immediate save
+            // Structural change: force order update for all
+            next.forEach(b => dirtyBlocks.current.add(b.id)); 
             persistBlocks(next);
             // Focus previous block
             const focusIdx = Math.max(0, idx - 1);
@@ -521,7 +537,8 @@ const AdminTopicEditor = () => {
             const next = [...prev];
             const [moved] = next.splice(dragIndex, 1);
             next.splice(targetIndex, 0, moved);
-            // Immediate save for reordering
+            // Structural change: force order update
+            next.forEach(b => dirtyBlocks.current.add(b.id));
             persistBlocks(next);
             return next;
         });
