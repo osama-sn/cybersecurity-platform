@@ -64,6 +64,8 @@ const AdminTopicEditor = () => {
     // Track which blocks have been modified to optimize Firestore writes
     const dirtyBlocks = useRef(new Set());
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [isOfflineMode, setIsOfflineMode] = useState(false);
+    const [showDraftRestore, setShowDraftRestore] = useState(null); // { blocks, timestamp }
 
     useEffect(() => {
         blocksRef.current = blocks;
@@ -119,7 +121,21 @@ const AdminTopicEditor = () => {
                 return { id: localId, ...d.data(), _isNew: false };
             });
             loaded.sort((a, b) => (a.order || 0) - (b.order || 0));
-            setBlocks(loaded.length > 0 ? loaded : [newBlock('text')]);
+            const initialBlocks = loaded.length > 0 ? loaded : [newBlock('text')];
+            setBlocks(initialBlocks);
+
+            // Check for Local Draft
+            const draftKey = `cyber_draft_${topicId}`;
+            const draftStr = localStorage.getItem(draftKey);
+            if (draftStr) {
+                try {
+                    const draft = JSON.parse(draftStr);
+                    // Only show if the draft has more blocks or different content (simplified check)
+                    if (draft.blocks && draft.blocks.length > 0) {
+                        setShowDraftRestore(draft);
+                    }
+                } catch (e) { console.error("Malformed draft", e); }
+            }
         };
         fetchBlocks();
 
@@ -204,10 +220,24 @@ const AdminTopicEditor = () => {
             dirtyBlocks.current.clear(); 
             setHasUnsavedChanges(false);
             setSaveStatus('saved');
+            setIsOfflineMode(false);
+            localStorage.removeItem(`cyber_draft_${topicId}`); // Clear on success
             setTimeout(() => setSaveStatus('idle'), 2000);
         } catch (err) {
             console.error('Save error:', err);
-            setSaveStatus('idle');
+            // Handle Quota/Offline
+            if (err.code === 'resource-exhausted' || err.code === 'unavailable' || !navigator.onLine) {
+                setIsOfflineMode(true);
+                localStorage.setItem(`cyber_draft_${topicId}`, JSON.stringify({
+                    blocks: currentBlocks,
+                    timestamp: Date.now()
+                }));
+                setSaveStatus('saved'); // Show "Synced" button (locally)
+                setTimeout(() => setSaveStatus('idle'), 2000);
+            } else {
+                setSaveStatus('idle');
+                alert("Cloud Sync failed. Work will be saved locally.");
+            }
         }
     };
 
@@ -887,7 +917,48 @@ const AdminTopicEditor = () => {
                 </div>
             )}
 
-            {/* ── Editor Canvas ── */}
+                {/* Offline Mode Status / Draft Restore UI */}
+                {isOfflineMode && (
+                    <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between text-amber-500 animate-pulse">
+                        <div className="flex items-center gap-3">
+                            <ShieldAlert size={18} />
+                            <span className="text-xs font-bold uppercase tracking-widest">Local Draft Mode Active (Firebase Quota Help)</span>
+                        </div>
+                        <span className="text-[10px] italic">Work is being saved on your computer.</span>
+                    </div>
+                )}
+
+                {showDraftRestore && (
+                    <div className="mb-8 p-6 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 duration-500">
+                        <div className="space-y-1">
+                            <h3 className="text-indigo-400 font-bold text-lg flex items-center gap-2">
+                                <FileStack size={18} /> Found Local Backup
+                            </h3>
+                            <p className="text-cyber-500 text-xs">A newer version of this mission was found saved on your computer (from {new Date(showDraftRestore.timestamp).toLocaleTimeString()}).</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => {
+                                    setBlocks(showDraftRestore.blocks);
+                                    setHasUnsavedChanges(true); // Persist back to firestore later
+                                    setShowDraftRestore(null);
+                                }}
+                                className="px-6 py-2 bg-indigo-500 text-white font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-indigo-400 transition-all"
+                            >
+                                Restore Draft
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    localStorage.removeItem(`cyber_draft_${topicId}`);
+                                    setShowDraftRestore(null);
+                                }}
+                                className="px-6 py-2 border border-indigo-500/30 text-indigo-400 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-indigo-500/10 transition-all"
+                            >
+                                Ignore
+                            </button>
+                        </div>
+                    </div>
+                )}
             <div
                 className="editor-container relative bg-cyber-900/20 border border-cyber-700/30 rounded-2xl p-6 md:p-10 min-h-[400px] shadow-2xl"
                 onClick={(e) => {
