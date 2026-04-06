@@ -14,32 +14,34 @@ const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
   const { t } = useLanguage();
   const content = (
     <div
-      className={`relative group overflow-hidden border rounded-xl px-4 py-3 flex items-center justify-between transition-all duration-200
+      className={`relative group overflow-hidden border rounded-2xl px-5 py-4 flex items-center justify-between transition-all duration-300
         ${isDisabled
           ? 'bg-cyber-900/10 border-cyber-800/30 cursor-not-allowed opacity-50'
           : isCompleted 
             ? 'bg-emerald-500/5 border-emerald-500/10 hover:bg-emerald-500/10 hover:border-emerald-500/30' 
-            : 'bg-cyber-900/30 border-cyber-800/50 hover:bg-cyber-800/50 hover:border-cyber-primary/40'}
+            : 'bg-[#0d1117] border-cyber-800/60 hover:bg-cyber-900/40 hover:border-cyber-primary/40'}
+        hover:translate-x-1.5
       `}
     >
-      <div className="flex items-center gap-3 relative z-10 min-w-0">
-        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 transition-all duration-300
+      <div className="flex items-center gap-5 relative z-10 min-w-0 flex-1">
+        <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-all duration-300
           ${isDisabled
             ? 'bg-cyber-950 border-cyber-800 text-cyber-700'
             : isCompleted 
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-              : 'bg-cyber-800/50 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary/50'}
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+              : 'bg-cyber-800/50 border-cyber-700 text-cyber-primary group-hover:border-cyber-primary/60 shadow-[0_0_15px_rgba(0,243,255,0.1)]'}
         `}>
-          {isDisabled ? <Lock size={14} /> : isCompleted ? <CheckCircle size={16} strokeWidth={2.5} /> : <Play size={14} className="ml-0.5 fill-current" />}
+          {isDisabled ? <Lock size={16} /> : isCompleted ? <CheckCircle size={18} strokeWidth={2.5} /> : <Play size={16} className="ml-0.5 fill-current" />}
         </div>
         <div className="flex flex-col min-w-0">
-          <span className={`text-sm font-bold truncate transition-colors
-            ${isDisabled ? 'text-cyber-600' : isCompleted ? 'text-emerald-100/70' : 'text-white group-hover:text-cyber-primary'}
+          <span className={`text-base font-black tracking-tight truncate transition-colors
+            ${isDisabled ? 'text-cyber-600' : isCompleted ? 'text-emerald-100/90' : 'text-white group-hover:text-cyber-primary'}
           `}>
             {topic.title}
           </span>
-          <div className="flex items-center gap-2">
-            <span className={`text-[9px] font-black uppercase tracking-widest
+          <div className="flex items-center gap-2.5 mt-0.5">
+            <div className={`w-1.5 h-1.5 rounded-full ${isDisabled ? 'bg-red-500/30' : isCompleted ? 'bg-emerald-500/60' : 'bg-cyber-primary/60 animate-pulse'}`}></div>
+            <span className={`text-[10px] font-black uppercase tracking-[0.2em]
                 ${isDisabled ? 'text-red-500/40' : isCompleted ? 'text-emerald-500/60' : 'text-cyber-500'}
               `}>
                 {isDisabled ? t('sections.locked') : isCompleted ? t('sections.cleared') : t('sections.active')}
@@ -48,14 +50,15 @@ const TopicCard = ({ topic, isCompleted, sectionId, isDisabled }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 relative z-10 shrink-0">
+      <div className="flex items-center gap-4 relative z-10 shrink-0">
         {isCompleted && !isDisabled && (
-          <div className="flex items-center px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <Award size={10} className="text-emerald-400" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <Award size={12} className="text-emerald-400" />
+            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">XP Sync+</span>
           </div>
         )}
-        <div className={`transition-all duration-300 ${isDisabled ? 'text-cyber-800' : 'text-cyber-600 group-hover:text-cyber-primary'}`}>
-          <ChevronRight size={14} />
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border ${isDisabled ? 'border-cyber-800 text-cyber-800 scale-90' : 'border-cyber-800 text-cyber-600 group-hover:border-cyber-primary/30 group-hover:text-cyber-primary group-hover:bg-cyber-primary/5'}`}>
+          <ChevronRight size={16} />
         </div>
       </div>
     </div>
@@ -508,33 +511,42 @@ const SectionSkeleton = () => (
                         <p className="text-cyber-500 text-xs max-w-sm mt-1 leading-relaxed">{t('sections.restrictedDesc')}</p>
                       </div>
                     ) : (
-                      <div className="space-y-6">
+                      <div className="space-y-10 relative">
+                        {/* List Connecting Line (Timeline) */}
+                        <div className="absolute top-2 bottom-2 left-5 w-px bg-gradient-to-b from-cyber-primary/40 via-cyber-primary/10 to-transparent pointer-events-none z-0"></div>
+
                         {module.groups?.map(group => group.topics.length > 0 && (
-                          <div key={group.id} className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-primary shadow-[0_0_6px_rgba(0,243,255,0.8)]"></div>
-                              <h3 className="text-[10px] font-black text-cyber-400 uppercase tracking-[0.2em]">{group.title}</h3>
+                          <div key={group.id} className="space-y-4">
+                            <div className="flex items-center gap-3 relative z-10 translate-x-1">
+                              <div className="w-8 h-8 rounded-full bg-cyber-950 border border-cyber-700/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                                <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse shadow-[0_0_8px_rgba(0,243,255,0.8)]"></div>
+                              </div>
+                              <h3 className="text-[11px] font-black text-cyber-400 uppercase tracking-[0.25em]">{group.title}</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-3 relative z-10">
                               {group.topics.map(topic => (
                                 <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin} />
                               ))}
                             </div>
                           </div>
                         ))}
+
                         {module.ungroupedTopics?.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-cyber-500"></div>
-                              <h3 className="text-[10px] font-black text-cyber-400 uppercase tracking-[0.2em]">{t('sections.generalIntel')}</h3>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3 relative z-10 translate-x-1">
+                              <div className="w-8 h-8 rounded-full bg-cyber-950 border border-cyber-700/50 flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-cyber-500"></div>
+                              </div>
+                              <h3 className="text-[11px] font-black text-cyber-400 uppercase tracking-[0.25em]">{t('sections.generalIntel')}</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-3 relative z-10">
                               {module.ungroupedTopics.map(topic => (
                                 <TopicCard key={topic.id} topic={topic} isCompleted={!!progressData[topic.id]} sectionId={sectionId} isDisabled={topic.isLocked && !isAdmin && !isSuperAdmin} />
                               ))}
                             </div>
                           </div>
                         )}
+                        
                         {(!module.groups?.length && !module.ungroupedTopics?.length) && (
                           <p className="text-[10px] text-cyber-700 font-bold uppercase tracking-widest italic text-center py-8">{t('sections.emptySector')}</p>
                         )}
