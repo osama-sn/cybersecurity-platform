@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { ModeProvider } from './context/ModeContext';
@@ -21,48 +21,66 @@ import Settings from './pages/Settings';
 
 const NotFound = () => <div className="text-center mt-20"><h1>404</h1><p>Page not found</p></div>;
 
+const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+  },
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "about", element: <About /> },
+      { path: "sections", element: <SectionsList /> },
+      { path: "sections/:sectionId", element: <SectionPage /> },
+      { path: "sections/:sectionId/topics/:topicId", element: <TopicPage /> },
+      { path: "diploma", element: <Diploma /> },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: "section/:sectionId", element: <AdminSection /> },
+      { path: "modules/:moduleId", element: <AdminModule /> },
+      { path: "topics/:topicId", element: <AdminTopicEditor /> },
+    ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  }
+], {
+  basename: "/cybersecurity-platform"
+});
+
 function App() {
   return (
-    <BrowserRouter basename="/cybersecurity-platform">
-      <AuthProvider>
-        <DataProvider>
-          <ModeProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<Home />} />
-                <Route path="about" element={<About />} />
-                <Route path="sections" element={<SectionsList />} />
-                <Route path="sections/:sectionId" element={<SectionPage />} />
-                <Route path="sections/:sectionId/topics/:topicId" element={<TopicPage />} />
-                <Route path="diploma" element={<Diploma />} />
-                <Route path="profile" element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                } />
-              </Route>
-
-              {/* Admin Routes */}
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<AdminDashboard />} />
-                <Route path="section/:sectionId" element={<AdminSection />} />
-                <Route path="modules/:moduleId" element={<AdminModule />} />
-                <Route path="topics/:topicId" element={<AdminTopicEditor />} />
-              </Route>
-
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </ModeProvider>
-        </DataProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <DataProvider>
+        <ModeProvider>
+          <RouterProvider router={router} />
+        </ModeProvider>
+      </DataProvider>
+    </AuthProvider>
   );
 }
 

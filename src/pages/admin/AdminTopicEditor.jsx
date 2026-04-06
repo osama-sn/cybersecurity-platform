@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useBlocker } from 'react-router-dom';
 import {
     doc, getDoc, collection, query, where, getDocs, orderBy,
     addDoc, deleteDoc, serverTimestamp, updateDoc, writeBatch
@@ -54,8 +54,6 @@ const AdminTopicEditor = () => {
     const [dragIndex, setDragIndex] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
 
-    // Debounce timer ref
-    const saveTimer = useRef(null);
     // Map of blockId → Firestore docId (for blocks already persisted)
     const firestoreIds = useRef({}); // { localId: firestoreDocId }
     // Reference for latest blocks for cleanup save
@@ -155,11 +153,6 @@ const AdminTopicEditor = () => {
 
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            // ── Cleanup: Flush any pending save ──
-            if (dirtyBlocks.current.size > 0) {
-                persistBlocks(blocksRef.current);
-            }
-            if (saveTimer.current) clearTimeout(saveTimer.current);
             
             // Reset states
             setBlocks([]);
@@ -170,13 +163,8 @@ const AdminTopicEditor = () => {
         };
     }, [topicId]);
 
-    // ── Auto-save (debounced) ──────────────────────────────────────────────────
-    const scheduleSave = useCallback((updatedBlocks) => {
-        if (saveTimer.current) clearTimeout(saveTimer.current);
-        setSaveStatus('saving');
-        // Rare auto-save heartbeat (every 5 minutes or on manual)
-        saveTimer.current = setTimeout(() => persistBlocks(updatedBlocks), 5 * 60 * 1000); 
-    }, []);
+    // ── Saving Logic ──────────────────────────────────────────────────────────
+    // Auto-save is disabled per user request. Use persistBlocks manually.
 
     const persistBlocks = async (currentBlocks) => {
         try {
@@ -275,7 +263,7 @@ const AdminTopicEditor = () => {
             // 3. Update state AND persist immediately
             const nextBlocks = blocks.map(b => b.id === updatedBlock.id ? updatedBlock : b);
             setBlocks(nextBlocks);
-            await persistBlocks(nextBlocks); // Await immediate persist to ensure data integrity
+            setHasUnsavedChanges(true);
 
             // 4. Status update
             setSaveStatus('saved');
@@ -309,7 +297,6 @@ const AdminTopicEditor = () => {
         setHasUnsavedChanges(true);
         setBlocks(prev => {
             const next = prev.map(b => b.id === updatedBlock.id ? updatedBlock : b);
-            scheduleSave(next);
             return next;
         });
     };
@@ -326,7 +313,6 @@ const AdminTopicEditor = () => {
             // Let's force all to be dirty for structural changes.
             prev.forEach(b => dirtyBlocks.current.add(b.id)); 
             setHasUnsavedChanges(true);
-            persistBlocks(next);
             return next;
         });
         setActiveBlockId(nb.id);
@@ -338,15 +324,14 @@ const AdminTopicEditor = () => {
             if (prev.length === 1) {
                 // Don't delete the last block; just clear it
                 const cleared = [{ ...prev[0], content: '', type: 'text', metadata: {} }];
-                // Immediate save
-                persistBlocks(cleared);
+                setHasUnsavedChanges(true); // Flag change even if not persisted yet
                 return cleared;
             }
             const idx = prev.findIndex(b => b.id === blockId);
             const next = prev.filter(b => b.id !== blockId);
             // Structural change: force order update for all
             next.forEach(b => dirtyBlocks.current.add(b.id)); 
-            persistBlocks(next);
+            setHasUnsavedChanges(true);
             // Focus previous block
             const focusIdx = Math.max(0, idx - 1);
             setActiveBlockId(next[focusIdx]?.id || null);
@@ -400,11 +385,10 @@ const AdminTopicEditor = () => {
         if (e.key === 'Backspace' || e.key === 'Delete') {
             if (selectedBlockIds.size > 1) {
                 e.preventDefault();
-                const idsToDelete = Array.from(selectedBlockIds);
                 setBlocks(prev => {
                     const next = prev.filter(b => !selectedBlockIds.has(b.id));
                     if (next.length === 0) return [newBlock('text')]; // Always keep one
-                    persistBlocks(next);
+                    setHasUnsavedChanges(true);
                     return next;
                 });
                 setSelectedBlockIds(new Set());
@@ -595,11 +579,21 @@ const AdminTopicEditor = () => {
             next.splice(targetIndex, 0, moved);
             // Structural change: force order update
             next.forEach(b => dirtyBlocks.current.add(b.id));
-            persistBlocks(next);
+            setHasUnsavedChanges(true);
             return next;
         });
         setDragIndex(null);
         setDragOverIndex(null);
+    };
+
+    // ── Navigation Blocking ──────────────────────────────────────────────────
+    let blocker = useBlocker(({ currentValue, nextLocation }) => {
+        return hasUnsavedChanges && currentValue.pathname !== nextLocation.pathname;
+    });
+
+    const handleSaveAndExit = async () => {
+        await persistBlocks(blocks);
+        blocker.proceed();
     };
 
     // ── Render ─────────────────────────────────────────────────────────────────
@@ -642,10 +636,8 @@ const AdminTopicEditor = () => {
             }));
 
             const next = [...prev];
-            // Remove the paste block and insert parsed blocks in its place
             next.splice(pasteIndex, 1, ...newBlocks);
-
-            persistBlocks(next);
+            setHasUnsavedChanges(true);
 
             // Focus the last parsed block
             setTimeout(() => setActiveBlockId(newBlocks[newBlocks.length - 1].id), 50);
@@ -1052,7 +1044,7 @@ const AdminTopicEditor = () => {
                 )}
             </div>
 
-            {/* ── Keyboard Shortcuts Reference ── */}
+             {/* ── Keyboard Shortcuts Reference ── */}
             <div className="mt-6 px-2">
                 <p className="text-[10px] text-cyber-700 font-mono uppercase tracking-widest mb-2">Shortcuts</p>
                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-[10px] text-cyber-600 font-mono">
@@ -1073,6 +1065,57 @@ const AdminTopicEditor = () => {
                     ))}
                 </div>
             </div>
+
+            {/* ── Unsaved Changes Modal ── */}
+            {blocker.state === "blocked" && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-cyber-950 border border-cyber-700/50 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-300 relative overflow-hidden">
+                        {/* Decorative background */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary to-transparent opacity-50"></div>
+                        
+                        <div className="flex flex-col items-center text-center space-y-6">
+                            <div className="w-16 h-16 bg-cyber-primary/10 rounded-full flex items-center justify-center text-cyber-primary border border-cyber-primary/20 animate-pulse">
+                                <ShieldAlert size={32} />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Mission Data at Risk</h3>
+                                <p className="text-cyber-500 text-sm leading-relaxed">
+                                    You have unsaved intelligence. If you extract now, these modifications will be lost to the void.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col w-full gap-3">
+                                <button 
+                                    onClick={handleSaveAndExit}
+                                    disabled={saveStatus === 'saving'}
+                                    className="w-full py-4 bg-cyber-primary text-black font-black text-xs uppercase tracking-[0.2em] rounded-xl hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] transition-all flex items-center justify-center gap-2 group"
+                                >
+                                    {saveStatus === 'saving' ? (
+                                        <><Loader2 size={16} className="animate-spin" /> Uploading...</>
+                                    ) : (
+                                        <><Cloud size={16} className="group-hover:scale-110 transition-transform" /> Save & Extract</>
+                                    )}
+                                </button>
+                                
+                                <button 
+                                    onClick={() => blocker.proceed()}
+                                    className="w-full py-3 text-cyber-600 font-bold text-[10px] uppercase tracking-widest hover:text-rose-500 transition-colors"
+                                >
+                                    Discard and Abort Mission
+                                </button>
+
+                                <button 
+                                    onClick={() => blocker.reset()}
+                                    className="w-full py-4 border border-cyber-800 text-cyber-400 font-bold text-xs uppercase tracking-[0.1em] rounded-xl hover:bg-cyber-900 transition-all"
+                                >
+                                    Stay and Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
